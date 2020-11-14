@@ -1,0 +1,26 @@
+@import '../../../variables.scss';
+
+:host ::ng-deep {
+  .header-hamburger-trigger {
+    min-width: 2rem;
+  }
+  .header-overflow-trigger {
+    min-width: 2rem;
+  }
+}
+
+.app-logo {
+  transform: scale($title_icon_scale, $title_icon_scale);
+}
+
+@media only screen and (max-width: 768px) {
+  .header-nav {
+    display: none;
+  }
+  .header-action-item {
+    display: none;
+  }
+  // .branding .branding-icon {
+  //   display: inline-block !important;
+  // }
+}

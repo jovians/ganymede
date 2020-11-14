@@ -1,0 +1,61 @@
+<div class="alert alert-app-level">
+</div>
+<clr-header>
+  <div class="branding" tourAnchor="header.title">
+    <a [routerLink]="['about']" class="nav-link">
+      <div *ngIf="!app.subtitle && !app.toptitle">
+        <img [src]="app.icon" class="clr-icon branding-icon app-logo" style="margin-top:-2px;" />
+        <span class="title" style="font-size:0.8rem; padding-left:0.35rem; padding-right:0.5rem">{{ app.name }}</span>
+      </div>
+      <div *ngIf="app.toptitle && !app.subtitle">
+        <img [src]="app.icon" class="clr-icon branding-icon app-logo" style="margin-top:-0.8rem;" />
+        <div style="display:inline-block;">
+          <div class="title" style="font-size:0.8rem; padding-left:0.2rem; padding-right:0.5rem; height:0; margin-top:-0.1rem; font-size:70%; opacity:0.8;">
+            <b>{{ app.toptitle }}</b>
+          </div>  
+          <div class="title" style="font-size:0.8rem; padding-left:0.2rem; padding-right:0.5rem; margin-top: 0.7rem;">{{ app.name }}</div>
+        </div>
+      </div>
+      <div *ngIf="app.subtitle && !app.toptitle">
+        <img [src]="app.icon" class="clr-icon branding-icon app-logo" style="margin-top:-0.8rem;"/>
+        <div style="display:inline-block;">
+          <div class="title" style="font-size:0.8rem; padding-left:0.2rem; padding-right:0.5rem; margin-top:0.1rem; height:0;">{{ app.name }}</div>
+          <div class="title" style="font-size:0.8rem; padding-left:0.2rem; padding-right:0.5rem; font-size:70%; margin-top: 0.7rem; opacity:0.8;">{{ app.subtitle }}</div>  
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="header-nav">
+      <a *ngFor="let item of menuList" [id]="'topmenu-item-'+item.path" [routerLink]="[item.path]" class="nav-link nav-text">{{ item.name }}</a>
+  </div>
+  <div class="header-actions">
+    <!-- <form class="search">
+        <label for="search_input">
+            <input id="search_input" type="text" placeholder="Search for keywords...">
+        </label>
+    </form> -->
+    <clr-dropdown class="header-action-item">
+        <button class="nav-icon" clrDropdownTrigger aria-label="toggle settings menu">
+            <clr-icon shape="user"></clr-icon>
+            <clr-icon shape="caret down"></clr-icon>
+        </button>
+        <clr-dropdown-menu *clrIfOpen clrPosition="bottom-right">
+            <a href="..." clrDropdownItem>About</a>
+            <a href="..." clrDropdownItem>Preferences</a>
+            <a href="..." clrDropdownItem>Log out</a>
+        </clr-dropdown-menu>
+    </clr-dropdown>
+    <clr-dropdown class="header-action-item">
+        <button class="nav-icon" clrDropdownTrigger aria-label="toggle settings menu">
+            <clr-icon shape="cog"></clr-icon>
+            <clr-icon shape="caret down"></clr-icon>
+        </button>
+        <clr-dropdown-menu *clrIfOpen clrPosition="bottom-right">
+            <a href="..." clrDropdownItem>About</a>
+            <a href="..." clrDropdownItem>Preferences</a>
+            <a href="..." clrDropdownItem>Log out</a>
+        </clr-dropdown-menu>
+    </clr-dropdown>
+    <div class="header-action-item" style="height:1px; width:12px; pointer-events: none;"></div>
+  </div>
+</clr-header>

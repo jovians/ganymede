@@ -1,0 +1,19 @@
+{
+  "name": "@jovian/ganymede-clr",
+  "version": "0.0.0",
+  "scripts": {
+    "clean-js": "find . -name '*.js' -delete; find . -name '*.js.map' -delete;",
+    "prepublish": "tsc; node ganymede.appgen.js setvar revert;"
+  },
+  "dependencies": {
+    "sharp": "^0.25.4",
+    "tslib": "^1.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^12.11.1",
+    "codelyzer": "^5.2.1",
+    "ts-node": "~7.0.0",
+    "tslint": "~5.15.0",
+    "typescript": "^3.7.4"
+  }
+}

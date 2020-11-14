@@ -1,0 +1,72 @@
+:host {
+  background-color: black;
+  width:100%; min-height:100%;
+  display:flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.landing-video-container {
+  width:100%; height: 1080px;
+  display: inline-block;
+  overflow: hidden;
+}
+
+.landing-video {
+  z-index:1;
+  position: relative;
+  width:100%;
+  min-width:1920px;
+  opacity: 0.66;
+}
+@media only screen and (max-width: 1920px) {
+  .landing-video-center {
+    margin-left: calc(50% - 960px);
+  }
+}
+@media only screen and (min-width: 1921px) {
+  .landing-video-center {
+    margin-left: 0px;
+  }
+}
+
+.landing-logo-wrapper {
+  z-index:2;
+  position: relative;
+  width: 240px;
+  margin:0 auto;
+  opacity: 0.8;
+}
+.landing-logo {
+  padding-top:14vh;
+  width: 240px;
+  margin-left: -7px;
+}
+
+.landing-text {
+  z-index:2;
+  opacity: 0.8;
+  position: relative;
+
+  padding-top:6vh;
+  font-size:5rem; line-height:7rem; 
+  text-align:center;
+  color:white;
+  width:99%;
+  pointer-events: none;
+  text-shadow: 0px 3px 10px black;
+  font-family: "Avenir Next","Helvetica Neue",Arial,sans-serif;
+  font-weight: 200;
+  letter-spacing: 0.166rem;
+}
+
+.landing-subtext{
+  padding-top: 1.5rem;
+  opacity: 0.5;
+  font-size:1rem;
+  line-height:2;
+  width:50%;
+  margin:0 auto;
+  white-space: pre;
+  letter-spacing: 0.05rem;
+}

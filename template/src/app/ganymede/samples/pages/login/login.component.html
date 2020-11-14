@@ -1,0 +1,32 @@
+<div class="login-wrapper" style="display:flex; flex-direction: row;">
+  <form class="login">
+    <section class="title">
+      <img [src]="app.logoTitle" style="width: 75%; margin-left:-5%;"/>
+      <!-- <h3 class="welcome">Welcome to</h3> -->
+      <!-- {{ app.name }} -->
+      <h5 class="hint">Log in to unlock the full site experience</h5>
+    </section>
+    <div class="login-group">
+      <clr-input-container>
+          <label class="clr-sr-only">Username</label>
+          <input type="text" name="username" clrInput placeholder="Username" [formControl]="form.username"/>
+      </clr-input-container>
+      <clr-password-container>
+          <label class="clr-sr-only">Password</label>
+          <input type="password" name="password" clrPassword placeholder="Password" [formControl]="form.password"/>
+      </clr-password-container>
+      <clr-checkbox-wrapper>
+          <label>Remember me</label>
+          <input type="checkbox" name="rememberMe" clrCheckbox [formControl]="form.rememberMe"/>
+      </clr-checkbox-wrapper>
+      <!-- <div class="error active">
+          Invalid user name or password
+      </div> -->
+      <button type="submit" class="btn btn-primary">Log In</button>
+      <a href="javascript://" class="signup">Sign up for a Company ID</a>
+    </div>
+  </form>
+  <!-- <div class="bg-img-cont">
+    <img class="bg-img" [src]="app.loginImage"/>
+  </div> -->
+</div>
