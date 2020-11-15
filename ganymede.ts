@@ -49,6 +49,8 @@ class GanymedeAppGenerator {
       this.signLicense(a[1], a[2], a[3], a[4]);
     } else if (a[0] === 'license-verify') {
       this.verifyLicense();
+    } else if (a[0] === 'license-stamp') {
+      this.stampLicense();
     }
   }
 
@@ -76,6 +78,10 @@ class GanymedeAppGenerator {
     verifier.update(`GANYMEDE_LICENSE___${org}___${user}___${domain}___${scope}`);
     const verified = verifier.verify(publicKey, config.license.key, 'hex');
     console.log(verified ? 'GANYMEDE_LICENSE_VALID' : 'GANYMEDE_LICENSE_NOT_VALID');
+    return verified;
+  }
+
+  stampLicense() {
     let indexContent = fs.readFileSync('src/index.html', 'utf-8');
     indexContent = indexContent.replace('<gany.LICENSE_ORG>', config.license.org);
     indexContent = indexContent.replace('<gany.LICENSE_USER>', config.license.user);
@@ -83,7 +89,6 @@ class GanymedeAppGenerator {
     indexContent = indexContent.replace('<gany.LICENSE_SCOPE>', config.license.scope);
     indexContent = indexContent.replace('<gany.LICENSE_KEY>', config.license.key);
     fs.writeFileSync('src/index.html', indexContent);
-    return verified;
   }
 
   generate() {

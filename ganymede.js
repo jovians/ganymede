@@ -47,6 +47,9 @@ var GanymedeAppGenerator = /** @class */ (function () {
         else if (a[0] === 'license-verify') {
             this.verifyLicense();
         }
+        else if (a[0] === 'license-stamp') {
+            this.stampLicense();
+        }
     };
     GanymedeAppGenerator.prototype.signLicense = function (org, user, domain, scope) {
         var encryptedPrivateKey = fs.readFileSync('.license-signing-key');
@@ -71,6 +74,9 @@ var GanymedeAppGenerator = /** @class */ (function () {
         verifier.update("GANYMEDE_LICENSE___" + org + "___" + user + "___" + domain + "___" + scope);
         var verified = verifier.verify(publicKey, config.license.key, 'hex');
         console.log(verified ? 'GANYMEDE_LICENSE_VALID' : 'GANYMEDE_LICENSE_NOT_VALID');
+        return verified;
+    };
+    GanymedeAppGenerator.prototype.stampLicense = function () {
         var indexContent = fs.readFileSync('src/index.html', 'utf-8');
         indexContent = indexContent.replace('<gany.LICENSE_ORG>', config.license.org);
         indexContent = indexContent.replace('<gany.LICENSE_USER>', config.license.user);
@@ -78,7 +84,6 @@ var GanymedeAppGenerator = /** @class */ (function () {
         indexContent = indexContent.replace('<gany.LICENSE_SCOPE>', config.license.scope);
         indexContent = indexContent.replace('<gany.LICENSE_KEY>', config.license.key);
         fs.writeFileSync('src/index.html', indexContent);
-        return verified;
     };
     GanymedeAppGenerator.prototype.generate = function () {
         console.log("Setting template variables...");
