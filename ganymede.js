@@ -103,8 +103,8 @@ var GanymedeAppGenerator = /** @class */ (function () {
     };
     GanymedeAppGenerator.prototype.templateLoad = function () {
         var templateName = config.template.main;
-        // execSync(`cp src/app/ganymede/templates/${templateName}`, {stdio: 'inherit'});
         var moduleTsContent = fs.readFileSync('src/app/app.module.ts', 'utf-8');
+        moduleTsContent = moduleTsContent.replace('<gany.APP_TEMPLATE_NAME>', templateName);
         moduleTsContent = moduleTsContent.replace('<gany.APP_IMPORTS>', '');
         moduleTsContent = moduleTsContent.replace('<gany.APP_DECLARATIONS>', '');
         fs.writeFileSync('src/app/app.module.ts', moduleTsContent);

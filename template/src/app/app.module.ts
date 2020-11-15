@@ -6,7 +6,6 @@ import { NgModule, Injector, APP_INITIALIZER } from '@angular/core';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
 import { RequestInterceptor } from './request.interceptor';
 
 import { ClarityModule } from '@clr/angular';
@@ -15,6 +14,8 @@ import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { MarkdownModule, MarkedOptions } from 'ngx-markdown';
+
+import { GanymedeTemplateModule, AppComponent } from './ganymede/components/templates/<gany.APP_TEMPLATE_NAME>/template.module.ts';
 
 const notFoundValue = Promise.resolve();
 const translateBasePath = 'assets/i18n/';
