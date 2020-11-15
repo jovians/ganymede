@@ -1,0 +1,19 @@
+<clr-main-container>
+  <div class="main-container">
+    <div class="alert alert-app-level">
+    </div>
+    <app-header *ngIf="headerVisible" #headerComponent></app-header>
+    <div class="content-container">
+        <main #mainContentArea class="content-area" style="margin:0; padding:0; order:0;">
+          <router-outlet></router-outlet>
+        </main>
+        <nav *ngIf="leftSidebarVisible" class="sidenav" [clr-nav-level]="1">
+            <app-left-sidebar></app-left-sidebar>
+        </nav>
+        <nav *ngIf="rightSidebarVisible" class="sidenav" style="order:1; border-left: 1px solid #ccc;"  [clr-nav-level]="2">
+            <app-right-sidebar></app-right-sidebar>
+        </nav>
+    </div>
+    <app-footer *ngIf="footerVisible" #footerComponent></app-footer>
+  </div>
+</clr-main-container>

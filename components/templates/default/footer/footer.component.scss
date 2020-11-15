@@ -1,0 +1,40 @@
+:host {
+  width:100%;
+  max-height:26px;
+  background-color:#444444;
+  display: flex;
+  justify-content: space-between;
+  white-space:nowrap;
+  font-family: Metropolis,"Avenir Next","Helvetica Neue",Arial,sans-serif;
+  font-weight: 100;
+  text-shadow: none;
+  
+}
+
+.footer-left {
+  color:white;
+  max-height:inherit;
+  overflow-y:hidden;
+  padding-left:20px;
+}
+
+.footer-middle {
+  color:white;
+  max-height:inherit;
+  overflow-y:hidden;
+}
+
+.footer-right {
+  color:white;
+  max-height:inherit;
+  overflow-y:hidden;
+  padding-right:20px;
+}
+
+.footer-entry {
+  color:white;
+  max-height:inherit;
+  overflow-y:hidden;
+  font-size:12px;
+  margin-top:1px;
+}
