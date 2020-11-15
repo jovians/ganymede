@@ -15,7 +15,7 @@ import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-transla
 
 import { MarkdownModule, MarkedOptions } from 'ngx-markdown';
 
-import { GanymedeTemplateModule, AppComponent } from './ganymede/components/templates/<gany.APP_TEMPLATE_NAME>/template.module.ts';
+import { GanymedeTemplateModule, AppComponent } from './ganymede/components/templates/<gany.APP_TEMPLATE_NAME>/template.module';
 
 const notFoundValue = Promise.resolve();
 const translateBasePath = 'assets/i18n/';
