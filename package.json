@@ -8,6 +8,7 @@
     "lint": "ng lint"
   },
   "dependencies": {
+    "@jovian/fourq": "0.0.11",
     "@sendgrid/mail": "^7.4.0",
     "mongodb": "^3.6.3",
     "sharp": "^0.25.4",

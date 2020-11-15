@@ -5,6 +5,7 @@
 
  // tslint:disable: no-console
 const fs = require('fs');
+const crypt = require('crypto');
 
 const allReplaces: {find: RegExp, value: string}[] = [];
 let config = null;
@@ -39,10 +40,43 @@ class GanymedeAppGenerator {
       } else {
         this.generate();
       }
-    }
-    if (a[0] === 'packages-update') {
+    } else if (a[0] === 'packages-update') {
       this.packageJsonImport();
+    } else if (a[0] === 'template-select') {
+      this.templateSelect(a[1]);
+    } else if (a[0] === 'license-sign') {
+      this.signLicense(a[1], a[2], a[3], a[4]);
+    } else if (a[0] === 'license-verify') {
+      this.verifyLicense();
     }
+  }
+
+  signLicense(org: string, user: string, domain: string, scope: string) {
+    const encryptedPrivateKey = fs.readFileSync('.license-signing-key');
+    const privateKeyPassphrase = fs.readFileSync('.license-signing-key-passphrase');
+    const signer = crypt.createSign('RSA-SHA256');
+    signer.update(`GANYMEDE_LICENSE___${org}___${user}___${domain}___${scope}`);
+    signer.end();
+    const sig = signer.sign({
+      key: encryptedPrivateKey,
+      passphrase: privateKeyPassphrase
+    }, 'hex');
+    console.log('License Key: ' + sig);
+    return sig;
+  }
+
+  verifyLicense(): boolean {
+    const forCustomer = fs.existsSync('ganymede/.license-public-key');
+    const publicKey = fs.readFileSync(forCustomer ? 'ganymede/.license-public-key' : '.license-public-key');
+    const verifier = crypt.createVerify('RSA-SHA256');
+    const org = config.license.org;
+    const user = config.license.user;
+    const domain = config.license.domain;
+    const scope = config.license.scope;
+    verifier.update(`GANYMEDE_LICENSE___${org}___${user}___${domain}___${scope}`);
+    const verified = verifier.verify(publicKey, config.license.key, 'hex');
+    console.log(verified ? 'GANYMEDE_LICENSE_VALID' : 'GANYMEDE_LICENSE_NOT_VALID');
+    return verified;
   }
 
   generate() {
@@ -68,6 +102,10 @@ class GanymedeAppGenerator {
       }
     }
     fs.writeFileSync('package.json', JSON.stringify(pkgTemplate, null, 2));
+  }
+
+  templateSelect(templateName:string='default') {
+ 
   }
 
   initialize(configPath: string = defaultConfigPath) {

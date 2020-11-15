@@ -1,8 +1,8 @@
 import { Component, OnDestroy, ViewChild, ElementRef, AfterViewInit, Input } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { RouteObservingService } from '../../services/route-observing.service';
-import { AuthService } from '../../services/auth.service';
-import { AppService } from '../../services/app.service';
+import { RouteObservingService } from '../../../services/route-observing.service';
+import { AuthService } from '../../../services/auth.service';
+import { AppService } from '../../../services/app.service';
 
 // import { headerNavigation } from '../../../app-routing.module';
 

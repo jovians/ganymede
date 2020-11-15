@@ -4,6 +4,7 @@
  */
 // tslint:disable: no-console
 var fs = require('fs');
+var crypt = require('crypto');
 var allReplaces = [];
 var config = null;
 var defaultConfigPath = 'ganymede.conf.json';
@@ -33,9 +34,44 @@ var GanymedeAppGenerator = /** @class */ (function () {
                 this.generate();
             }
         }
-        if (a[0] === 'packages-update') {
+        else if (a[0] === 'packages-update') {
             this.packageJsonImport();
         }
+        else if (a[0] === 'template-select') {
+            this.templateSelect(a[1]);
+        }
+        else if (a[0] === 'license-sign') {
+            this.signLicense(a[1], a[2], a[3], a[4]);
+        }
+        else if (a[0] === 'license-verify') {
+            this.verifyLicense();
+        }
+    };
+    GanymedeAppGenerator.prototype.signLicense = function (org, user, domain, scope) {
+        var encryptedPrivateKey = fs.readFileSync('.license-signing-key');
+        var privateKeyPassphrase = fs.readFileSync('.license-signing-key-passphrase');
+        var signer = crypt.createSign('RSA-SHA256');
+        signer.update("GANYMEDE_LICENSE___" + org + "___" + user + "___" + domain + "___" + scope);
+        signer.end();
+        var sig = signer.sign({
+            key: encryptedPrivateKey,
+            passphrase: privateKeyPassphrase
+        }, 'hex');
+        console.log('License Key: ' + sig);
+        return sig;
+    };
+    GanymedeAppGenerator.prototype.verifyLicense = function () {
+        var forCustomer = fs.existsSync('ganymede/.license-public-key');
+        var publicKey = fs.readFileSync(forCustomer ? 'ganymede/.license-public-key' : '.license-public-key');
+        var verifier = crypt.createVerify('RSA-SHA256');
+        var org = config.license.org;
+        var user = config.license.user;
+        var domain = config.license.domain;
+        var scope = config.license.scope;
+        verifier.update("GANYMEDE_LICENSE___" + org + "___" + user + "___" + domain + "___" + scope);
+        var verified = verifier.verify(publicKey, config.license.key, 'hex');
+        console.log(verified ? 'GANYMEDE_LICENSE_VALID' : 'GANYMEDE_LICENSE_NOT_VALID');
+        return verified;
     };
     GanymedeAppGenerator.prototype.generate = function () {
         console.log("Setting template variables...");
@@ -63,6 +99,9 @@ var GanymedeAppGenerator = /** @class */ (function () {
             }
         }
         fs.writeFileSync('package.json', JSON.stringify(pkgTemplate, null, 2));
+    };
+    GanymedeAppGenerator.prototype.templateSelect = function (templateName) {
+        if (templateName === void 0) { templateName = 'default'; }
     };
     GanymedeAppGenerator.prototype.initialize = function (configPath) {
         if (configPath === void 0) { configPath = defaultConfigPath; }
