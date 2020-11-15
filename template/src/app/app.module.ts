@@ -11,7 +11,6 @@ import { RequestInterceptor } from './ganymede/util/request.interceptor';
 
 import { ClarityModule } from '@clr/angular';
 
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
 
@@ -39,8 +38,6 @@ export function langInitializerFactory(translate: TranslateService, injector: In
     HttpClientModule,
     BrowserModule,
     AppRoutingModule,
-    ReactiveFormsModule,
-    FormsModule,
     ClarityModule,
     BrowserAnimationsModule,
     TranslateModule.forRoot({
@@ -66,9 +63,16 @@ export function langInitializerFactory(translate: TranslateService, injector: In
               },
           },
     }),
+    // BEGIN GANYMEDE AUTOGEN SECTION
+    <gany.APP_IMPORTS>
+    // END GANYMEDE AUTOGEN SECTION
   ],
   declarations: [
     AppComponent,
+
+    // BEGIN GANYMEDE AUTOGEN SECTION
+    <gany.APP_DECLARATIONS>
+    // END GANYMEDE AUTOGEN SECTION
   ],
   providers: [
     {

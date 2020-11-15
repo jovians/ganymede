@@ -5,6 +5,7 @@
 // tslint:disable: no-console
 var fs = require('fs');
 var crypt = require('crypto');
+var execSync = require('child_process').execSync;
 var allReplaces = [];
 var config = null;
 var defaultConfigPath = 'ganymede.conf.json';
@@ -37,8 +38,8 @@ var GanymedeAppGenerator = /** @class */ (function () {
         else if (a[0] === 'packages-update') {
             this.packageJsonImport();
         }
-        else if (a[0] === 'template-select') {
-            this.templateSelect(a[1]);
+        else if (a[0] === 'template-load') {
+            this.templateLoad();
         }
         else if (a[0] === 'license-sign') {
             this.signLicense(a[1], a[2], a[3], a[4]);
@@ -100,8 +101,13 @@ var GanymedeAppGenerator = /** @class */ (function () {
         }
         fs.writeFileSync('package.json', JSON.stringify(pkgTemplate, null, 2));
     };
-    GanymedeAppGenerator.prototype.templateSelect = function (templateName) {
-        if (templateName === void 0) { templateName = 'default'; }
+    GanymedeAppGenerator.prototype.templateLoad = function () {
+        var templateName = config.template.main;
+        // execSync(`cp src/app/ganymede/templates/${templateName}`, {stdio: 'inherit'});
+        var moduleTsContent = fs.readFileSync('src/app/app.module.ts', 'utf-8');
+        moduleTsContent = moduleTsContent.replace('<gany.APP_IMPORTS>', '');
+        moduleTsContent = moduleTsContent.replace('<gany.APP_DECLARATIONS>', '');
+        fs.writeFileSync('src/app/app.module.ts', moduleTsContent);
     };
     GanymedeAppGenerator.prototype.initialize = function (configPath) {
         if (configPath === void 0) { configPath = defaultConfigPath; }
