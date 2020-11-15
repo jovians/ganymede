@@ -7,7 +7,7 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { RequestInterceptor } from './ganymede/util/request.interceptor';
+import { RequestInterceptor } from './request.interceptor';
 
 import { ClarityModule } from '@clr/angular';
 
