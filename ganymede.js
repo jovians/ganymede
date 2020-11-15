@@ -62,8 +62,7 @@ var GanymedeAppGenerator = /** @class */ (function () {
         return sig;
     };
     GanymedeAppGenerator.prototype.verifyLicense = function () {
-        var forCustomer = fs.existsSync('ganymede/.license-public-key');
-        var publicKey = fs.readFileSync(forCustomer ? 'src/app/ganymede/.license-public-key' : '.license-public-key');
+        var publicKey = fs.readFileSync('src/app/ganymede/.license-public-key');
         var verifier = crypt.createVerify('RSA-SHA256');
         var org = config.license.org;
         var user = config.license.user;

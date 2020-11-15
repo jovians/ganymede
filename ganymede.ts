@@ -67,8 +67,7 @@ class GanymedeAppGenerator {
   }
 
   verifyLicense(): boolean {
-    const forCustomer = fs.existsSync('ganymede/.license-public-key');
-    const publicKey = fs.readFileSync(forCustomer ? 'src/app/ganymede/.license-public-key' : '.license-public-key');
+    const publicKey = fs.readFileSync('src/app/ganymede/.license-public-key');
     const verifier = crypt.createVerify('RSA-SHA256');
     const org = config.license.org;
     const user = config.license.user;
