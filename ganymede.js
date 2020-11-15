@@ -4,7 +4,6 @@
  */
 // tslint:disable: no-console
 var fs = require('fs');
-var sharp = require('sharp');
 var allReplaces = [];
 var config = null;
 var defaultConfigPath = 'ganymede.conf.json';

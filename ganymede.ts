@@ -5,7 +5,6 @@
 
  // tslint:disable: no-console
 const fs = require('fs');
-const sharp = require('sharp');
 
 const allReplaces: {find: RegExp, value: string}[] = [];
 let config = null;
