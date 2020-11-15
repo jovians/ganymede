@@ -64,6 +64,8 @@ export function langInitializerFactory(translate: TranslateService, injector: In
               },
           },
     }),
+    GanymedeTemplateModule,
+
     // BEGIN GANYMEDE AUTOGEN SECTION
     <gany.APP_IMPORTS>
     // END GANYMEDE AUTOGEN SECTION
