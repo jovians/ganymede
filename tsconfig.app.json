@@ -8,7 +8,6 @@
     "ganymede.ts",
     "ganymede/**/*",
     "node_modules/**/*",
-    "template/server/**/*",
     "server/**/*",
     "**/*.spec.ts",
     "**/*.TEMPLATE.*"

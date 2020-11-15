@@ -10,7 +10,7 @@ describe('workspace-project App', () => {
 
   it('should display welcome message', async () => {
     page.navigateTo();
-    expect(await page.getTitleText()).toEqual('ganymede-clr app is running!');
+    expect(await page.getTitleText()).toEqual('<ANGULAR_APP_NAME> app is running!');
   });
 
   afterEach(async () => {
