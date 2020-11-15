@@ -71,6 +71,13 @@ var GanymedeAppGenerator = /** @class */ (function () {
         verifier.update("GANYMEDE_LICENSE___" + org + "___" + user + "___" + domain + "___" + scope);
         var verified = verifier.verify(publicKey, config.license.key, 'hex');
         console.log(verified ? 'GANYMEDE_LICENSE_VALID' : 'GANYMEDE_LICENSE_NOT_VALID');
+        var indexContent = fs.readFileSync('src/index.html', 'utf-8');
+        indexContent = indexContent.replace('<gany.LICENSE_ORG>', config.license.org);
+        indexContent = indexContent.replace('<gany.LICENSE_USER>', config.license.user);
+        indexContent = indexContent.replace('<gany.LICENSE_DOMAIN>', config.license.domain);
+        indexContent = indexContent.replace('<gany.LICENSE_SCOPE>', config.license.scope);
+        indexContent = indexContent.replace('<gany.LICENSE_KEY>', config.license.key);
+        fs.writeFileSync('src/index.html', indexContent);
         return verified;
     };
     GanymedeAppGenerator.prototype.generate = function () {

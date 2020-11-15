@@ -76,6 +76,13 @@ class GanymedeAppGenerator {
     verifier.update(`GANYMEDE_LICENSE___${org}___${user}___${domain}___${scope}`);
     const verified = verifier.verify(publicKey, config.license.key, 'hex');
     console.log(verified ? 'GANYMEDE_LICENSE_VALID' : 'GANYMEDE_LICENSE_NOT_VALID');
+    let indexContent = fs.readFileSync('src/index.html', 'utf-8');
+    indexContent = indexContent.replace('<gany.LICENSE_ORG>', config.license.org);
+    indexContent = indexContent.replace('<gany.LICENSE_USER>', config.license.user);
+    indexContent = indexContent.replace('<gany.LICENSE_DOMAIN>', config.license.domain);
+    indexContent = indexContent.replace('<gany.LICENSE_SCOPE>', config.license.scope);
+    indexContent = indexContent.replace('<gany.LICENSE_KEY>', config.license.key);
+    fs.writeFileSync('src/index.html', indexContent);
     return verified;
   }
 
@@ -148,7 +155,7 @@ class GanymedeAppGenerator {
       }
     }
   }
-  
+
   private configReplacerUndo() {
     const allTargets = [].concat(configReplacerTargets, styleReplacesTargets);
     for (const filePath of allTargets) {
@@ -161,12 +168,12 @@ class GanymedeAppGenerator {
       }
     }
   }
-  
+
   private configReplacerRefresh() {
     this.configReplacerUndo();
     this.configReplacerDo();
   }
-  
+
   private getBackUpFilePath(filePath: string) {
     const dotSplit = filePath.split('.');
     const extension = dotSplit.pop();
