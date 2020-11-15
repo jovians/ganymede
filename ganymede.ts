@@ -10,18 +10,18 @@ const sharp = require('sharp');
 const allReplaces: {find: RegExp, value: string}[] = [];
 let config = null;
 
-const defaultConfigPath = 'app/ganymede.conf.json';
+const defaultConfigPath = 'ganymede.conf.json';
 
 const configReplacerTargets = [
-  'template/package.json',
-  'template/angular.json',
-  'template/karma.conf.js',
-  'template/src/index.html',
-  'template/e2e/src/app.spec.ts',
+  'package.json',
+  'angular.json',
+  'karma.conf.js',
+  'src/index.html',
+  'e2e/src/app.spec.ts',
 ];
 
 const styleReplacesTargets = [
-  'template/src/variables.scss',
+  'src/variables.scss',
 ];
 
 class GanymedeAppGenerator {
@@ -41,6 +41,9 @@ class GanymedeAppGenerator {
         this.generate();
       }
     }
+    if (a[0] === 'packages-update') {
+      this.packageJsonImport();
+    }
   }
 
   generate() {
@@ -54,6 +57,18 @@ class GanymedeAppGenerator {
   refresh() {
     console.log(`Refreshing template variables...`);
     this.configReplacerRefresh();
+  }
+
+  packageJsonImport() {
+    const pkgTemplate = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
+    const pkgSaved = JSON.parse(fs.readFileSync('package.saved.json', 'utf-8'));
+    for (const field of Object.keys(pkgSaved)) {
+      if (field === 'name' || field === 'version') { continue; }
+      for (const field2 of Object.keys(pkgSaved[field])) {
+        pkgTemplate[field][field2] = pkgSaved[field][field2];
+      }
+    }
+    fs.writeFileSync('package.json', JSON.stringify(pkgTemplate, null, 2));
   }
 
   initialize(configPath: string = defaultConfigPath) {
@@ -120,7 +135,7 @@ class GanymedeAppGenerator {
 }
 
 
-const appGen = new GanymedeAppGenerator;
+const appGen = new GanymedeAppGenerator();
 appGen.initialize();
 appGen.executeBasedOnArgs();
 
