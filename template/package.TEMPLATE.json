@@ -1,6 +1,6 @@
 {
-  "name": "<APP_PACKAGE_NAME>",
-  "version": "<APP_PACKAGE_VERSION>",
+  "name": "<gany.APP_PACKAGE_NAME>",
+  "version": "<gany.APP_PACKAGE_VERSION>",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

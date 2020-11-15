@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "<ANGULAR_APP_NAME>": {
+    "<gany.ANGULAR_APP_NAME>": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/<ANGULAR_APP_NAME>",
+            "outputPath": "dist/<gany.ANGULAR_APP_NAME>",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -72,18 +72,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "<ANGULAR_APP_NAME>:build"
+            "browserTarget": "<gany.ANGULAR_APP_NAME>:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "<ANGULAR_APP_NAME>:build:production"
+              "browserTarget": "<gany.ANGULAR_APP_NAME>:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "<ANGULAR_APP_NAME>:build"
+            "browserTarget": "<gany.ANGULAR_APP_NAME>:build"
           }
         },
         "test": {
@@ -120,18 +120,18 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "<ANGULAR_APP_NAME>:serve"
+            "devServerTarget": "<gany.ANGULAR_APP_NAME>:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "<ANGULAR_APP_NAME>:serve:production"
+              "devServerTarget": "<gany.ANGULAR_APP_NAME>:serve:production"
             }
           }
         }
       }
     }
   },
-  "defaultProject": "<ANGULAR_APP_NAME>",
+  "defaultProject": "<gany.ANGULAR_APP_NAME>",
   "cli": {
     "analytics": "<ANGULAR_APP_CLI_ANALYTICS_TOKEN>"
   }
