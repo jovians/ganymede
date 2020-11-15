@@ -71,8 +71,6 @@ export function langInitializerFactory(translate: TranslateService, injector: In
     // END GANYMEDE AUTOGEN SECTION
   ],
   declarations: [
-    AppComponent,
-
     // BEGIN GANYMEDE AUTOGEN SECTION
     <gany.APP_DECLARATIONS>
     // END GANYMEDE AUTOGEN SECTION
