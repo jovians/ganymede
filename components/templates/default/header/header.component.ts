@@ -4,8 +4,6 @@ import { RouteObservingService } from '../../../services/route-observing.service
 import { AuthService } from '../../../services/auth.service';
 import { AppService } from '../../../services/app.service';
 
-// import { headerNavigation } from '../../../app-routing.module';
-
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
@@ -22,10 +20,11 @@ export class HeaderComponent implements OnDestroy, AfterViewInit {
     public auth: AuthService,
     private routeObservingService: RouteObservingService,
   ) {
-    // this.menuList = headerNavigation;
+    this.menuList = app.template.header.nav;
   }
 
   handleUrlChange(url: string) {
+    if (!url) { return; }
     const majorPath = url.split('/')[1];
     const detected = this.menuList.filter(item => item.path === majorPath)[0];
     if (this.selectedRef) {

@@ -8,11 +8,9 @@ import { Router } from '@angular/router';
     templateUrl: './markdown-frame.component.html',
     styles: [':host {width:100%; height:100%;}']
 })
-
 export class MarkdownFrameComponent implements AfterViewInit {
 
     @ViewChild('markdownViewer') markdownViewer: MarkdownComponent;
-    basePath: string = 'assets/md/';
     src: string = '';
     renderOnError: boolean = false;
 
@@ -27,19 +25,21 @@ export class MarkdownFrameComponent implements AfterViewInit {
 
     }
 
-    async load(src: string = ''): Promise<void> {
+    unload() { this.markdownViewer.render(``); }
+
+    async load(src: string = ''): Promise<boolean> {
       return new Promise((resolve, reject) => {
         this.src = src;
         if (this.src) {
-          this.http.get(this.basePath + this.src, {responseType: 'text'}).subscribe(data => {
+          this.http.get(this.src, {responseType: 'text'}).subscribe(data => {
               try {
                   this.markdownViewer.render(data, true);
-                  resolve();
+                  resolve(true);
               } catch (e) {
                   if (this.renderOnError) {
                     this.markdownViewer.render(`Markdown Render Failed: ${e.message}`);
-                    console.error(e);
-                    resolve();
+                    // console.error(e);
+                    resolve(true);
                   } else {
                     reject(e);
                   }
@@ -47,8 +47,8 @@ export class MarkdownFrameComponent implements AfterViewInit {
           }, e => {
             if (this.renderOnError) {
               this.markdownViewer.render(`Markdown Render Failed: ${e.message}`);
-              console.error(e);
-              resolve();
+              // console.error(e);
+              resolve(true);
             } else {
               reject(e);
             }
@@ -57,8 +57,8 @@ export class MarkdownFrameComponent implements AfterViewInit {
           const e = new Error(`Source not supplied.`);
           if (this.renderOnError) {
             this.markdownViewer.render(`Markdown Load Failed: ${e.message}`);
-            console.error(e);
-            resolve();
+            // console.error(e);
+            resolve(true);
           } else {
             reject(e);
           }

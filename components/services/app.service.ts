@@ -1,29 +1,13 @@
 import { Injectable } from '@angular/core';
-
-const baseImgPath = '/assets/img';
-const baseIcoPath = '/assets/ico';
-const baseVidPath = '/assets/vid';
-const config = require('../../../../../ganymede.conf.json');
+import { GanymedeAppData } from '../ganymede.app.interface';
 
 @Injectable({
   providedIn: 'root'
 })
-export class AppService {
+export class AppService extends GanymedeAppData {
 
-  name = `Ganymede App`;
-  fullname = `Sample Ganymede App`;
-  toptitle = ``;
-  subtitle = ``;
-
-  logo = `${baseIcoPath}/apple-icon.png`;
-  logoTitle = `${baseImgPath}/.png`;
-  // logoTitleVertical = `${baseImgPath}/.png`;
-
-  icon = `${baseIcoPath}/apple-icon.png`;
-
-  loginImage = `${baseImgPath}/s.jpg`;
-
-  landingVideo = `${baseVidPath}/devops_landing.mp4`;
-
-  constructor() {}
+  constructor() {
+    super();
+    Object.assign(this, (window as any).__ganymedeAppData);
+  }
 }

@@ -1,11 +1,13 @@
+"use strict";
 /**
  * Jovian Io App Generator (Angular using Clarity, and server components)
  * (c) Jovian 2020, All rights reserved.
  */
+exports.__esModule = true;
 // tslint:disable: no-console
-var fs = require('fs');
-var crypt = require('crypto');
-var execSync = require('child_process').execSync;
+var fs = require("fs");
+var crypto = require("crypto");
+var fourq_1 = require("@jovian/fourq");
 var allReplaces = [];
 var config = null;
 var defaultConfigPath = 'ganymede.conf.json';
@@ -24,7 +26,8 @@ var GanymedeAppGenerator = /** @class */ (function () {
     }
     GanymedeAppGenerator.prototype.executeBasedOnArgs = function () {
         var a = prepCommandLineArgs();
-        if (a[0] === 'appset') {
+        var opname = a[0];
+        if (opname === 'appset') {
             if (a[1] === 'revert') {
                 this.revert();
             }
@@ -35,46 +38,100 @@ var GanymedeAppGenerator = /** @class */ (function () {
                 this.generate();
             }
         }
-        else if (a[0] === 'packages-update') {
+        else if (opname === 'packages-update') {
             this.packageJsonImport();
         }
-        else if (a[0] === 'template-load') {
+        else if (opname === 'template-load') {
             this.templateLoad();
         }
-        else if (a[0] === 'license-sign') {
+        else if (opname === 'license-keygen') {
+            this.generateLicenseSigningKey();
+        }
+        else if (opname === 'license-sign') {
             this.signLicense(a[1], a[2], a[3], a[4]);
         }
-        else if (a[0] === 'license-verify') {
+        else if (opname === 'license-verify') {
             this.verifyLicense();
         }
-        else if (a[0] === 'license-stamp') {
+        else if (opname === 'license-stamp') {
             this.stampLicense();
         }
+        else if (opname === 'param-file-init') {
+            this.paramFileInit();
+        }
+    };
+    GanymedeAppGenerator.prototype.generateLicenseSigningKey = function () {
+        var seed = crypto.randomBytes(32);
+        var keypair = fourq_1.FourQ.generateFromSeed(seed);
+        var publicKeyBase64 = keypair.publicKey.toString('base64');
+        var secretKeyBase64 = keypair.secretKey.toString('base64');
+        fs.writeFileSync('.license-public-key', 'fourq:' + publicKeyBase64);
+        var prompt = require('prompt');
+        prompt.start();
+        prompt.get([{ name: 'passphrase', hidden: true }], function (e, result) {
+            if (e) {
+                return console.log('\nCanceled.');
+            }
+            var passphrase = result.passphrase;
+            var passphraseHash = crypto.createHash('sha256').update('GANYMEDE_SALT::' + passphrase).digest();
+            var iv = crypto.randomBytes(16);
+            var cipher = crypto.createCipheriv('aes-256-cbc', passphraseHash, iv);
+            var encrypted = cipher.update(Buffer.from(secretKeyBase64, 'base64'));
+            encrypted = Buffer.concat([encrypted, cipher.final()]);
+            var encryptedPrivateKeyData = 'aes-256-cbc:' + iv.toString('hex') + ':' + encrypted.toString('hex');
+            fs.writeFileSync('.license-signing-key', encryptedPrivateKeyData);
+            console.log('Public Key: ' + publicKeyBase64);
+            console.log('Encrypted Private Key: ' + encryptedPrivateKeyData);
+        });
     };
     GanymedeAppGenerator.prototype.signLicense = function (org, user, domain, scope) {
-        var encryptedPrivateKey = fs.readFileSync('.license-signing-key');
-        var privateKeyPassphrase = fs.readFileSync('.license-signing-key-passphrase');
-        var signer = crypt.createSign('RSA-SHA256');
-        signer.update("GANYMEDE_LICENSE___" + org + "___" + user + "___" + domain + "___" + scope);
-        signer.end();
-        var sig = signer.sign({
-            key: encryptedPrivateKey,
-            passphrase: privateKeyPassphrase
-        }, 'hex');
-        console.log('License Key: ' + sig);
-        return sig;
+        var encryptedPrivateKeyInfo = fs.readFileSync('.license-signing-key', 'utf8').split(':');
+        var publicKeyBase64 = fs.readFileSync('.license-public-key', 'utf8').split(':')[1];
+        var prompt = require('prompt');
+        prompt.start();
+        prompt.get([{ name: 'passphrase', hidden: true }], function (e, result) {
+            if (e) {
+                return console.log('\nCanceled.');
+            }
+            var passphrase = result.passphrase;
+            var passphraseHash = crypto.createHash('sha256').update('GANYMEDE_SALT::' + passphrase).digest();
+            var encryptionScheme = encryptedPrivateKeyInfo.shift();
+            var encryptionIV = encryptedPrivateKeyInfo.shift();
+            var encryptedText = encryptedPrivateKeyInfo.shift();
+            var encryptedData = Buffer.from(encryptedText, 'hex');
+            var decrypted;
+            try {
+                var decipher = crypto.createDecipheriv(encryptionScheme, passphraseHash, Buffer.from(encryptionIV, 'hex'));
+                decrypted = decipher.update(encryptedData);
+                decrypted = Buffer.concat([decrypted, decipher.final()]);
+            }
+            catch (e) {
+                return console.log('Passphrase incorrect.');
+            }
+            // console.log(decrypted.toString('base64'));
+            var secretKey = decrypted;
+            var licenseMessage = Buffer.from("GANYMEDE_LICENSE___" + org + "___" + user + "___" + domain + "___" + scope);
+            var sig = fourq_1.FourQ.sign(licenseMessage, secretKey);
+            var valid = fourq_1.FourQ.verify(sig.data, licenseMessage, Buffer.from(publicKeyBase64, 'base64'));
+            if (valid) {
+                console.log('License Key: ' + sig.data.toString('base64'));
+            }
+            else {
+                console.log('Fatal: signed signaure does not verified to be true');
+            }
+        });
     };
     GanymedeAppGenerator.prototype.verifyLicense = function () {
-        var publicKey = fs.readFileSync('src/app/ganymede/.license-public-key');
-        var verifier = crypt.createVerify('RSA-SHA256');
+        var publicKeyBase64 = fs.readFileSync('src/app/ganymede/.license-public-key', 'utf8').split(':')[1];
         var org = config.license.org;
         var user = config.license.user;
         var domain = config.license.domain;
         var scope = config.license.scope;
-        verifier.update("GANYMEDE_LICENSE___" + org + "___" + user + "___" + domain + "___" + scope);
-        var verified = verifier.verify(publicKey, config.license.key, 'hex');
-        console.log(verified ? 'GANYMEDE_LICENSE_VALID' : 'GANYMEDE_LICENSE_NOT_VALID');
-        return verified;
+        var licenseMessage = Buffer.from("GANYMEDE_LICENSE___" + org + "___" + user + "___" + domain + "___" + scope);
+        var sigData = Buffer.from(config.license.key, 'base64');
+        var valid = fourq_1.FourQ.verify(sigData, licenseMessage, Buffer.from(publicKeyBase64, 'base64'));
+        console.log(valid ? 'GANYMEDE_LICENSE_VALID' : 'GANYMEDE_LICENSE_NOT_VALID');
+        return valid;
     };
     GanymedeAppGenerator.prototype.stampLicense = function () {
         var indexContent = fs.readFileSync('src/index.html', 'utf-8');
@@ -84,6 +141,14 @@ var GanymedeAppGenerator = /** @class */ (function () {
         indexContent = indexContent.replace('<gany.LICENSE_SCOPE>', config.license.scope);
         indexContent = indexContent.replace('<gany.LICENSE_KEY>', config.license.key);
         fs.writeFileSync('src/index.html', indexContent);
+    };
+    GanymedeAppGenerator.prototype.paramFileInit = function () {
+        if (!fs.existsSync('src/global.scss')) {
+            fs.writeFileSync('src/global.scss', '');
+        }
+        if (!fs.existsSync('ganymede.nav.ts')) {
+            fs.writeFileSync('ganymede.nav.ts', '');
+        }
     };
     GanymedeAppGenerator.prototype.generate = function () {
         console.log("Setting template variables...");

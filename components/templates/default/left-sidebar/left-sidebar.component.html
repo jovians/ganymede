@@ -1,1 +1,30 @@
-Test
+<section class="sidenav-content">
+  <ng-template ngFor let-itemData [ngForOf]="navItems" let-i="index">
+    <a *ngIf="!itemData.children || itemData.children.length === 0" [ngClass]="{'active': router.url === '/' + itemData.link}"
+        [routerLink]="[itemData.link]" (click)="endHere($event)" class="nav-link">{{ itemData.name }}</a>
+    <section *ngIf="!itemData.leftNavType && itemData.children?.length"
+      [ngClass]="{'active': router.url === '/' + itemData.link}"
+      [routerLink]="[itemData.link]" (click)="endHere($event)" class="nav-group collapsible">
+      <input [id]="'sidenav-item-' + idemGuard + '-' + i" type="checkbox">
+      <label [for]="'sidenav-item-' + idemGuard + '-' + i">{{ itemData.name }}</label>
+      <ul class="nav-list">
+          <li *ngFor="let item of itemData.children">
+            <a class="nav-link" [ngClass]="{'active': router.url === '/' + item.link}"
+                [routerLink]="[item.link]" (click)="endHere($event)">{{ item.name }}</a>
+          </li>
+      </ul>
+    </section>
+    <section *ngIf="itemData.leftNavType==='category' && itemData.children?.length"
+      [ngClass]="{'active': router.url === '/' + itemData.link}"
+      [routerLink]="[itemData.link]" (click)="endHere($event)" class="nav-group">
+      <input [id]="'sidenav-item-' + idemGuard + '-' + i" type="checkbox">
+      <label [for]="'sidenav-item-' + idemGuard + '-' + i">{{ itemData.name }}</label>
+      <ul class="nav-list">
+        <li *ngFor="let item of itemData.children">
+          <a class="nav-link" [ngClass]="{'active': router.url === '/' + item.link}"
+            [routerLink]="[item.link]" (click)="endHere($event)">{{ item.name }}</a>
+        </li>
+      </ul>
+    </section>
+  </ng-template>
+</section>

@@ -9,6 +9,8 @@ import { LeftSidebarComponent } from './left-sidebar/left-sidebar.component';
 import { RightSidebarComponent } from './right-sidebar/right-sidebar.component';
 
 import { ClarityModule } from '@clr/angular';
+// import { MarkdownFrameComponent } from '../../markdown/markdown-frame/markdown-frame.component';
+// import { MarkdownContentComponent } from '../../markdown/markdown-content/markdown-content.component';
 
 @NgModule({
   imports: [
@@ -22,7 +24,15 @@ import { ClarityModule } from '@clr/angular';
     HeaderComponent,
     FooterComponent,
     LeftSidebarComponent,
-    RightSidebarComponent
+    RightSidebarComponent,
+  ],
+  exports: [
+    AppComponent,
+
+    HeaderComponent,
+    FooterComponent,
+    LeftSidebarComponent,
+    RightSidebarComponent,
   ]
 })
 export class GanymedeTemplateModule { }

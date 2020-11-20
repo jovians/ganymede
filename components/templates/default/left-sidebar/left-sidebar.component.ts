@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { AppService } from '../../../services/app.service';
 
 @Component({
   selector: 'app-left-sidebar',
@@ -7,9 +9,14 @@ import { Component, OnInit } from '@angular/core';
 })
 export class LeftSidebarComponent implements OnInit {
 
-  constructor() { }
+  @Input() navItems = [];
+  idemGuard = Date.now();
+  constructor(
+    public app: AppService,
+    public router: Router,
+  ) { }
 
-  ngOnInit() {
-  }
+  ngOnInit() { }
 
+  endHere(e) { e.stopPropagation(); }
 }

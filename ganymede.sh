@@ -8,9 +8,15 @@ echo "Pulling latest Ganymede source..."
 git pull;
 cd ../../../;
 
+FOURQ_INSTALLED=$(node -p "try{typeof require('@jovian/fourq')==='object'}catch(e){''}")
+if [[ $FOURQ_INSTALLED != "true" ]]; then
+  echo "Installing dependency... [ @jovian/fourq ]"
+  npm install @jovian/fourq > /dev/null 2>&1;
+fi
+
 cp src/app/ganymede/ganymede.js ganymede.js
 LICENSE_MSG=$(node ganymede.js license-verify)
-if [ $LICENSE_MSG == "GANYMEDE_LICENSE_NOT_VALID" ]; then
+if [[ $LICENSE_MSG == "GANYMEDE_LICENSE_NOT_VALID" ]]; then
   echo "Ganymede license is not valid; aborting."
   exit
 fi
@@ -26,6 +32,7 @@ node ganymede.js appset
 node ganymede.js license-stamp
 node ganymede.js packages-update
 node ganymede.js template-load
+node ganymede.js param-file-init
 
 find . -name '*.TEMPLATE.*' -delete;
 rm -rf package.saved.json
