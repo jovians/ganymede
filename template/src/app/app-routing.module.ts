@@ -1,10 +1,10 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
-import { routes } from '../../ganymede.nav';
+import { appRoutes } from '../../ganymede.app';
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(appRoutes)],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }
