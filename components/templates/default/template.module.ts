@@ -9,6 +9,7 @@ import { LeftSidebarComponent } from './left-sidebar/left-sidebar.component';
 import { RightSidebarComponent } from './right-sidebar/right-sidebar.component';
 
 import { ClarityModule } from '@clr/angular';
+import { TranslateModule } from '@ngx-translate/core';
 // import { MarkdownFrameComponent } from '../../markdown/markdown-frame/markdown-frame.component';
 // import { MarkdownContentComponent } from '../../markdown/markdown-content/markdown-content.component';
 
@@ -16,7 +17,8 @@ import { ClarityModule } from '@clr/angular';
   imports: [
     CommonModule,
     RouterModule,
-    ClarityModule
+    ClarityModule,
+    TranslateModule.forChild(),
   ],
   declarations: [
     AppComponent,

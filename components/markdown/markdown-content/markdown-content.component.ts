@@ -18,7 +18,7 @@ export class MarkdownContentComponent implements OnInit {
     private router: Router,
   ) {
     this.app.routeData.subscribe(data => {
-      if (data.pageData && data.pageData.type === 'md-contents') {
+      if (data.pageData && data.pageData.type === 'basic-contents') {
         this.loadFile(data.pageData.root);
       }
     });
@@ -30,7 +30,7 @@ export class MarkdownContentComponent implements OnInit {
   }
 
   async loadFile(path: string) {
-    if (path.indexOf('~') >= 0) { path = path.replace('~', this.app.defaultMarkdownAssetPath + '/'); }
+    if (path.indexOf('~') >= 0) { path = path.replace('~', this.app.defaultUserContentsPath + '/'); }
     if (path.indexOf('{LANG}') >= 0) { path = path.replace('{LANG}', this.app.lang); }
     this.markdownFrame.renderOnError = false;
 

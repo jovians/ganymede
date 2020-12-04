@@ -1,0 +1,16 @@
+{
+  "name": "@jovian/ganymede-server-module",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "@jovian/fourq": "0.0.19",
+    "crypto": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^12.19.8",
+    "codelyzer": "^5.2.1",
+    "ts-node": "~7.0.0",
+    "tslint": "~5.15.0",
+    "typescript": "^3.7.4"
+  }
+}

@@ -8,6 +8,12 @@ echo "Pulling latest Ganymede source..."
 git pull;
 cd ../../../;
 
+LANGSTER_INSTALLED=$(node -p "try{typeof require('@jovian/langster')==='object'}catch(e){''}")
+if [[ $LANGSTER_INSTALLED != "true" ]]; then
+  echo "Installing dependency... [ glob ]"
+  npm install glob --save-dev > /dev/null 2>&1;
+fi
+
 FOURQ_INSTALLED=$(node -p "try{typeof require('@jovian/fourq')==='object'}catch(e){''}")
 if [[ $FOURQ_INSTALLED != "true" ]]; then
   echo "Installing dependency... [ @jovian/fourq ]"

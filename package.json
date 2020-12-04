@@ -9,9 +9,9 @@
   },
   "dependencies": {
     "@jovian/fourq": "0.0.18",
+    "@jovian/langster": "0.0.3",
     "@sendgrid/mail": "^7.4.0",
     "mongodb": "^3.6.3",
-    "prompt": "^1.0.0",
     "sharp": "^0.25.4",
     "tslib": "^1.10.0"
   },

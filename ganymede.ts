@@ -6,8 +6,8 @@
  // tslint:disable: no-console
 import * as fs from 'fs';
 import * as crypto from 'crypto';
-import { execSync } from 'child_process';
 import { FourQ } from '@jovian/fourq';
+import { NgxTranslateLangster } from '@jovian/langster';
 
 
 const allReplaces: {find: RegExp, value: string}[] = [];
@@ -20,7 +20,7 @@ const configReplacerTargets = [
   'angular.json',
   'karma.conf.js',
   'src/index.html',
-  'e2e/src/app.spec.ts',
+  'src/assets/ico/manifest.json',
 ];
 
 const styleReplacesTargets = [
@@ -48,6 +48,7 @@ class GanymedeAppGenerator {
       this.packageJsonImport();
     } else if (opname === 'template-load') {
       this.templateLoad();
+
     } else if (opname === 'license-keygen') {
       this.generateLicenseSigningKey();
     } else if (opname === 'license-sign') {
@@ -56,8 +57,14 @@ class GanymedeAppGenerator {
       this.verifyLicense();
     } else if (opname === 'license-stamp') {
       this.stampLicense();
+
     } else if (opname === 'param-file-init') {
       this.paramFileInit();
+
+    } else if (opname === 'i18n-update') {
+      this.i18nUpdate();
+    } else if (opname === 'i18n-generate') {
+      this.i18nGenerateFromJson();
     }
   }
 
@@ -197,6 +204,23 @@ class GanymedeAppGenerator {
     }
   }
 
+  i18nGenerateFromJson() {
+    const i18nPath = fs.existsSync('src/assets/i18n') ? 'src/assets/i18n' : '../../assets/i18n';
+    new NgxTranslateLangster({
+      folderPath: i18nPath,
+      langPackExtension: '.lang.js',
+      ignorePatternsAdditional: ['**/ganymede/**', '**/ganymede.ts']
+    }).generateFromJson();
+  }
+
+  i18nUpdate() {
+    const i18nPath = fs.existsSync('src/assets/i18n') ? 'src/assets/i18n' : '../../assets/i18n';
+    new NgxTranslateLangster({
+      folderPath: i18nPath,
+      langPackExtension: '.lang.js',
+      ignorePatternsAdditional: ['**/ganymede/**', '**/ganymede.ts']
+    }).update();
+  }
 
   private configReplacerDo() {
     const allTargets = [].concat(configReplacerTargets, styleReplacesTargets);

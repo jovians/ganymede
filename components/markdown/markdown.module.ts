@@ -14,22 +14,7 @@ import { MarkdownContentComponent } from './markdown-content/markdown-content.co
     CommonModule,
     RouterModule,
     ClarityModule,
-    MarkdownModule.forRoot({
-      loader: HttpClient,
-      markedOptions: {
-          provide: MarkedOptions,
-          useValue: {
-                  gfm: true,
-                  tables: true,
-                  breaks: false,
-                  pedantic: false,
-                  sanitize: false,
-                  smartLists: true,
-                  smartypants: false,
-                  highlight: true
-              },
-          },
-    }),
+    MarkdownModule.forChild(),
   ],
   declarations: [
     MarkdownFrameComponent,

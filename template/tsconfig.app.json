@@ -5,14 +5,19 @@
     "baseUrl": "./",
   },
   "exclude": [
+    "**/dist/**/*",
+    "node_modules/**/*",
+    "**/*.spec.ts",
+    "**/*.TEMPLATE.*",
     "ganymede.ts",
     "ganymede/**/*",
+    "src/assets/**/*.js",
+    "src/assets/i18n/**/*",
+    "src/assets-root/**/*",
+    "src/app/ganymede/template/src/assets-root/*",
+    "src/app/ganymede/*.ts",
+    "src/app/ganymede/server/**/*.ts",
     "src/app/ganymede/template/**/*",
-    "src2/**/*",
-    "node_modules/**/*",
-    "template/server/**/*",
-    "server/**/*",
-    "**/*.spec.ts",
-    "**/*.TEMPLATE.*"
+    "server/**/*"
   ]
 }

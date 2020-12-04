@@ -8,6 +8,7 @@ exports.__esModule = true;
 var fs = require("fs");
 var crypto = require("crypto");
 var fourq_1 = require("@jovian/fourq");
+var langster_1 = require("@jovian/langster");
 var allReplaces = [];
 var config = null;
 var defaultConfigPath = 'ganymede.conf.json';
@@ -16,7 +17,7 @@ var configReplacerTargets = [
     'angular.json',
     'karma.conf.js',
     'src/index.html',
-    'e2e/src/app.spec.ts',
+    'src/assets/ico/manifest.json',
 ];
 var styleReplacesTargets = [
     'src/variables.scss',
@@ -58,6 +59,12 @@ var GanymedeAppGenerator = /** @class */ (function () {
         }
         else if (opname === 'param-file-init') {
             this.paramFileInit();
+        }
+        else if (opname === 'i18n-update') {
+            this.i18nUpdate();
+        }
+        else if (opname === 'i18n-generate') {
+            this.i18nGenerateFromJson();
         }
     };
     GanymedeAppGenerator.prototype.generateLicenseSigningKey = function () {
@@ -203,6 +210,22 @@ var GanymedeAppGenerator = /** @class */ (function () {
                 value: config.styles.replacer[replaceKey] + ''
             });
         }
+    };
+    GanymedeAppGenerator.prototype.i18nGenerateFromJson = function () {
+        var i18nPath = fs.existsSync('src/assets/i18n') ? 'src/assets/i18n' : '../../assets/i18n';
+        new langster_1.NgxTranslateLangster({
+            folderPath: i18nPath,
+            langPackExtension: '.lang.js',
+            ignorePatternsAdditional: ['**/ganymede/**', '**/ganymede.ts']
+        }).generateFromJson();
+    };
+    GanymedeAppGenerator.prototype.i18nUpdate = function () {
+        var i18nPath = fs.existsSync('src/assets/i18n') ? 'src/assets/i18n' : '../../assets/i18n';
+        new langster_1.NgxTranslateLangster({
+            folderPath: i18nPath,
+            langPackExtension: '.lang.js',
+            ignorePatternsAdditional: ['**/ganymede/**', '**/ganymede.ts']
+        }).update();
     };
     GanymedeAppGenerator.prototype.configReplacerDo = function () {
         var allTargets = [].concat(configReplacerTargets, styleReplacesTargets);

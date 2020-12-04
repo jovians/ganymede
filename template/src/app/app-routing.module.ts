@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
-import { appRoutes } from '../../ganymede.app';
+import { appRoutes } from '../../ganymede.app.ui';
 
 @NgModule({
   imports: [RouterModule.forRoot(appRoutes)],

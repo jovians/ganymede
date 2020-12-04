@@ -97,7 +97,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
     if (data.pageData) {
       this.leftSidebarNavItems = [];
-      if (data.pageData.type === 'md-contents') {
+      if (data.pageData.type === 'basic-contents') {
         this.leftSidebarNavItems = data.pageData.children;
       }
     }

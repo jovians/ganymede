@@ -243,3 +243,5 @@ FourQ.getFleet = function(workerCount){
   }, 1000);
 
 }
+
+if (window.__init_FourQ__) { window.__init_FourQ__(); }

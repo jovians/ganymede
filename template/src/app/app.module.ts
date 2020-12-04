@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { BrowserModule } from '@angular/platform-browser';
-import { LOCATION_INITIALIZED } from '@angular/common';
+import { CommonModule, LOCATION_INITIALIZED } from '@angular/common';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule, Injector, APP_INITIALIZER } from '@angular/core';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
@@ -16,6 +16,9 @@ import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-transla
 import { MarkdownModule, MarkedOptions } from 'ngx-markdown';
 
 import { GanymedeTemplateModule, AppComponent } from './ganymede/components/templates/<gany.APP_TEMPLATE_NAME>/template.module';
+import { GanymedeMarkdownModule } from './ganymede/components/markdown/markdown.module';
+import { GanymedePagesModule } from './ganymede/components/pages/pages.module';
+import { ganymedeLicenseCallbacks } from './ganymede/ganymede.license';
 
 const notFoundValue = Promise.resolve();
 const translateBasePath = 'assets/i18n/';
@@ -36,6 +39,7 @@ export function langInitializerFactory(translate: TranslateService, injector: In
 
 @NgModule({
   imports: [
+    CommonModule,
     HttpClientModule,
     BrowserModule,
     AppRoutingModule,
@@ -65,6 +69,8 @@ export function langInitializerFactory(translate: TranslateService, injector: In
           },
     }),
     GanymedeTemplateModule,
+    GanymedeMarkdownModule,
+    GanymedePagesModule,
 
     // BEGIN GANYMEDE AUTOGEN SECTION
     <gany.APP_IMPORTS>
@@ -92,3 +98,8 @@ export function langInitializerFactory(translate: TranslateService, injector: In
   bootstrap: [AppComponent]
 })
 export class AppModule { }
+
+ganymedeLicenseCallbacks.push((valid, ganyMeta) => {
+  // tslint:disable-next-line: no-console
+  if (!valid) { console.warn(`Ganymede license is not valid; serial_key="${ganyMeta['ganymede-license-key']}"`); }
+});
