@@ -48,3 +48,9 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+
+# Ganymede
+src/app/ganymede
+src/app/ganymede/*
+ganymede/**/*
+ganymede.app.js
