@@ -1,0 +1,12 @@
+{
+  "namespace": "@jovian/ganymede-clr",
+  "mounted": "ganymede",
+  "group": "components/templates/default",
+
+  "name": "TopAlertComponent",
+  "folder": "top-alert",
+  "file": "top-alert.component",
+  "selector": "app-top-alert",
+
+  "attributes": ["ui", "angular", "clarity"]
+}

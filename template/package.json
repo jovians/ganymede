@@ -7,9 +7,15 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "electron-entry": "cp src/app/ganymede/electron/electron.js electron.js",
+    "electron-start": "npm run electron-entry && electron . start",
+    "electron-test": "npm run electron-entry && electron . test",
+    "electron-build-mac": "npm run build && npm run electron-entry && electron-packager . --overwrite --platform=darwin --arch=x64 --icon=dist/assets/ico/mac/icon.icns --prune=true --out=dist --dir=dist-electron",
+    "version": "echo $npm_package_version"
   },
   "private": true,
+  "main": "src/app/ganymede/electron/electron.js",
   "dependencies": {
     "@angular/animations": "^9.1.12",
     "@angular/common": "^9.1.12",
@@ -23,6 +29,9 @@
     "@clr/core": "^3.0.0",
     "@clr/icons": "^3.1.5",
     "@clr/ui": "3.1.5",
+    "@jovian/fourq": "^1.0.7",
+    "@jovian/langster": "0.0.6",
+    "@jovian/type-tools": "^6.0.0",
     "@ngx-translate/core": "^11.0.1",
     "@ngx-translate/http-loader": "^4.0.0",
     "@webcomponents/webcomponentsjs": "^2.0.0",
@@ -33,6 +42,7 @@
     "request": "^2.88.2",
     "rxjs": "~6.5.3",
     "tslib": "^1.10.0",
+    "typescript": "^3.7.4",
     "zone.js": "^0.10.3"
   },
   "devDependencies": {
@@ -44,6 +54,7 @@
     "@types/jasminewd2": "~2.0.3",
     "@types/node": "^12.11.1",
     "codelyzer": "^5.2.1",
+    "electron": "^11.3.0",
     "jasmine-core": "^3.6.0",
     "jasmine-spec-reporter": "~4.2.1",
     "karma": "~4.1.0",
@@ -53,7 +64,6 @@
     "karma-jasmine-html-reporter": "^1.5.4",
     "protractor": "~5.4.0",
     "ts-node": "~7.0.0",
-    "tslint": "~5.15.0",
-    "typescript": "^3.7.4"
+    "tslint": "~5.15.0"
   }
 }

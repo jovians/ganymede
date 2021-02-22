@@ -1,5 +1,9 @@
+/*
+ * Copyright 2014-2021 Jovian, all rights reserved.
+ */
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
+import { Components } from '../../../../ui.components';
 import { AppService } from '../../services/app.service';
 import { MarkdownFrameComponent } from '../markdown-frame/markdown-frame.component';
 
@@ -9,6 +13,7 @@ import { MarkdownFrameComponent } from '../markdown-frame/markdown-frame.compone
   styles: [':host {width:100%; height:100%;}']
 })
 export class MarkdownContentComponent implements OnInit {
+  static registration = Components.register(MarkdownContentComponent, () => require('./markdown-content.component.json'));
 
   @ViewChild('markdownFrame') markdownFrame: MarkdownFrameComponent;
   @Input() filePath = '';

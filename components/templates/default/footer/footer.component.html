@@ -2,6 +2,8 @@
 <div class="footer-middle"></div>
 <div class="footer-right">
   <div class="footer-entry">
-    Test Footers
+    <span *ngIf="app.features?.licenseFooter?.messageHTML && app.features?.licenseFooter?.messageHTML.indexOf('Ganymede')">
+      <a href="https://ganymede.dev" target="_blank">{{ app.features?.licenseFooter?.messageHTML }}</a>
+    </span>
   </div>
 </div>

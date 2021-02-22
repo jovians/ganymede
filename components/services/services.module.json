@@ -1,0 +1,11 @@
+{
+  "namespace": "@jovian/ganymede-clr",
+  "mounted": "ganymede",
+  "group": "components/services",
+
+  "name": "GenymedeServicesModule",
+  "folder": "",
+  "file": "services.module",
+
+  "attributes": ["ui", "angular", "clarity"]
+}

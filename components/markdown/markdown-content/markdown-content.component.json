@@ -1,0 +1,12 @@
+{
+  "namespace": "@jovian/ganymede-clr",
+  "mounted": "ganymede",
+  "group": "components/markdown",
+
+  "name": "MarkdownContentComponent",
+  "folder": "markdown-content",
+  "file": "markdown-content.component",
+  "selector": "app-markdown-content",
+
+  "attributes": ["ui", "angular", "clarity"]
+}

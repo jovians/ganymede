@@ -28,7 +28,7 @@ interface UrlInfo {
 
 const env: any = {};
 
-function envPrepare() {
+const envPrepare = () => {
   const nv = navigator;
   const ua = nv.userAgent;
   const ual = ua.toLowerCase();
@@ -85,7 +85,7 @@ function envPrepare() {
   env.isEdge = ( ua.match(/(Edge)/g) ? true : false ); if (env.isEdge) { env.browser = 'edge'; }
   env.isIE = (ua.indexOf('MSIE ') > 0 || ua.indexOf('Trident/') > 0) && !env.isChrome && !env.isFirefox && !env.isSafari && !env.isEdge;
   if (!env.browser) { env.browser = 'other'; }
-}
+};
 
 envPrepare();
 
@@ -96,7 +96,7 @@ let fetchFunc;
 const fetchFunc0 = (e) => { if (fetchFunc) { fetchFunc(e); } };
 
 const urlInfoCache = {};
-function getUrlInfo(url: string): UrlInfo {
+const getUrlInfo = (url: string): UrlInfo => {
   if (urlInfoCache[url] && Date.now() - urlInfoCache[url].t < 86400000) {
     return urlInfoCache[url];
   }
@@ -197,42 +197,61 @@ function getUrlInfo(url: string): UrlInfo {
   // };
   urlInfoCache[oriUrl] = info;
   return info;
-}
-
+};
 
 
 self.addEventListener('install', installFunc0);
 self.addEventListener('fetch', fetchFunc0);
-self.addEventListener('activate', () => { try { clients.claim(); } catch (e) {} });
+self.addEventListener('activate', (e: any) => { e.waitUntil(self.clients.claim()); });
 
 
 const clientWindows = {};
 let cacheMap = null;
-function clientslog(msg) {
+let cacheName = 'ganymedeServiceWorker';
+const basicFiles = false ? [] : [];
+
+
+const clientslog = (msg) => {
   for (const cid of Object.keys(clientWindows)) {
     // tslint:disable-next-line: no-console
     try { clientWindows[cid].target.postMessage(msg); } catch (e) { console.log(e); }
   }
-}
-let cacheName = 'fetch_cache';
-const basicFiles = false ? [] : [];
+};
+
+// tslint:disable-next-line: no-string-literal
+self['newClientChecker'] = () => {
+  skipWaiting();
+  // tslint:disable-next-line: no-console
+  // try { self.clients.claim(); } catch (e) { console.log(e); }
+  self.clients.matchAll({includeUncontrolled: true, type: 'window'}).then(matchedClients => {
+    if (matchedClients && matchedClients.length) {
+      for (const cid of Object.keys(clientWindows)) {
+        clientWindows[cid].checked = false;
+      }
+      const announce = (client, cid) => { client.postMessage('GanymedeSW::ACK ' + cid); };
+      for (const client of matchedClients) {
+        // if (!client.focused) { continue; }
+        const cid = client.id;
+        if (!clientWindows[cid]) {
+          clientWindows[cid] = { mapped: false, target: client };
+          try {
+            announce(client, cid);
+          } catch (e) {
+            console.log(e);
+          }
+        }
+        clientWindows[cid].checked = true;
+      }
+      for (const cid of Object.keys(clientWindows)) {
+        if (!clientWindows[cid].checked) { delete clientWindows[cid]; }
+      }
+    }
+  });
+};
 
 // tslint:disable-next-line: no-unused-expression
 (async () => {
 
-// var ascii_sha_arr = new Uint8Array(64), ascii_hash_hash_arr = [], ascii_sha = async function(v){
-// 	if(!self.crypto || !self.crypto.subtle) return 'NO_SUBTLE_CRYPTO_LIBRARY';
-// 	v = v+''; var len = v.length > 64 ? 64 : v.length;
-// 	for(var i = 0; i < len; ++i) ascii_sha_arr[i] = v.charCodeAt(i) % 256;
-// 	for(var i = len; i < 64; ++i) ascii_sha_arr[i] = 0;
-// 	var hash = await self.crypto.subtle.digest('SHA-512', ascii_sha_arr);
-// 	var hash2 = new Uint8Array(hash); ascii_hash_hash_arr.length = 64;
-// 	for(var i = 0; i < 64; ++i) ascii_hash_hash_arr[i] = hash2[i];
-// 	var str = String.fromCharCode.apply(null,ascii_hash_hash_arr);
-// 	return btoa(String.fromCharCode.apply(null,ascii_hash_hash_arr));
-// }
-// var swv = 'SW_VERSION', swv_sha = await ascii_sha(swv), swv_sha_short = swv_sha.substr(0,10);
-// console.log('%c[Ganymede SW]','color:#de00ff;',   'Version: '+swv+' ('+swv_sha_short+')');
 fetchFunc = e => {
   try {
     if (!env.domains || !env.hostname) { return false; }
@@ -303,40 +322,15 @@ fetchFunc = e => {
 };
 
 installFunc = e => {
-  skipWaiting();
+  // skipWaiting();
   e.waitUntil(caches.open(cacheName).then(cache => {
     // tslint:disable-next-line: no-console
-    console.log('%c[Ganymede SW]', 'color:#de00ff;', 'Caching all basic static files...');
+    console.log('%c[Ganymede SW]', 'color:#de00ff;', 'caching all basic static files...');
     cache.addAll(basicFiles);
   }));
 };
 
-setInterval(() => {
-  // tslint:disable-next-line: no-console
-  try { self.clients.claim(); } catch (e) { console.log(e); }
-  self.clients.matchAll({includeUncontrolled: true, type: 'window'}).then(matchedClients => {
-    if (matchedClients && matchedClients.length) {
-      for (const cid of Object.keys(clientWindows)) {
-        clientWindows[cid].checked = false;
-      }
-      for (const client of matchedClients) {
-        const cid = client.id;
-        if (!clientWindows[cid]) {
-          clientWindows[cid] = { mapped: false, target: client };
-          try {
-            client.postMessage('SW::get_cache_map::' + cid + '::sw_ver,' + 'swv' + ',' + 'swv_sha_short');
-          } catch (e) {
-
-          }
-        }
-        clientWindows[cid].checked = true;
-      }
-      for (const cid of Object.keys(clientWindows)) {
-        if (!clientWindows[cid].checked) { delete clientWindows[cid]; }
-      }
-    }
-  });
-}, 1000);
+// setInterval(newClientChecker, 100);
 
 
 })();
@@ -347,26 +341,28 @@ self.addEventListener('message', (e) => {
     sourceDomain = sourceDomain.split(':')[0];
     if (env.domains.indexOf(sourceDomain) === -1) {
       // tslint:disable-next-line: no-console
-      console.log('%c[Ganymede SW]', 'color:#de00ff;', 'Blocked message from unregistered domain ' + sourceDomain);
+      console.log('%c[Ganymede SW]', 'color:#de00ff;', 'blocked message from unregistered domain ' + sourceDomain);
       return;
     }
   }
 
-  console.log(e);
   if (e.data && e.data.action) {
-    if (e.data.action === 'versions') {
+    if (e.data.action === 'set') {
+      // tslint:disable-next-line: no-string-literal
+      self['newClientChecker']();
+      if (env.domains || !Array.isArray(e.data.domains) || !e.data.hostname) { return; }
       verInfo = e.data.versionInfo;
-    } else if (e.data.action === 'setDebugLevel') {
-      env.debugLevel = e.data.debugLevel;
-    } else if (e.data.action === 'setAllowedDomains') {
-      if (env.domains || !Array.isArray(e.data.domains) || !e.data.hostname) {
-        console.log(e);
-        return;
-      }
       env.domains = [];
       env.hostname = e.data.hostname;
       for (const domain of e.data.domains) {
         if (env.domains.indexOf(domain) === -1) { env.domains.push(domain); }
+      }
+      if (Array.isArray(e.data.defaultCache) && e.data.defaultCache.length > 0) {
+        caches.open(cacheName).then(cache => {
+          // tslint:disable-next-line: no-console
+          console.log('%c[Ganymede SW]', 'color:#de00ff;', 'caching all default caches...');
+          cache.addAll(e.data.defaultCache);
+        });
       }
     }
   }

@@ -12,4 +12,9 @@
   width: 0px;
 }
 
+.sidenav .sidenav-content > .nav-link {
+  width: calc(100% - 1.525rem);
+  padding-right: 0.1rem;
+}
+
 @import './global.scss';

@@ -1,0 +1,12 @@
+{
+  "namespace": "@jovian/ganymede-clr",
+  "mounted": "ganymede",
+  "group": "components/templates/default",
+
+  "name": "RightSidebarComponent",
+  "folder": "right-sidebar",
+  "file": "right-sidebar.component",
+  "selector": "app-right-sidebar",
+
+  "attributes": ["ui", "angular", "clarity"]
+}

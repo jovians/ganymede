@@ -1,12 +1,13 @@
-<div *ngIf="markdownNotCurrentLang" class="not-preferred-lang">
+<div *ngIf="contentNotCurrentLang" class="not-preferred-lang">
   This content is not available in {{app.lang}}
 </div>
-<div id="editor"></div>
+<!-- <div id="editor">{{ 'test.test' | translate:tparam({ age: 10, gender: getGender() }) }}</div> -->
+<!-- <div id="editor">{{ 'test.test' | translate:tparam('age=10, gender=boy') }}</div> -->
 <!-- <ckeditor [editor]="Editor" data="<p>Hello, world!</p>" [config]="editorConfig" (ready)="onReady($event)"></ckeditor> -->
 <div class="md-content-container">
   <div #notFoundMessage class="not-found-container">
-    <div *ngIf="markdownNotFound">
-      Cannot find markdown (.md) content for '{{ markdownName | translate }}' ({{markdownLink}})
+    <div *ngIf="contentNotFound">
+      Cannot find markdown (.md) content for '{{ contentData?.name | translate }}' ({{contentPath}})
     </div>
   </div>
   <div #outputArea></div>

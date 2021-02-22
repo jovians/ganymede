@@ -1,16 +1,16 @@
 {
   "name": "@jovian/ganymede-clr",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "scripts": {
     "clean-js": "find . -name '*.js' -delete; find . -name '*.js.map' -delete;",
-    "prepublish": "tsc; node ganymede.js setvar revert;",
-    "postpublish": "tsc; node ganymede.js setvar;",
     "lint": "ng lint"
   },
   "dependencies": {
     "@jovian/fourq": "0.0.18",
-    "@jovian/langster": "0.0.3",
-    "@sendgrid/mail": "^7.4.0",
+    "@jovian/langster": "0.0.6",
+    "@jovian/type-tools": "^6.0.0",
+    "@sendgrid/mail": "^7.4.2",
+    "aes-simple": "0.0.2",
     "mongodb": "^3.6.3",
     "sharp": "^0.25.4",
     "tslib": "^1.10.0"
@@ -22,5 +22,9 @@
     "ts-node": "~7.0.0",
     "tslint": "~5.15.0",
     "typescript": "^3.7.4"
-  }
+  },
+  "bin": {
+    "gany": "./ganymede.sh"
+  },
+  "license": "UNLICENSED"
 }

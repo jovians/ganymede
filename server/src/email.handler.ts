@@ -36,7 +36,7 @@ export class EmailHandler_SendGrid implements EmailHandler {
         if(e) { return reject(e); }
         return resolve(true);
       };
-      Sendgrid.send(data);
+      // Sendgrid.send(data);
     });
   }
   handleInbox(){}

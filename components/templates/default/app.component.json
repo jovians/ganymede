@@ -1,0 +1,12 @@
+{
+  "namespace": "@jovian/ganymede-clr",
+  "mounted": "ganymede",
+  "group": "components/templates/default",
+
+  "name": "AppComponent",
+  "folder": "",
+  "file": "app.component",
+  "selector": "app-root",
+
+  "attributes": ["ui", "angular", "clarity"]
+}

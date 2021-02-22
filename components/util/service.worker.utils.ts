@@ -1,27 +1,30 @@
+/*
+ * Copyright 2014-2021 Jovian, all rights reserved.
+ */
 import { ganylog } from './console.util';
 import { PreInitUtils } from './preinit.util';
+import { getGanymedeAppData } from '../ganymede.app.interface';
 
 export class ServiceWorkerUtil {
 
+  static announceSent = false;
   static async initialize() {
 
-    await PreInitUtils.entrypoint();
+    if (!('serviceWorker' in navigator)) { return; }
 
-    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-      navigator.serviceWorker.controller.postMessage({
-        action: 'versions',
-        versionInfo: PreInitUtils.preinitDataPrevious.versionInfo
-      });
-      const hostnameOnly = location.hostname.split(':')[0];
-      navigator.serviceWorker.controller.postMessage({
-        action: 'setAllowedDomains',
-        hostname: hostnameOnly,
-        domains: [hostnameOnly],
-      });
-    }
+    const app = getGanymedeAppData();
+    const serviceWorkers = await ServiceWorkerUtil.getServiceWorkersList();
 
-    if ('serviceWorker' in navigator) {
-      if (!PreInitUtils.preinitDataPrevious.versionInfo ||
+    if (app.features.serviceWorker && app.features.serviceWorker.enabled) {
+      
+      if (serviceWorkers.length > 0) {
+        ServiceWorkerUtil.sendAnnounce();
+      }
+  
+      navigator.serviceWorker.onmessage = e => {
+        // console.log(e);
+      };
+      if (!PreInitUtils.preinitDataPrevious.versionInfo || serviceWorkers.length === 0 ||
           (PreInitUtils.preinitDataPrevious &&
             PreInitUtils.preinitDataPrevious.versionInfo.sw !== PreInitUtils.preinitData.versionInfo.sw)) {
         if (!navigator.onLine) {
@@ -29,13 +32,60 @@ export class ServiceWorkerUtil {
           return;
         }
         ganylog('SW', 'service worker version changed detected; registering new service worker...');
-        // localStorage.setItem('swv',ver_info.sw);
         const v = PreInitUtils.preinitData.versionInfo ? PreInitUtils.preinitData.versionInfo.sw : 0;
-        navigator.serviceWorker.register('/sw.js?v=' + v);
+        const regOptions: any = { enabled: true, registrationStrategy: 'registerImmediately' };
+        navigator.serviceWorker.register('/sw.js?v=' + v, regOptions)
+          .then(reg => {
+            ganylog('SW', 'registration succeeded, scope=' + reg.scope);
+            if (!ServiceWorkerUtil.announceSent) { ServiceWorkerUtil.sendAnnounce(); }
+          })
+          .catch(registrationError => {
+            ganylog('SW', 'registration failed');
+            // tslint:disable-next-line: no-console
+            console.log(registrationError);
+          });
       }
-      navigator.serviceWorker.onmessage = e => {
-        console.log(e);
-      };
+
+    } else {
+      for (const reg of serviceWorkers) { reg.unregister(); }
     }
   }
+
+  static async getServiceWorkersList() {
+    return new Promise<ServiceWorkerRegistration[]>(resolve => {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          resolve(registrations as any);
+        }).catch(e => {
+          console.log(e)
+          resolve([]);
+        });
+      } else {
+        resolve([]);
+      }
+    });
+  }
+
+  static async sendAnnounce() {
+    return new Promise<boolean>(resolve => {
+      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        try {
+          const hostnameOnly = location.hostname.split(':')[0];
+          navigator.serviceWorker.controller.postMessage({
+            action: 'set',
+            hostname: hostnameOnly,
+            domains: [hostnameOnly],
+            versionInfo: PreInitUtils.preinitDataPrevious.versionInfo
+          });
+          ServiceWorkerUtil.announceSent = true;
+        } catch (e) {
+          console.log(e);
+          resolve(false);
+        }
+      } else {
+        resolve(false);
+      }
+    });
+  }
+
 }

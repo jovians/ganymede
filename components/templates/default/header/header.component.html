@@ -2,7 +2,7 @@
 </div>
 <clr-header>
   <div class="branding" tourAnchor="header.title">
-    <a [routerLink]="['about']" class="nav-link">
+    <a [routerLink]="[app.landingPath]" class="nav-link">
       <div *ngIf="!app.subtitle && !app.toptitle">
         <img [src]="app.icon" class="clr-icon branding-icon app-logo" style="margin-top:-2px;" />
         <span class="title" style="font-size:0.8rem; padding-left:0.35rem; padding-right:0.5rem">{{ app.name }}</span>
@@ -54,6 +54,7 @@
             <a href="..." clrDropdownItem>About</a>
             <a href="..." clrDropdownItem>Preferences</a>
             <a href="..." clrDropdownItem>Log out</a>
+            <a *ngIf="env.electron" clrDropdownItem (click)="env.electron.closeWindow()">Exit App</a>
         </clr-dropdown-menu>
     </clr-dropdown>
     <div class="header-action-item" style="height:1px; width:12px; pointer-events: none;"></div>

@@ -1,3 +1,6 @@
+/*
+ * Copyright 2014-2021 Jovian, all rights reserved.
+ */
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -10,6 +13,8 @@ import { RightSidebarComponent } from './right-sidebar/right-sidebar.component';
 
 import { ClarityModule } from '@clr/angular';
 import { TranslateModule } from '@ngx-translate/core';
+
+import { Modules } from '../../../../ui.modules';
 // import { MarkdownFrameComponent } from '../../markdown/markdown-frame/markdown-frame.component';
 // import { MarkdownContentComponent } from '../../markdown/markdown-content/markdown-content.component';
 
@@ -37,5 +42,7 @@ import { TranslateModule } from '@ngx-translate/core';
     RightSidebarComponent,
   ]
 })
-export class GanymedeTemplateModule { }
+export class GanymedeTemplateModule {
+  static registration = Modules.register(GanymedeTemplateModule, () => require('./template.module.json'));
+}
 export { AppComponent };

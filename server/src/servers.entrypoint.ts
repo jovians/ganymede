@@ -1,10 +1,15 @@
 import { AuthServer } from './auth.server';
-import { serverConst } from './const';
+import { ServerConst } from './const';
 
-for (const arg of process.argv) {
-  if (arg === '--prod') { serverConst.prod = true; }
+export class ServerEntryPoint {
+  static started = false;
+  static start() {
+    if (ServerEntryPoint.started) { return; }
+    for (const arg of process.argv) {
+      if (arg === '--prod') { ServerConst.data.prod = true; }
+    }
+    const authServer = new AuthServer();
+    authServer.initialize();
+    ServerEntryPoint.started = true;
+  }
 }
-
-const authServer = new AuthServer();
-authServer.initialize();
-

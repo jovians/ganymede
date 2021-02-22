@@ -1,0 +1,31 @@
+{
+  "version": "0.0.0",
+  "license": {
+    "org": "ganymede",
+    "user": "ganymede",
+    "domain": "ganymede.dev",
+    "scope": "early-access",
+    "key": "tA60pTbF99Q+3n7G6xuyBPki/pOUQKI0fcrQDmGZuB8hJsTLNCBXmAsQ79rNTRL5spYz1k6NuIfKolB1mb8VAA=="
+  },
+  "template": {
+    "main": "default"
+  },
+  "modules": {
+    "geolocate": {
+      "server": "https://ipinfo.io/json",
+      "tokenParam": { "name": "token", "type": "query" },
+      "token": "d4c99332d01ff3"
+    }
+  },
+  "replacer": {
+    "<gany.APP_TITLE>": "Ganymede App", 
+    "<gany.ANGULAR_APP_NAME>": "ganymede-app",
+    "<gany.APP_PACKAGE_NAME>": "ganymede-app",
+    "<gany.APP_PACKAGE_VERSION>": "0.0.0"
+  },
+  "styles": {
+    "replacer": {
+      "$title_icon_scale": 0.8
+    }
+  }
+}

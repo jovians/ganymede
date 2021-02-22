@@ -1,5 +1,9 @@
 @import '../../../../../../variables.scss';
 
+:host {
+  -webkit-app-region: drag;
+}
+
 :host ::ng-deep {
   .header-hamburger-trigger {
     min-width: 2rem;

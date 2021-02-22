@@ -1,16 +1,16 @@
+/*
+ * Copyright 2014-2021 Jovian, all rights reserved.
+ */
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { consumeSubDir, RouteData, RouteDataNavigatableContent, RouteDataPage } from '../../util/route.helper';
 import { MarkdownFrameComponent } from '../../markdown/markdown-frame/markdown-frame.component';
 import { AppService } from '../../services/app.service';
 import { RouteObservingService } from '../../services/route-observing.service';
-import { CKEDITOR } from '../../util/ckeditor.utils';
 import { HttpClient } from '@angular/common/http';
 import { ApiCallerService } from '../../services/api-caller.service';
-import { PreInitUtils } from '../../util/preinit.util';
-// import { MutationWatcher } from '../../util/mutation.observer';
-
-// declare var Prism: any;
+import { ResourceGuard } from '../../services/resource-guard';
+import { Components } from '../../../../ui.components';
 
 export enum BasicContentType {
   HTML = 'HTML',
@@ -28,15 +28,19 @@ export interface BasicContentMetadata {
   styleUrls: ['./basic-contents.component.scss']
 })
 export class BasicContentsComponent implements OnInit {
+  static registration = Components.register(BasicContentsComponent, () => require('./basic-contents.component.json'));
 
   public static asRoute(subdir: string, routeData: RouteData, otherParams?: any) {
     const routeDef =  {
-      matcher: consumeSubDir(subdir),
+      matcher: consumeSubDir(subdir, routeData),
       component: BasicContentsComponent,
-      data: routeData
+      canActivate: [ResourceGuard],
+      data: routeData,
     };
     if (otherParams) { Object.assign(routeDef, otherParams); }
-    if (routeData.pageData) { routeData.pageData.path = subdir; }
+    if (routeData.pageData) {
+      routeData.pageData.path = subdir;
+    }
     if (routeData.pageData.children) {
       const basepath = routeData.pageData.mountpath ?
                         routeData.pageData.mountpath + '/' + routeData.pageData.path
@@ -78,23 +82,9 @@ export class BasicContentsComponent implements OnInit {
         });
       }
     });
-
-    PreInitUtils.entrypoint();
-
-    // this.http.get('/api/ganymede/auth/deviceTimestamp', {responseType: 'text'}).subscribe(data => {
-    //   console.log('getBrowserTimestamp', data);
-    // }, e => { console.log(e); });
-
-    // (window as any)['uniqueSession'] = 'sdfsdfsdf';
-    // console.log((window as any)['uniqueSession']);
   }
 
   onReady(editor) {
-    // console.log(e);
-    // editor.data.processor = new GFMDataProcessor();
-    // editor.extraPlugins = 'markdown';
-    // console.log(editor);
-    // console.log(editor.ui.componentFactory.names())
     editor.ui.getEditableElement().parentElement.insertBefore(
       editor.ui.view.toolbar.element,
       editor.ui.getEditableElement()
@@ -121,7 +111,7 @@ export class BasicContentsComponent implements OnInit {
       contentNode = matched;
       paths.push(contentNode.path);
     }
-    this.contentPath = this.app.defaultUserContentsPath + '/' + paths.slice(0, -1).join('/');
+    this.contentPath = this.app.defaultUserContentsPath + '/' + paths.join('/');
     return contentNode;
   }
 
@@ -154,60 +144,14 @@ export class BasicContentsComponent implements OnInit {
     }, e => {
       console.log(e);
     });
-    // this.markdownNotCurrentLang = false;
-    // let loaded = false;
-    // if (this.markdownPath && this.markdownFrame) {
-    //   try {
-    //     if (this.markdownPathIsRoot) {
-    //       loaded = await this.markdownFrame.load(this.markdownPath + '/_root.' + this.app.lang + '.md');
-    //     } else {
-    //       loaded = await this.markdownFrame.load(this.markdownPath + '/' + this.contentData.path + '.' + this.app.lang + '.md');
-    //     }
-    //   } catch (e) {}
-    //   if (loaded) { this.markdownNotFound = false; return; }
-    //   for (const lang of this.app.langList) {
-    //     if (lang === this.app.lang) { continue; }
-    //     try {
-    //       if (this.markdownPathIsRoot) {
-    //         loaded = await this.markdownFrame.load(this.markdownPath + '/_root.' + lang + '.md');
-    //       } else {
-    //         loaded = await this.markdownFrame.load(this.markdownPath + '/' + this.contentData.path + '.' + lang + '.md');
-    //       }
-    //       this.markdownNotCurrentLang = true;
-    //       this.markdownNotFound = false;
-    //       return;
-    //     } catch (e) { }
-    //   }
-    // }
-    // this.markdownNotFound = true;
-    // if (this.notFoundMessage) { this.notFoundMessage.nativeElement.style.opacity = 1; }
-    // if (this.markdownFrame) { this.markdownFrame.unload(); }
   }
 
   ngAfterViewInit() {
     this.loadMarkdown();
-    // CKEDITOR.getClassicEditor().then(editorDef => {
-    //   // CKEDITOR.getRootDef().filter.allowedContent.push('infoBox');
-    //   editorDef.create( document.querySelector( '#editor' ), {
-    //     codeBlock: {
-    //       languages: [
-    //         { language: 'typescript', label: 'TypeScript' },
-    //         { language: 'javascript', label: 'JavaScript' },
-    //         { language: 'html', label: 'HTML' },
-    //       ]
-    //     },
-    //   } )
-    //   .then( editor => {
-
-    //   } )
-    //   .catch( error => {
-    //       console.error( error.stack );
-    //   } );
-    // });
   }
 
   ngOnInit(): void {
-
+    
   }
 
   private getMetadataJsonPath() {

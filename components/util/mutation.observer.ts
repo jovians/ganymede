@@ -1,3 +1,7 @@
+/*
+ * Copyright 2014-2021 Jovian, all rights reserved.
+ */
+
 interface MutationWatcherConfig {
   childList?: boolean;
   subtree?: boolean;

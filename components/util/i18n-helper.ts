@@ -1,3 +1,7 @@
+/*
+ * Copyright 2014-2021 Jovian, all rights reserved.
+ */
+
 export const i18n = new Proxy({} as any, {
   get: (_1, prop, _2) => {
     let stringVal: string = prop as string;

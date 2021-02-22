@@ -16,14 +16,27 @@ import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-transla
 import { MarkdownModule, MarkedOptions } from 'ngx-markdown';
 
 import { GanymedeTemplateModule, AppComponent } from './ganymede/components/templates/<gany.APP_TEMPLATE_NAME>/template.module';
+import { GenymedeServicesModule } from './ganymede/components/services/services.module';
 import { GanymedeMarkdownModule } from './ganymede/components/markdown/markdown.module';
 import { GanymedePagesModule } from './ganymede/components/pages/pages.module';
 import { ganymedeLicenseCallbacks } from './ganymede/ganymede.license';
 
+import { PreInitUtils } from './ganymede/components/util/preinit.util';
+import { ganymedeAppData } from '../../ganymede.app';
+
 const notFoundValue = Promise.resolve();
 const translateBasePath = 'assets/i18n/';
 
-export function langInitializerFactory(translate: TranslateService, injector: Injector) {
+export function preInitFactory() {
+  return () => new Promise<any>(async resolve => {
+    if (ganymedeAppData.features.preinit) {
+      await PreInitUtils.entrypoint();
+    }
+    resolve();
+  });
+}
+
+export function langInitFactory(translate: TranslateService, injector: Injector) {
   return () => new Promise<any>(resolve => {
     injector.get(LOCATION_INITIALIZED, notFoundValue).then(() => {
       try {
@@ -68,6 +81,7 @@ export function langInitializerFactory(translate: TranslateService, injector: In
               },
           },
     }),
+    GenymedeServicesModule,
     GanymedeTemplateModule,
     GanymedeMarkdownModule,
     GanymedePagesModule,
@@ -84,7 +98,12 @@ export function langInitializerFactory(translate: TranslateService, injector: In
   providers: [
     {
       provide: APP_INITIALIZER,
-      useFactory: langInitializerFactory,
+      useFactory: preInitFactory,
+      deps: [],
+      multi: true
+    }, {
+      provide: APP_INITIALIZER,
+      useFactory: langInitFactory,
       deps: [TranslateService, Injector],
       multi: true
     }, {
@@ -93,7 +112,7 @@ export function langInitializerFactory(translate: TranslateService, injector: In
       multi: true,
     },
     TranslateService,
-    MarkedOptions
+    MarkedOptions,
   ],
   bootstrap: [AppComponent]
 })

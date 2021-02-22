@@ -2,6 +2,7 @@
 
 # compiled output
 /dist
+/dist-electron
 
 # dependencies
 /node_modules
@@ -44,8 +45,3 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
-
-#license
-.license-signing*
-
-ganymede.conf.json

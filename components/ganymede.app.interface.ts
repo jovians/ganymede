@@ -14,6 +14,15 @@ export interface GanymedeAppFeatures {
       accessIp?: string;
     }
   };
+  licenseFooter?: {
+    messageHTML?: string;
+  };
+  serviceWorker?: {
+    enabled?: boolean;
+  };
+  geolocate?: {
+    enabled?: boolean;
+  };
 }
 
 export class GanymedeAppData {
@@ -30,6 +39,7 @@ export class GanymedeAppData {
 
   loginImage = `${baseImgPath}/s.jpg`;
 
+  landingPath = '/';
   landingVideo = `${baseVidPath}/devops_landing.mp4`;
 
   template;
@@ -44,12 +54,22 @@ export class GanymedeAppData {
   routeData = new Subject<any>();
 
   features: GanymedeAppFeatures = {
-    preinit: {}
+    preinit: {},
+    licenseFooter: { messageHTML: 'Powered by Ganymede' },
+    // serviceWorker: { enabled: true },
   };
+
+  conf: any; // ganymede.conf.json content
 
   constructor(initializer?: Partial<GanymedeAppData>) {
     if (initializer) {
+      const defaultFeatures = this.features;
       Object.assign(this, initializer);
+      for (const featureName of Object.keys(defaultFeatures)) {
+        if (!this.features[featureName]) {
+          this.features[featureName] = defaultFeatures[featureName];
+        }
+      }
     }
   }
 }

@@ -1,6 +1,7 @@
-/**
- * Jovian Io App Generator (Angular using Clarity, and server components)
- * (c) Jovian 2020, All rights reserved.
+/*
+ * Copyright 2014-2021 Jovian, all rights reserved.
+ *
+ * Jovian Ganymede App Generator (Angular using Clarity, and server components)
  */
 
  // tslint:disable: no-console
@@ -8,6 +9,7 @@ import * as fs from 'fs';
 import * as crypto from 'crypto';
 import { FourQ } from '@jovian/fourq';
 import { NgxTranslateLangster } from '@jovian/langster';
+const http = require('http');
 
 
 const allReplaces: {find: RegExp, value: string}[] = [];
@@ -65,7 +67,59 @@ class GanymedeAppGenerator {
       this.i18nUpdate();
     } else if (opname === 'i18n-generate') {
       this.i18nGenerateFromJson();
+
+    } else if (opname === 'encrypt-file') {
+      this.encryptFile(a[1], a[2]);
+    } else if (opname === 'decrypt-file') {
+      this.decryptFile(a[1], a[2]);
+
+    } else if (opname === 'product-name') {
+      console.log(config.productName);
+    } else if (opname === 'stash') {
+      // this.encryptFile(a[1], a[2]);
+    } else if (opname === 'stash-pop') {
+      // this.decryptFile(a[1], a[2]);
     }
+  }
+
+  encryptFile(filePath: string, passphrase: string) {
+    if (!passphrase) {
+      if (fs.existsSync('./.archive.encryption.key')) {
+        passphrase = fs.readFileSync('./.archive.encryption.key', 'utf8');
+      } else { throw new Error('Passphrase is required for encryption'); }
+    }
+    const fileContent = fs.readFileSync(filePath);
+    const passphraseHash = crypto.createHash('sha256').update('AES_ENCRYPT_SALT::' + passphrase).digest();
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv('aes-256-cbc', passphraseHash, iv);
+    let encrypted = cipher.update(fileContent);
+    encrypted = Buffer.concat([encrypted, cipher.final()]);
+    const encryptedFileData = Buffer.concat([Buffer.from('aes-256-cbc:' + iv.toString('hex') + ':', 'ascii'), encrypted]);
+    fs.writeFileSync(filePath + '.enc', encryptedFileData);
+  }
+
+  decryptFile(filePath: string, passphrase: string) {
+    if (!passphrase) {
+      if (fs.existsSync('./.archive.encryption.key')) {
+        passphrase = fs.readFileSync('./.archive.encryption.key', 'utf8');
+      } else { throw new Error('Passphrase is required for decryption'); }
+    }
+    const fileContents = fs.readFileSync(filePath);
+    const passphraseHash = crypto.createHash('sha256').update('AES_ENCRYPT_SALT::' + passphrase).digest();
+    const encryptionScheme = 'aes-256-cbc';
+    let ivEnd: number;
+    for (let i = 12; i < fileContents.length; ++i) { if (fileContents[i] === 58) { ivEnd = i; break; } }
+    const encryptionIV = Buffer.from(fileContents.slice(12, ivEnd).toString('ascii'), 'hex');
+    const encryptedData = fileContents.slice(ivEnd + 1);
+    let decrypted;
+    try {
+      const decipher = crypto.createDecipheriv(encryptionScheme, passphraseHash, encryptionIV);
+      decrypted = decipher.update(encryptedData);
+      decrypted = Buffer.concat([decrypted, decipher.final()]);
+    } catch (e) {
+      return console.log('Passphrase incorrect.');
+    }
+    fs.writeFileSync(filePath.slice(0, -4), decrypted);
   }
 
   generateLicenseSigningKey() {
@@ -73,7 +127,7 @@ class GanymedeAppGenerator {
     const keypair = FourQ.generateFromSeed(seed);
     const publicKeyBase64 = keypair.publicKey.toString('base64');
     const secretKeyBase64 = keypair.secretKey.toString('base64');
-    fs.writeFileSync('.license-public-key', 'fourq:' + publicKeyBase64);
+    fs.writeFileSync('license-public-key', 'fourq:' + publicKeyBase64);
     const prompt = require('prompt');
     prompt.start();
     prompt.get([{name: 'passphrase', hidden: true}], (e, result) => {
@@ -91,9 +145,10 @@ class GanymedeAppGenerator {
     });
   }
 
-  signLicense(org: string, user: string, domain: string, scope: string) {
-    const encryptedPrivateKeyInfo = fs.readFileSync('.license-signing-key', 'utf8').split(':');
-    const publicKeyBase64 = fs.readFileSync('.license-public-key', 'utf8').split(':')[1];
+  async signLicense(org: string, user: string, domain: string, scope: string) {
+    // const encryptedPrivateKeyInfo = fs.readFileSync('.license-signing-key', 'utf8').split(':');
+    const encryptedPrivateKeyInfo = (await getRequest('127.0.0.1', '/get-encryped-signing-key', 58267)).split(':');
+    const publicKeyBase64 = fs.readFileSync('license-public-key', 'utf8').split(':')[1];
     const prompt = require('prompt');
     prompt.start();
     prompt.get([{name: 'passphrase', hidden: true}], (e, result) => {
@@ -126,7 +181,7 @@ class GanymedeAppGenerator {
   }
 
   verifyLicense(): boolean {
-    const publicKeyBase64 = fs.readFileSync('src/app/ganymede/.license-public-key', 'utf8').split(':')[1];
+    const publicKeyBase64 = fs.readFileSync('src/app/ganymede/license-public-key', 'utf8').split(':')[1];
     const org = config.license.org;
     const user = config.license.user;
     const domain = config.license.domain;
@@ -150,7 +205,6 @@ class GanymedeAppGenerator {
 
   paramFileInit() {
     if (!fs.existsSync('src/global.scss')) { fs.writeFileSync('src/global.scss', ''); }
-    if (!fs.existsSync('ganymede.nav.ts')) { fs.writeFileSync('ganymede.nav.ts', ''); }
   }
 
   generate() {
@@ -167,15 +221,17 @@ class GanymedeAppGenerator {
   }
 
   packageJsonImport() {
-    const pkgTemplate = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
-    const pkgSaved = JSON.parse(fs.readFileSync('package.saved.json', 'utf-8'));
-    for (const field of Object.keys(pkgSaved)) {
-      if (field === 'name' || field === 'version') { continue; }
-      for (const field2 of Object.keys(pkgSaved[field])) {
-        pkgTemplate[field][field2] = pkgSaved[field][field2];
+    if (fs.existsSync('package.saved.json')) {
+      const pkgTemplate = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
+      const pkgSaved = JSON.parse(fs.readFileSync('package.saved.json', 'utf-8'));
+      for (const field of Object.keys(pkgSaved)) {
+        if (field === 'name' || field === 'version') { continue; }
+        for (const field2 of Object.keys(pkgSaved[field])) {
+          pkgTemplate[field][field2] = pkgSaved[field][field2];
+        }
       }
+      fs.writeFileSync('package.json', JSON.stringify(pkgTemplate, null, 2));
     }
-    fs.writeFileSync('package.json', JSON.stringify(pkgTemplate, null, 2));
   }
 
   templateLoad() {
@@ -187,8 +243,14 @@ class GanymedeAppGenerator {
     fs.writeFileSync('src/app/app.module.ts', moduleTsContent);
   }
 
-  initialize(configPath: string = defaultConfigPath) {
-    config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+  loadConfig(configPath: string = defaultConfigPath) {
+    if (!config) {
+      config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    }
+  }
+
+  initializeReplaces(configPath: string = defaultConfigPath) {
+    this.loadConfig(configPath);
     allReplaces.length = 0;
     for (const replaceKey of Object.keys(config.replacer)) {
       allReplaces.push({
@@ -223,6 +285,7 @@ class GanymedeAppGenerator {
   }
 
   private configReplacerDo() {
+    this.initializeReplaces();
     const allTargets = [].concat(configReplacerTargets, styleReplacesTargets);
     for (const filePath of allTargets) {
       try {
@@ -241,6 +304,7 @@ class GanymedeAppGenerator {
   }
 
   private configReplacerUndo() {
+    this.initializeReplaces();
     const allTargets = [].concat(configReplacerTargets, styleReplacesTargets);
     for (const filePath of allTargets) {
       try {
@@ -269,13 +333,21 @@ class GanymedeAppGenerator {
 
 
 const appGen = new GanymedeAppGenerator();
-appGen.initialize();
+appGen.loadConfig();
 appGen.executeBasedOnArgs();
-
-
 
 function prepCommandLineArgs() {
   const args = JSON.parse(JSON.stringify(process.argv));
   args.shift(); args.shift(); // remove cmd and file; `node file.js`
   return args;
+}
+
+async function getRequest(host: string, path: string, port: number = 80) {
+  return new Promise<string>(resolve => {
+    http.request({ host, path, port }, (res) => {
+      const chunks = [];
+      res.on('data', chunk => { chunks.push(chunk); });
+      res.on('end', () => { resolve(chunks.join('')); });
+    }).end();
+  });
 }

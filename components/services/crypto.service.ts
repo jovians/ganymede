@@ -1,3 +1,6 @@
+/*
+ * Copyright 2014-2021 Jovian, all rights reserved.
+ */
 import { Injectable } from '@angular/core';
 declare var FourQ: any;
 

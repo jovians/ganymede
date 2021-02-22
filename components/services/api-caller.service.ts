@@ -1,3 +1,6 @@
+/*
+ * Copyright 2014-2021 Jovian, all rights reserved.
+ */
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ServiceWorkerUtil } from '../util/service.worker.utils';

@@ -1,8 +1,13 @@
+/*
+ * Copyright 2014-2021 Jovian, all rights reserved.
+ */
 import { Component, OnDestroy, ViewChild, ElementRef, AfterViewInit, Input } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { RouteObservingService } from '../../../services/route-observing.service';
 import { AuthService } from '../../../services/auth.service';
 import { AppService } from '../../../services/app.service';
+import { EnvService } from '../../../services/env.service';
+import { Components } from '../../../../../ui.components';
 
 @Component({
   selector: 'app-header',
@@ -10,6 +15,7 @@ import { AppService } from '../../../services/app.service';
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnDestroy, AfterViewInit {
+  static registration = Components.register(HeaderComponent, () => require('./header.component.json'));
 
   @Input() public menuList;
   private selectedRef = null;
@@ -17,6 +23,7 @@ export class HeaderComponent implements OnDestroy, AfterViewInit {
 
   constructor(
     public app: AppService,
+    public env: EnvService,
     public auth: AuthService,
     private routeObservingService: RouteObservingService,
   ) {
@@ -26,7 +33,7 @@ export class HeaderComponent implements OnDestroy, AfterViewInit {
   handleUrlChange(url: string) {
     if (!url) { return; }
     const majorPath = url.split('/')[1];
-    const detected = this.menuList.filter(item => item.path === majorPath)[0];
+    const detected = this.menuList.filter(item => item.path.split('/')[0] === majorPath)[0];
     if (this.selectedRef) {
       const el = document.getElementById('topmenu-item-' + this.selectedRef.path);
       el.classList.remove('active');

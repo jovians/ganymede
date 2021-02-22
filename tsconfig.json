@@ -1,28 +1,23 @@
 {
-  "compileOnSave": false,
   "compilerOptions": {
     "allowJs": true,
     "baseUrl": "./",
-    "outDir": "./dist/out-tsc",
-    "sourceMap": true,
-    "declaration": false,
-    "downlevelIteration": true,
-    "experimentalDecorators": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "importHelpers": true,
+    "outDir": "./dist/out",
     "target": "es2015",
-    "typeRoots": [
-      "node_modules/@types"
-    ],
-    "lib": [
-      "es2018",
-      "dom"
-    ]
+    "module": "commonjs",
+    "strict": false,
+    "types": ["node"],
+    "esModuleInterop": true,
+    "moduleResolution": "Node",
+    "forceConsistentCasingInFileNames": true,
+    "removeComments": true,
+    "experimentalDecorators": true
   },
-  "angularCompilerOptions": {
-    "enableIvy": true,
-    "fullTemplateTypeCheck": true,
-    "strictInjectionParameters": true
-  }
+  "include": [
+    "ganymede.ts",
+    "ganymede.license.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

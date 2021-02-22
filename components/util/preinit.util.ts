@@ -1,3 +1,7 @@
+/*
+ * Copyright 2014-2021 Jovian, all rights reserved.
+ */
+
 import { ganymedeAppData } from '../../../../../ganymede.app';
 
 export class PreInitUtils {
@@ -12,9 +16,9 @@ export class PreInitUtils {
   static entrypoint(): Promise<void> {
     let cachedPreinitInfo = localStorage.getItem('gany_preinit_data') as any;
     cachedPreinitInfo = cachedPreinitInfo ? JSON.parse(cachedPreinitInfo) : {};
-    PreInitUtils.preinitDataPrevious = cachedPreinitInfo;
     if (PreInitUtils.initialized) { return new Promise<void>(resolve => { resolve(); }); }
     if (PreInitUtils.initializing) { return PreInitUtils.initPromise; }
+    PreInitUtils.preinitDataPrevious = cachedPreinitInfo;
     PreInitUtils.initializing = true;
     const promise = new Promise<void>(resolve => {
       const appData = ganymedeAppData;

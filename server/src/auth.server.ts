@@ -3,7 +3,7 @@ import * as BodyParser from 'body-parser';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import { FourQ } from '@jovian/fourq';
-import { serverConst } from './const';
+import { ServerConst } from './const';
 import { ganymedeAppData as appData } from '../../../../../ganymede.app';
 
 export class AuthServer {
@@ -54,17 +54,22 @@ export class AuthServer {
           res.cookie('gany_dev_ss_token', secret, {
             expires: new Date(Date.now() + 3155695200), // 100 years
             httpOnly: true,
-            secure: serverConst.prod ? true : false
+            secure: ServerConst.data.prod ? true : false
           });
         } else {
           secret = target[1].split('; ')[0].replace('-', '+').replace('.', '/').replace('_', '=');
         }
         const t = Date.now();
         const nonce =  crypto.randomBytes(6).toString('base64');
-        const msg = Buffer.from(`${serverConst.salts.browserTimestamp}:${nonce}:${t}`);
+        const msg = Buffer.from(`${ServerConst.data.salts.browserTimestamp}:${nonce}:${t}`);
         const hash = crypto.createHash('sha256').update(msg).digest('base64');
         return res.end(`${Date.now()}::${nonce}::${hash}`);
       });
+
+      // this.apiRoot.get('/api/ganymede/routes/happytree', async (req, res) => {
+      //   console.log(req.query.path);
+      //   res.end(JSON.stringify({ yes: true }));
+      // });
 
       if (appData.features.preinit) {
         this.apiRoot.get('/api/ganymede/preinit', async (req, res) => {
@@ -76,8 +81,9 @@ export class AuthServer {
             swMeta = fs.statSync('../../../assets-root/sw.js');
             swMeta = JSON.parse(swMeta);
           } catch (e) {}
-          ret.sw = swMeta ? swMeta.mtimeMs : 0;
+          ret.sw = swMeta ? Math.floor(swMeta.mtimeMs) : 0;
           res.set('Last-Modified', Date.now() + ', ' + ip);
+          res.set('Content-Type', 'application/json');
           res.end(JSON.stringify(ret));
         });
       }

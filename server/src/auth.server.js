@@ -95,7 +95,7 @@ var AuthServer = /** @class */ (function () {
                                 res.cookie('gany_dev_ss_token', secret, {
                                     expires: new Date(Date.now() + 3155695200),
                                     httpOnly: true,
-                                    secure: const_1.serverConst.prod ? true : false
+                                    secure: const_1.ServerConst.data.prod ? true : false
                                 });
                             }
                             else {
@@ -103,11 +103,15 @@ var AuthServer = /** @class */ (function () {
                             }
                             t = Date.now();
                             nonce = crypto.randomBytes(6).toString('base64');
-                            msg = Buffer.from(const_1.serverConst.salts.browserTimestamp + ":" + nonce + ":" + t);
+                            msg = Buffer.from(const_1.ServerConst.data.salts.browserTimestamp + ":" + nonce + ":" + t);
                             hash = crypto.createHash('sha256').update(msg).digest('base64');
                             return [2 /*return*/, res.end(Date.now() + "::" + nonce + "::" + hash)];
                         });
                     }); });
+                    // this.apiRoot.get('/api/ganymede/routes/happytree', async (req, res) => {
+                    //   console.log(req.query.path);
+                    //   res.end(JSON.stringify({ yes: true }));
+                    // });
                     if (ganymede_app_1.ganymedeAppData.features.preinit) {
                         this.apiRoot.get('/api/ganymede/preinit', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
                             var ret, ip, swMeta;
@@ -122,8 +126,9 @@ var AuthServer = /** @class */ (function () {
                                     swMeta = JSON.parse(swMeta);
                                 }
                                 catch (e) { }
-                                ret.sw = swMeta ? swMeta.mtimeMs : 0;
+                                ret.sw = swMeta ? Math.floor(swMeta.mtimeMs) : 0;
                                 res.set('Last-Modified', Date.now() + ', ' + ip);
+                                res.set('Content-Type', 'application/json');
                                 res.end(JSON.stringify(ret));
                                 return [2 /*return*/];
                             });

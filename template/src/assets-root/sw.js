@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 var _this = this;
 var env = {};
-function envPrepare() {
+var envPrepare = function () {
     var nv = navigator;
     var ua = nv.userAgent;
     var ual = ua.toLowerCase();
@@ -127,7 +127,7 @@ function envPrepare() {
     if (!env.browser) {
         env.browser = 'other';
     }
-}
+};
 envPrepare();
 var verInfo = {};
 var installFunc;
@@ -139,7 +139,7 @@ var fetchFunc0 = function (e) { if (fetchFunc) {
     fetchFunc(e);
 } };
 var urlInfoCache = {};
-function getUrlInfo(url) {
+var getUrlInfo = function (url) {
     if (urlInfoCache[url] && Date.now() - urlInfoCache[url].t < 86400000) {
         return urlInfoCache[url];
     }
@@ -263,16 +263,15 @@ function getUrlInfo(url) {
     // };
     urlInfoCache[oriUrl] = info;
     return info;
-}
+};
 self.addEventListener('install', installFunc0);
 self.addEventListener('fetch', fetchFunc0);
-self.addEventListener('activate', function () { try {
-    clients.claim();
-}
-catch (e) { } });
+self.addEventListener('activate', function (e) { e.waitUntil(self.clients.claim()); });
 var clientWindows = {};
 var cacheMap = null;
-function clientslog(msg) {
+var cacheName = 'ganymedeServiceWorker';
+var basicFiles = false ? [] : [];
+var clientslog = function (msg) {
     for (var _i = 0, _a = Object.keys(clientWindows); _i < _a.length; _i++) {
         var cid = _a[_i];
         // tslint:disable-next-line: no-console
@@ -283,25 +282,46 @@ function clientslog(msg) {
             console.log(e);
         }
     }
-}
-var cacheName = 'fetch_cache';
-var basicFiles = false ? [] : [];
+};
+// tslint:disable-next-line: no-string-literal
+self['newClientChecker'] = function () {
+    skipWaiting();
+    // tslint:disable-next-line: no-console
+    // try { self.clients.claim(); } catch (e) { console.log(e); }
+    self.clients.matchAll({ includeUncontrolled: true, type: 'window' }).then(function (matchedClients) {
+        if (matchedClients && matchedClients.length) {
+            for (var _i = 0, _a = Object.keys(clientWindows); _i < _a.length; _i++) {
+                var cid = _a[_i];
+                clientWindows[cid].checked = false;
+            }
+            var announce = function (client, cid) { client.postMessage('GanymedeSW::ACK ' + cid); };
+            for (var _b = 0, matchedClients_1 = matchedClients; _b < matchedClients_1.length; _b++) {
+                var client = matchedClients_1[_b];
+                // if (!client.focused) { continue; }
+                var cid = client.id;
+                if (!clientWindows[cid]) {
+                    clientWindows[cid] = { mapped: false, target: client };
+                    try {
+                        announce(client, cid);
+                    }
+                    catch (e) {
+                        console.log(e);
+                    }
+                }
+                clientWindows[cid].checked = true;
+            }
+            for (var _c = 0, _d = Object.keys(clientWindows); _c < _d.length; _c++) {
+                var cid = _d[_c];
+                if (!clientWindows[cid].checked) {
+                    delete clientWindows[cid];
+                }
+            }
+        }
+    });
+};
 // tslint:disable-next-line: no-unused-expression
 (function () { return __awaiter(_this, void 0, void 0, function () {
     return __generator(this, function (_a) {
-        // var ascii_sha_arr = new Uint8Array(64), ascii_hash_hash_arr = [], ascii_sha = async function(v){
-        // 	if(!self.crypto || !self.crypto.subtle) return 'NO_SUBTLE_CRYPTO_LIBRARY';
-        // 	v = v+''; var len = v.length > 64 ? 64 : v.length;
-        // 	for(var i = 0; i < len; ++i) ascii_sha_arr[i] = v.charCodeAt(i) % 256;
-        // 	for(var i = len; i < 64; ++i) ascii_sha_arr[i] = 0;
-        // 	var hash = await self.crypto.subtle.digest('SHA-512', ascii_sha_arr);
-        // 	var hash2 = new Uint8Array(hash); ascii_hash_hash_arr.length = 64;
-        // 	for(var i = 0; i < 64; ++i) ascii_hash_hash_arr[i] = hash2[i];
-        // 	var str = String.fromCharCode.apply(null,ascii_hash_hash_arr);
-        // 	return btoa(String.fromCharCode.apply(null,ascii_hash_hash_arr));
-        // }
-        // var swv = 'SW_VERSION', swv_sha = await ascii_sha(swv), swv_sha_short = swv_sha.substr(0,10);
-        // console.log('%c[Ganymede SW]','color:#de00ff;',   'Version: '+swv+' ('+swv_sha_short+')');
         fetchFunc = function (e) {
             try {
                 if (!env.domains || !env.hostname) {
@@ -392,49 +412,13 @@ var basicFiles = false ? [] : [];
             }
         };
         installFunc = function (e) {
-            skipWaiting();
+            // skipWaiting();
             e.waitUntil(caches.open(cacheName).then(function (cache) {
                 // tslint:disable-next-line: no-console
-                console.log('%c[Ganymede SW]', 'color:#de00ff;', 'Caching all basic static files...');
+                console.log('%c[Ganymede SW]', 'color:#de00ff;', 'caching all basic static files...');
                 cache.addAll(basicFiles);
             }));
         };
-        setInterval(function () {
-            // tslint:disable-next-line: no-console
-            try {
-                self.clients.claim();
-            }
-            catch (e) {
-                console.log(e);
-            }
-            self.clients.matchAll({ includeUncontrolled: true, type: 'window' }).then(function (matchedClients) {
-                if (matchedClients && matchedClients.length) {
-                    for (var _i = 0, _a = Object.keys(clientWindows); _i < _a.length; _i++) {
-                        var cid = _a[_i];
-                        clientWindows[cid].checked = false;
-                    }
-                    for (var _b = 0, matchedClients_1 = matchedClients; _b < matchedClients_1.length; _b++) {
-                        var client = matchedClients_1[_b];
-                        var cid = client.id;
-                        if (!clientWindows[cid]) {
-                            clientWindows[cid] = { mapped: false, target: client };
-                            try {
-                                client.postMessage('SW::get_cache_map::' + cid + '::sw_ver,' + 'swv' + ',' + 'swv_sha_short');
-                            }
-                            catch (e) {
-                            }
-                        }
-                        clientWindows[cid].checked = true;
-                    }
-                    for (var _c = 0, _d = Object.keys(clientWindows); _c < _d.length; _c++) {
-                        var cid = _d[_c];
-                        if (!clientWindows[cid].checked) {
-                            delete clientWindows[cid];
-                        }
-                    }
-                }
-            });
-        }, 1000);
         return [2 /*return*/];
     });
 }); })();
@@ -444,23 +428,18 @@ self.addEventListener('message', function (e) {
         sourceDomain = sourceDomain.split(':')[0];
         if (env.domains.indexOf(sourceDomain) === -1) {
             // tslint:disable-next-line: no-console
-            console.log('%c[Ganymede SW]', 'color:#de00ff;', 'Blocked message from unregistered domain ' + sourceDomain);
+            console.log('%c[Ganymede SW]', 'color:#de00ff;', 'blocked message from unregistered domain ' + sourceDomain);
             return;
         }
     }
-    console.log(e);
     if (e.data && e.data.action) {
-        if (e.data.action === 'versions') {
-            verInfo = e.data.versionInfo;
-        }
-        else if (e.data.action === 'setDebugLevel') {
-            env.debugLevel = e.data.debugLevel;
-        }
-        else if (e.data.action === 'setAllowedDomains') {
+        if (e.data.action === 'set') {
+            // tslint:disable-next-line: no-string-literal
+            self['newClientChecker']();
             if (env.domains || !Array.isArray(e.data.domains) || !e.data.hostname) {
-                console.log(e);
                 return;
             }
+            verInfo = e.data.versionInfo;
             env.domains = [];
             env.hostname = e.data.hostname;
             for (var _i = 0, _a = e.data.domains; _i < _a.length; _i++) {
@@ -468,6 +447,13 @@ self.addEventListener('message', function (e) {
                 if (env.domains.indexOf(domain) === -1) {
                     env.domains.push(domain);
                 }
+            }
+            if (Array.isArray(e.data.defaultCache) && e.data.defaultCache.length > 0) {
+                caches.open(cacheName).then(function (cache) {
+                    // tslint:disable-next-line: no-console
+                    console.log('%c[Ganymede SW]', 'color:#de00ff;', 'caching all default caches...');
+                    cache.addAll(e.data.defaultCache);
+                });
             }
         }
     }

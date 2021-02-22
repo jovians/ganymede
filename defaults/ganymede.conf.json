@@ -1,0 +1,33 @@
+{
+  "version": "0.0.0",
+  "productName": "ganymede-app",
+  "packageDomain": "dev.ganymede",
+  "license": {
+    "org": "ganymede",
+    "user": "ganymede",
+    "domain": "localhost",
+    "scope": "early-access",
+    "key": "d7JUbUZMPkUVJQM2/7iDHBgEyYOYGhHhd5eiC0pXtC0djZsSUOmKVqkoHIbHfC6YZVQVcot8As+ZKYrTkeclAA=="
+  },
+  "template": {
+    "main": "default"
+  },
+  "modules": {
+    "geolocate": {
+      "server": "https://ipinfo.io/json",
+      "tokenParam": { "name": "token", "type": "query" },
+      "token": "d4c99332d01ff3"
+    }
+  },
+  "replacer": {
+    "<gany.APP_TITLE>": "Ganymede App", 
+    "<gany.ANGULAR_APP_NAME>": "ganymede-app",
+    "<gany.APP_PACKAGE_NAME>": "ganymede-app",
+    "<gany.APP_PACKAGE_VERSION>": "0.0.0"
+  },
+  "styles": {
+    "replacer": {
+      "$title_icon_scale": 0.8
+    }
+  }
+}

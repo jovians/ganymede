@@ -1,9 +1,16 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
-import { Router, ActivationStart, NavigationEnd, ActivatedRoute } from '@angular/router';
+/*
+ * Copyright 2014-2021 Jovian, all rights reserved.
+ */
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Router, ActivationStart, NavigationEnd, ActivatedRoute, ChildActivationEnd, ActivationEnd } from '@angular/router';
 import { AppService } from '../../services/app.service';
 import { Subscription } from 'rxjs';
 import { RouteObservingService } from '../../services/route-observing.service';
 import { LeftSidebarComponent } from './left-sidebar/left-sidebar.component';
+import { ResourceGuard } from '../../services/resource-guard';
+import { preResolvePath } from '../../util/route.pre-resolver';
+import { Components } from '../../../../ui.components';
+
 // import { HeaderComponent } from './modules/header/header.component';
 // import { RouteObservingService } from './shared/services/route-observing.service';
 
@@ -12,9 +19,11 @@ import { LeftSidebarComponent } from './left-sidebar/left-sidebar.component';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
+  static registration = Components.register(AppComponent, () => require('./app.component.json'));
 
   // @ViewChild('headerComponent') headerComponent: HeaderComponent;
+  @ViewChild('containerComponent') containerComponent: ElementRef;
   @ViewChild('leftSideBarComponent') leftSideBarComponent: LeftSidebarComponent;
   @ViewChild('mainContentArea') mainContentArea: ElementRef;
 
@@ -24,6 +33,7 @@ export class AppComponent implements OnInit, OnDestroy {
   rightSidebarVisible: boolean;
   leftSidebarVisibleSaved: boolean;
   rightSidebarVisibleSaved: boolean;
+  resGuard = ResourceGuard;
 
   leftSidebarNavItems = [];
   activatedRouteDataSubscribed = false;
@@ -43,6 +53,9 @@ export class AppComponent implements OnInit, OnDestroy {
         this.rightSidebarVisible = this.rightSidebarVisibleSaved;
       }
     };
+    preResolvePath().then(ngRoute => {
+      if (ngRoute && ngRoute.data) { this.handleRouteData(ngRoute.data); }
+    });
     this.routerSubscription = this.router.events.subscribe(e => {
       if (e instanceof NavigationEnd) {
         this.routeObservingService.setUrlSegment(e.url);
@@ -55,12 +68,23 @@ export class AppComponent implements OnInit, OnDestroy {
         window.dispatchEvent(new Event('resize'));
       } else if (e instanceof ActivationStart) {
         this.handleRouteData(e.snapshot.data);
-
         this.leftSidebarVisibleSaved = this.leftSidebarVisible;
         this.rightSidebarVisibleSaved = this.rightSidebarVisible;
       }
     });
 
+  }
+
+  ngAfterViewInit(): void {
+    this.showApp();
+  }
+
+  showApp() {
+    this.containerComponent.nativeElement.style.opacity = 1;
+  }
+
+  hideApp() {
+    this.containerComponent.nativeElement.style.opacity = 0;
   }
 
   async handleRouteData(data) {
@@ -102,12 +126,21 @@ export class AppComponent implements OnInit, OnDestroy {
       }
     }
 
+    setTimeout(() => {
+      if (!this.resGuard.routeValid || !this.resGuard.authorized) {
+        this.footerVisible = false;
+        this.leftSidebarVisible = false;
+        this.rightSidebarVisible = false;
+        if (this.leftSideBarComponent) {
+          this.leftSideBarComponent.navItems = [];
+        }
+      }
+    }, 0);
+
     this.app.routeData.next(data);
   }
 
-  ngOnInit() {
-
-  }
+  ngOnInit() {}
 
   ngOnDestroy() {
     if (this.routerSubscription) { this.routerSubscription.unsubscribe(); }

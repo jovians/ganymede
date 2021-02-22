@@ -17,16 +17,25 @@ var GanymedeAppData = /** @class */ (function () {
         // logoTitleVertical = `${baseImgPath}/.png`;
         this.icon = baseIcoPath + "/apple-icon.png";
         this.loginImage = baseImgPath + "/s.jpg";
+        this.landingPath = '/';
         this.landingVideo = baseVidPath + "/devops_landing.mp4";
         this.lang = 'en';
         this.langList = ['en'];
         this.defaultUserContentsPath = '/assets/user-contents';
         this.routeData = new rxjs_1.Subject();
         this.features = {
-            preinit: {}
+            preinit: {},
+            licenseFooter: { messageHTML: 'Powered by Ganymede' }
         };
         if (initializer) {
+            var defaultFeatures = this.features;
             Object.assign(this, initializer);
+            for (var _i = 0, _a = Object.keys(defaultFeatures); _i < _a.length; _i++) {
+                var featureName = _a[_i];
+                if (!this.features[featureName]) {
+                    this.features[featureName] = defaultFeatures[featureName];
+                }
+            }
         }
     }
     return GanymedeAppData;

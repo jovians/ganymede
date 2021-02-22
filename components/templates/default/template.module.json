@@ -1,0 +1,11 @@
+{
+  "namespace": "@jovian/ganymede-clr",
+  "mounted": "ganymede",
+  "group": "components/templates/default",
+
+  "name": "GanymedeTemplateModule",
+  "folder": "",
+  "file": "template.module",
+
+  "attributes": ["ui", "angular", "clarity"]
+}

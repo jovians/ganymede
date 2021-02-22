@@ -1,6 +1,6 @@
 import * as Express from 'express';
-import * as BodyParser from "body-parser";
-import { serverConst } from './const';
+import * as BodyParser from 'body-parser';
+import { ServerConst } from './const';
 
 import { BasicModules } from './basic.modules';
 
@@ -25,7 +25,7 @@ export class AppServer {
       // process.on('SIGKILL', this.terminationHandler);
 
       this.mailer = new EmailHandler_SendGrid();
-      this.mailer.setApiKey(serverConst.sendgrid.key);
+      this.mailer.setApiKey(ServerConst.data.sendgrid.key);
 
       const connector = new DataStoreConnector_MongoDB();
       const dataStore = await connector.open();

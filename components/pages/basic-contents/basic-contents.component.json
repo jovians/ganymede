@@ -1,0 +1,12 @@
+{
+  "namespace": "@jovian/ganymede-clr",
+  "mounted": "ganymede",
+  "group": "components/pages",
+
+  "name": "BasicContentsComponent",
+  "folder": "basic-contents",
+  "file": "basic-contents.component",
+  "selector": "app-basic-contents",
+
+  "attributes": ["ui", "angular", "clarity"]
+}
