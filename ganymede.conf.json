@@ -1,11 +1,17 @@
 {
+  "productName": "ganymede-app",
   "version": "0.0.0",
+  "ganymedeVersion": "latest",
+  "ganymedeTarget": "latest",
   "license": {
     "org": "ganymede",
     "user": "ganymede",
+    "app": "ganymede",
     "domain": "ganymede.dev",
     "scope": "early-access",
-    "key": "tA60pTbF99Q+3n7G6xuyBPki/pOUQKI0fcrQDmGZuB8hJsTLNCBXmAsQ79rNTRL5spYz1k6NuIfKolB1mb8VAA=="
+    "etc": "4102405199",
+    "key": "IqncLEavW4Qg8RM3ycDvUHGump+hC7VUJJuUdxoaA4RMAODPIHjGjWnGTFXpmDpZ6OxM1aSf9vO9c4kGMocXAA==",
+    "keyLocal": "nruZtRR9S8KytNoe5MQcb2JciUhqyzHwUOlhUdN08iKSSxMZWWcoZHHjpn0Wd7vUW1TDdN+2c5sxz9E7URsiAA=="
   },
   "template": {
     "main": "default"

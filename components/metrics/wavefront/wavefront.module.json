@@ -1,0 +1,11 @@
+{
+  "namespace": "@jovian/ganymede-clr",
+  "mounted": "ganymede",
+  "group": "components/metrics/wavefront",
+
+  "name": "GanymedeWavefrontModule",
+  "folder": "",
+  "file": "wavefront.module",
+
+  "attributes": ["ui", "angular", "clarity"]
+}

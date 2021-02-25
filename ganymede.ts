@@ -54,7 +54,7 @@ class GanymedeAppGenerator {
     } else if (opname === 'license-keygen') {
       this.generateLicenseSigningKey();
     } else if (opname === 'license-sign') {
-      this.signLicense(a[1], a[2], a[3], a[4]);
+      this.signLicense(a[1], a[2], a[3], a[4], a[5], a[6]);
     } else if (opname === 'license-verify') {
       this.verifyLicense();
     } else if (opname === 'license-stamp') {
@@ -79,7 +79,23 @@ class GanymedeAppGenerator {
       // this.encryptFile(a[1], a[2]);
     } else if (opname === 'stash-pop') {
       // this.decryptFile(a[1], a[2]);
+
+    } else if (opname === 'product-name-set') {
+      this.setProductName(a[1]);
+    } else if (opname === 'cli-version') {
+      console.log(require('./package.json').version);
     }
+  }
+
+  setProductName(productNameSet: string) {
+    const productName = productNameSet.indexOf(':') >= 0 ? productNameSet.split(':')[0] : productNameSet;
+    const commonName = productNameSet.indexOf(':') >= 0 ? productNameSet.split(':')[1] : productName;
+    const configJson = JSON.parse(fs.readFileSync(defaultConfigPath, 'utf-8'));
+    configJson.productName = productName;
+    configJson.replacer['<gany.APP_TITLE>'] = commonName;
+    configJson.replacer['<gany.ANGULAR_APP_NAME>'] = productName;
+    configJson.replacer['<gany.APP_PACKAGE_NAME>'] = productName;
+    fs.writeFileSync(defaultConfigPath, JSON.stringify(configJson, null, 2), 'utf-8');
   }
 
   encryptFile(filePath: string, passphrase: string) {
@@ -145,7 +161,7 @@ class GanymedeAppGenerator {
     });
   }
 
-  async signLicense(org: string, user: string, domain: string, scope: string) {
+  async signLicense(org: string, user: string, app: string, domain: string, scope: string, etc: string) {
     // const encryptedPrivateKeyInfo = fs.readFileSync('.license-signing-key', 'utf8').split(':');
     const encryptedPrivateKeyInfo = (await getRequest('127.0.0.1', '/get-encryped-signing-key', 58267)).split(':');
     const publicKeyBase64 = fs.readFileSync('license-public-key', 'utf8').split(':')[1];
@@ -169,7 +185,8 @@ class GanymedeAppGenerator {
       }
       // console.log(decrypted.toString('base64'));
       const secretKey = decrypted;
-      const licenseMessage = Buffer.from(`GANYMEDE_LICENSE___${org}___${user}___${domain}___${scope}`);
+      const licenseMessage = Buffer.from(`GANYMEDE_LICENSE___${org}___${user}___${app}___${domain}___${scope}___${etc}`);
+      console.log(`License message: ${licenseMessage}`);
       const sig = FourQ.sign(licenseMessage, secretKey);
       const valid = FourQ.verify(sig.data, licenseMessage, Buffer.from(publicKeyBase64, 'base64'));
       if (valid) {
@@ -181,15 +198,21 @@ class GanymedeAppGenerator {
   }
 
   verifyLicense(): boolean {
-    const publicKeyBase64 = fs.readFileSync('src/app/ganymede/license-public-key', 'utf8').split(':')[1];
+    const pubkeySource = fs.existsSync('license-public-key') ? 'license-public-key' : 'src/app/ganymede/license-public-key';
+    const publicKeyBase64 = fs.readFileSync(pubkeySource, 'utf8').split(':')[1];
     const org = config.license.org;
     const user = config.license.user;
+    const app = config.license.app;
     const domain = config.license.domain;
     const scope = config.license.scope;
-    const licenseMessage = Buffer.from(`GANYMEDE_LICENSE___${org}___${user}___${domain}___${scope}`);
+    const etc = config.license.etc;
+    const licenseMessage = Buffer.from(`GANYMEDE_LICENSE___${org}___${user}___${app}___${domain}___${scope}___${etc}`);
     const sigData = Buffer.from(config.license.key, 'base64');
     const valid = FourQ.verify(sigData, licenseMessage, Buffer.from(publicKeyBase64, 'base64'));
-    console.log(valid ? 'GANYMEDE_LICENSE_VALID' : 'GANYMEDE_LICENSE_NOT_VALID');
+    const licenseMessage2 = Buffer.from(`GANYMEDE_LICENSE___${org}___${user}___${app}___localhost___${scope}___${etc}`);
+    const sigData2 = Buffer.from(config.license.keyLocal, 'base64');
+    const valid2 = FourQ.verify(sigData2, licenseMessage2, Buffer.from(publicKeyBase64, 'base64'));
+    console.log(`domain=${valid ? 'valid' : 'not_valid'};localhost=${valid2 ? 'valid' : 'not_valid'}`);
     return valid;
   }
 

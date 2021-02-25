@@ -3,7 +3,7 @@
   "mounted": "ganymede",
   "group": "components/services",
 
-  "name": "GenymedeServicesModule",
+  "name": "GanymedeServicesModule",
   "folder": "",
   "file": "services.module",
 

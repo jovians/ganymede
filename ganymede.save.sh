@@ -1,6 +1,13 @@
 #! /bin/sh
 
+if [ ! -f ganymede.conf.json ]; then
+    echo "ERROR: Cannot execute scripts on working directory that doesn't have ganymede.conf.json file."
+    exit 1
+fi
+
 PRODUCT_NAME=$(npm run --silent product-name)
+
+echo "Saving product profile '$PRODUCT_NAME'..."
 
 mkdir -p "profiles/$PRODUCT_NAME"
 
@@ -42,3 +49,5 @@ cp -R src/assets/other/* "profiles/$PRODUCT_NAME/src/assets/other"
 
 cp -R src/app/routes/* "profiles/$PRODUCT_NAME/src/app/routes"
 cp -R src/app/user-custom/* "profiles/$PRODUCT_NAME/src/app/user-custom"
+
+echo "Saved to '$PRODUCT_NAME'"

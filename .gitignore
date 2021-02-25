@@ -45,3 +45,9 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+
+# ignore ganymede extensions (each its own git)
+/extensions
+
+# ignore ganymede real sources
+.ganysource

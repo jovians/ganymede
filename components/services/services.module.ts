@@ -16,6 +16,6 @@ import { RouteObservingService } from './route-observing.service';
   declarations: [],
   exports: []
 })
-export class GenymedeServicesModule {
-  static registration = Modules.register(GenymedeServicesModule, () => require('./services.module.json'));
+export class GanymedeServicesModule {
+  static registration = Modules.register(GanymedeServicesModule, () => require('./services.module.json'));
 }

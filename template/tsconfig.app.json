@@ -4,24 +4,23 @@
     "outDir": "./dist/out/app",
     "baseUrl": "./",
   },
+  "include": [
+    "**/*.ts",
+    "node_modules/@jovian/type-tools/**/*.ts",
+    "node_modules/@jovian/type-tools-iface/**/*.ts",
+  ],
   "exclude": [
+    "**/*.spec.ts",
     "**/dist/**/*",
     "**/dist-electron/**/*",
-    "node_modules/**/*",
-    "**/*.spec.ts",
+    "**/server/**/*",
     "**/*.TEMPLATE.*",
-    "ganymede.ts",
     "profiles/**/*",
-    "ganymede/**/*",
-    "src/assets/**/*.js",
     "src/assets/i18n/**/*",
     "src/assets-root/**/*",
-    "src/app/ganymede/template/src/assets-root/*",
     "src/app/ganymede/*.ts",
-    "src/app/ganymede/server/**/*.ts",
     "src/app/ganymede/defaults/**/*",
     "src/app/ganymede/template/**/*",
-    "src/app/ganymede/electron/**/*",
-    "server/**/*"
+    "src/app/ganymede/electron/**/*"
   ]
 }

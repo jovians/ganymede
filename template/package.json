@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve --proxy-config proxy.conf.json",
-    "build": "ng build",
+    "build": "ng build --prod --vendor-chunk",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
@@ -12,10 +12,11 @@
     "electron-start": "npm run electron-entry && electron . start",
     "electron-test": "npm run electron-entry && electron . test",
     "electron-build-mac": "npm run build && npm run electron-entry && electron-packager . --overwrite --platform=darwin --arch=x64 --icon=dist/assets/ico/mac/icon.icns --prune=true --out=dist --dir=dist-electron",
+    "product-name": "node -p 'try{require(`./ganymede.conf.json`).productName}catch(e){``}'",
     "version": "echo $npm_package_version"
   },
   "private": true,
-  "main": "src/app/ganymede/electron/electron.js",
+  "main": "electron.js",
   "dependencies": {
     "@angular/animations": "^9.1.12",
     "@angular/common": "^9.1.12",
@@ -31,7 +32,7 @@
     "@clr/ui": "3.1.5",
     "@jovian/fourq": "^1.0.7",
     "@jovian/langster": "0.0.6",
-    "@jovian/type-tools": "^6.0.0",
+    "@jovian/type-tools": "^6.0.3",
     "@ngx-translate/core": "^11.0.1",
     "@ngx-translate/http-loader": "^4.0.0",
     "@webcomponents/webcomponentsjs": "^2.0.0",

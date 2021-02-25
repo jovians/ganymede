@@ -1,9 +1,11 @@
-<div class="footer-left"></div>
-<div class="footer-middle"></div>
+<div class="footer-left">{{ app.footerMessage.left ? app.footerMessage.left : '' }}</div>
+<div class="footer-middle">{{ app.footerMessage.middle ? app.footerMessage.middle : '' }}</div>
 <div class="footer-right">
   <div class="footer-entry">
-    <span *ngIf="app.features?.licenseFooter?.messageHTML && app.features?.licenseFooter?.messageHTML.indexOf('Ganymede')">
+    <span *ngIf="app.footerMessage.right">{{ app.footerMessage.right }}</span>
+    <span *ngIf="app.footerMessage.right && !env.licenseValid" class="footer-right-divider">|</span>
+    <span *ngIf="!env.licenseValid">
       <a href="https://ganymede.dev" target="_blank">{{ app.features?.licenseFooter?.messageHTML }}</a>
-    </span>
+    </span>    
   </div>
 </div>

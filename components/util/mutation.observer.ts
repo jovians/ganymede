@@ -2,6 +2,8 @@
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 
+import { LifecycleLinkable, LifecycleLinker, LifecycleLinkType } from './lifecycle.linker';
+
 interface MutationWatcherConfig {
   childList?: boolean;
   subtree?: boolean;
@@ -12,7 +14,7 @@ interface MutationWatcherConfig {
 export class MutationWatcher {
 
   observer: MutationObserver;
-  onAny: () => void;
+  onAny: (mutations: MutationRecord[]) => void;
   onNew: (node: HTMLElement) => void;
   onDelete: (node: HTMLElement) => void;
 
@@ -23,9 +25,18 @@ export class MutationWatcher {
   }
 
   onElementMutation(mutations: MutationRecord[]) {
-    if (this.onAny) { this.onAny(); }
+    if (this.onAny) { this.onAny(mutations); }
     if (this.onNew) { this.forAllAddedHTMLNodes(mutations, this.onNew); }
     if (this.onDelete) { this.forAllRemovedHTMLNodes(mutations, this.onDelete); }
+  }
+
+  wrapUp() {
+    this.onElementMutation(this.observer.takeRecords());
+  }
+
+  destroy() {
+    this.observer.disconnect();
+    this.observer = null;
   }
 
   private forAllRemovedHTMLNodes(mutations: MutationRecord[], callback: (node: HTMLElement) => void) {
@@ -54,5 +65,21 @@ export class MutationWatcher {
       this.recursiveGetSubElements(childElement, list);
     }
     return list;
+  }
+}
+
+export class MutationUtil {
+  static link(component: LifecycleLinkable, target: HTMLElement, onMutations: (mutations: MutationRecord[]) => void) {
+    const link = LifecycleLinker.link(LifecycleLinkType.MUTATION_SUBTREE, component, target);
+    if (link) {
+      let observer = new MutationWatcher(target, { childList: true, subtree: true, attributes: false });
+      observer.onAny = (mutations) => {
+        onMutations(mutations);
+      };
+      link.onDestroy = () => {
+        observer.destroy();
+        observer = null;
+      };
+    }
   }
 }

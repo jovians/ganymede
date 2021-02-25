@@ -32,15 +32,15 @@ export class GanymedeAppData {
   subtitle = ``;
 
   logo = `${baseIcoPath}/apple-icon.png`;
-  logoTitle = `${baseImgPath}/.png`;
+  // logoTitle = `${baseImgPath}/.png`;
   // logoTitleVertical = `${baseImgPath}/.png`;
 
   icon = `${baseIcoPath}/apple-icon.png`;
 
   loginImage = `${baseImgPath}/s.jpg`;
 
-  landingPath = '/';
-  landingVideo = `${baseVidPath}/devops_landing.mp4`;
+  landingPath = `/`;
+  landingVideo = ``;
 
   template;
 
@@ -60,6 +60,8 @@ export class GanymedeAppData {
   };
 
   conf: any; // ganymede.conf.json content
+
+  footerMessage = { left: '', middle: '', right: '' };
 
   constructor(initializer?: Partial<GanymedeAppData>) {
     if (initializer) {

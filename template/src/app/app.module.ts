@@ -15,14 +15,16 @@ import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-transla
 
 import { MarkdownModule, MarkedOptions } from 'ngx-markdown';
 
-import { GanymedeTemplateModule, AppComponent } from './ganymede/components/templates/<gany.APP_TEMPLATE_NAME>/template.module';
-import { GenymedeServicesModule } from './ganymede/components/services/services.module';
-import { GanymedeMarkdownModule } from './ganymede/components/markdown/markdown.module';
-import { GanymedePagesModule } from './ganymede/components/pages/pages.module';
-import { ganymedeLicenseCallbacks } from './ganymede/ganymede.license';
+import { GanymedeCoreModule } from './ganymede/components/ganymede.core.module';
 
+import { ganymedeLicenseCallbacks } from './ganymede/ganymede.license';
 import { PreInitUtils } from './ganymede/components/util/preinit.util';
 import { ganymedeAppData } from '../../ganymede.app';
+
+import { UserRoutesModule } from './routes/routes.module';
+import { UserCustomAppModule } from './user-custom/custom.app.module';
+
+import { AppComponent } from './ganymede/components/templates/default/template.module';
 
 const notFoundValue = Promise.resolve();
 const translateBasePath = 'assets/i18n/';
@@ -81,10 +83,10 @@ export function langInitFactory(translate: TranslateService, injector: Injector)
               },
           },
     }),
-    GenymedeServicesModule,
-    GanymedeTemplateModule,
-    GanymedeMarkdownModule,
-    GanymedePagesModule,
+    GanymedeCoreModule,
+
+    UserRoutesModule,
+    UserCustomAppModule,
 
     // BEGIN GANYMEDE AUTOGEN SECTION
     <gany.APP_IMPORTS>
@@ -118,7 +120,11 @@ export function langInitFactory(translate: TranslateService, injector: Injector)
 })
 export class AppModule { }
 
-ganymedeLicenseCallbacks.push((valid, ganyMeta) => {
-  // tslint:disable-next-line: no-console
-  if (!valid) { console.warn(`Ganymede license is not valid; serial_key="${ganyMeta['ganymede-license-key']}"`); }
+ganymedeLicenseCallbacks.push((valid, license) => {
+  if (!valid) {
+    const msg = `Ganymede license is not valid; registration="${license.org}|${license.user}|${license.domain}|${license.scope}"\n`
+                + `Registration License Signature: ${license.key}`;
+    // tslint:disable-next-line: no-console
+    console.warn(msg);
+  }
 });

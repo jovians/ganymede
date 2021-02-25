@@ -17,6 +17,7 @@ export class Modules {
   static byName: {[typename: string]: { type: Class<any>; getData?: () => ModulesRegistrationData }} = {};
   static register<T>(type: Class<T>, getData?: () => ModulesRegistrationData) {
     if (Modules.byName[type.name]) { return; }
-    Modules.byName[type.name] = { type, getData };
+    const registration = Modules.byName[type.name] = { type, getData };
+    return registration;
   }
 }

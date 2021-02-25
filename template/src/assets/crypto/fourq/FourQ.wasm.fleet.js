@@ -1,3 +1,8 @@
+// ! IMPORTANT !
+// change below to where FourQ.wasm.worker.js is relative to your webapp 
+// e.g. for Angular it may be assets/js/FourQ.wasm.worker.js
+const wasmWorkerURL = 'assets/crypto/fourq/FourQ.wasm.worker.js';
+
 FourQ = {};
 
 FourQ.OpType = {
@@ -135,7 +140,7 @@ FourQ.getFleet = function(workerCount){
   }
 
   this.addWorker = function(unfinishedQueue){
-    var worker = new Worker("assets/crypto/fourq/FourQ.wasm.worker.js");
+    var worker = new Worker(wasmWorkerURL);
     worker.queue = unfinishedQueue ? unfinishedQueue : [];
     worker.congested = false;
     worker.saturated = false;
@@ -243,5 +248,3 @@ FourQ.getFleet = function(workerCount){
   }, 1000);
 
 }
-
-if (window.__init_FourQ__) { window.__init_FourQ__(); }

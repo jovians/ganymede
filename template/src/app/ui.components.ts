@@ -18,6 +18,7 @@ export class Components {
   static byName: {[typename: string]: { type: Class<any>; getData?: () => ComponentRegistrationData }} = {};
   static register<T>(type: Class<T>, getData?: () => ComponentRegistrationData) {
     if (Components.byName[type.name]) { return; }
-    Components.byName[type.name] = { type, getData };
+    const registration = Components.byName[type.name] = { type, getData };
+    return registration;
   }
 }

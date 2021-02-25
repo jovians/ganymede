@@ -2,7 +2,7 @@
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
-import { Router, ActivationStart, NavigationEnd, ActivatedRoute, ChildActivationEnd, ActivationEnd } from '@angular/router';
+import { Router, ActivationStart, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { AppService } from '../../services/app.service';
 import { Subscription } from 'rxjs';
 import { RouteObservingService } from '../../services/route-observing.service';
@@ -10,9 +10,6 @@ import { LeftSidebarComponent } from './left-sidebar/left-sidebar.component';
 import { ResourceGuard } from '../../services/resource-guard';
 import { preResolvePath } from '../../util/route.pre-resolver';
 import { Components } from '../../../../ui.components';
-
-// import { HeaderComponent } from './modules/header/header.component';
-// import { RouteObservingService } from './shared/services/route-observing.service';
 
 @Component({
   selector: 'app-root',

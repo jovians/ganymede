@@ -1,0 +1,11 @@
+{
+  "namespace": "thisapp",
+  "mounted": "user-custom",
+  "group": "",
+
+  "name": "UserCustomAppModule",
+  "folder": "",
+  "file": "custom.app.module",
+
+  "attributes": ["ui", "angular", "clarity"]
+}

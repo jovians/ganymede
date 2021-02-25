@@ -16,11 +16,11 @@ export class ServiceWorkerUtil {
     const serviceWorkers = await ServiceWorkerUtil.getServiceWorkersList();
 
     if (app.features.serviceWorker && app.features.serviceWorker.enabled) {
-      
+
       if (serviceWorkers.length > 0) {
         ServiceWorkerUtil.sendAnnounce();
       }
-  
+
       navigator.serviceWorker.onmessage = e => {
         // console.log(e);
       };
@@ -57,7 +57,6 @@ export class ServiceWorkerUtil {
         navigator.serviceWorker.getRegistrations().then(registrations => {
           resolve(registrations as any);
         }).catch(e => {
-          console.log(e)
           resolve([]);
         });
       } else {
@@ -79,7 +78,6 @@ export class ServiceWorkerUtil {
           });
           ServiceWorkerUtil.announceSent = true;
         } catch (e) {
-          console.log(e);
           resolve(false);
         }
       } else {
