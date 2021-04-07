@@ -1,4 +1,6 @@
 import { Subject } from 'rxjs';
+import { debugController } from './util/debug.controller';
+import { HttpErrorResponse, HttpRequest, HttpResponse } from '@angular/common/http';
 
 const baseImgPath = '/assets/img';
 const baseIcoPath = '/assets/ico';
@@ -59,9 +61,23 @@ export class GanymedeAppData {
     // serviceWorker: { enabled: true },
   };
 
-  conf: any; // ganymede.conf.json content
+  header = {
+    alwaysOn: true, exceptRoutes: [],
+    search: { enabled: false }
+  };
+  headerActions = [];
 
-  footerMessage = { left: '', middle: '', right: '' };
+  footer = { alwaysOn: false, exceptRoutes: [] };
+  footerActions = { left: [], middle: [], right: [] };
+
+  requestIntercept: {
+    type: string;
+    initialize?: () => {};
+  } = { type: 'simple' };
+
+  debug = debugController;
+
+  conf: any; // ganymede.conf.json content
 
   constructor(initializer?: Partial<GanymedeAppData>) {
     if (initializer) {

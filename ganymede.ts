@@ -22,7 +22,7 @@ const configReplacerTargets = [
   'angular.json',
   'karma.conf.js',
   'src/index.html',
-  'src/assets/ico/manifest.json',
+  'src/assets-root/manifest.json',
 ];
 
 const styleReplacesTargets = [

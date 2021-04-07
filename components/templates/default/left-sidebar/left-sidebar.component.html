@@ -1,4 +1,18 @@
 <section class="sidenav-content">
+  <div class="header-nav main-menu-container nav-group" *ngIf="this.app.displayMode === 'NARROW'">
+    <section class="main-menu-section">
+      <!-- <label [for]="'main-menu-item-' + idemGuard + '-' + i" class="main-menu">Main Menu</label> -->
+      <ul class="nav-list">
+        <li *ngFor="let item of menuList" class="bigger-item">
+          <a [id]="'main-menu-item-'+item.path" [routerLink]="[item.path]" class="nav-link bigger-item-a">{{ item.name | translate }}</a>
+        </li>
+      </ul>
+    </section>
+  </div>
+  <!-- <section *ngIf="this.app.displayMode === 'NARROW' && navItems && navItems.length > 0">
+    <label>Test</label>
+    <ul class="nav-list"></ul>
+  </section> -->
   <ng-template ngFor let-itemData [ngForOf]="navItems" let-i="index">
     <a *ngIf="!itemData.children || itemData.children.length === 0" [ngClass]="{'active': router.url === '/' + itemData.link}"
         [routerLink]="[itemData.link]" (click)="endHere($event)" class="nav-link">{{ itemData.name | translate }}</a>

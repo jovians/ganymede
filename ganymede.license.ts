@@ -32,15 +32,8 @@ window['__init_FourQ__'] = () => {
     for (let i = 0; i < str.length; ++i) { buff[i] = str.charCodeAt(i) % 256; }
     return buff;
   };
-  license.activeKey = currentDomain !== 'localhost' ? license.key : license.keyLocal;
+  license.activeKey = !currentDomain.startsWith('localhost') ? license.key : license.keyLocal;
   const msgs = [toBuffer(getLicenseMessage(currentDomain))];
-  if (currentDomain.split('.').length > 2) {
-    const domainParts = currentDomain.split('.');
-    domainParts.shift();
-    domainParts.unshift('*');
-    const wildcardDomain = domainParts.join('.');
-    msgs.push(toBuffer[getLicenseMessage(wildcardDomain)]);
-  }
   const fourq = new window.FourQ.getFleet();
   const sig = { data: toBuffer(atob(license.activeKey)) };
   const pubkey = toBuffer(atob(ganymedeLicensePublicKey));

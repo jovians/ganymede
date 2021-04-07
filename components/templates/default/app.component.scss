@@ -2,3 +2,9 @@
   // transition: opacity 200ms ease-in;
   opacity: 0;
 }
+
+@media only screen and (max-width: 768px) {
+  .sidenav-narrow {
+    padding-top: 2.5rem !important;
+  }
+}

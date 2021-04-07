@@ -4,9 +4,10 @@ import { CommonModule, LOCATION_INITIALIZED } from '@angular/common';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule, Injector, APP_INITIALIZER } from '@angular/core';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { RouteReuseStrategy } from '@angular/router';
 
 import { AppRoutingModule } from './app-routing.module';
-import { RequestInterceptor } from './request.interceptor';
+import { RequestInterceptor } from './http.wrapper';
 
 import { ClarityModule } from '@clr/angular';
 
@@ -19,7 +20,8 @@ import { GanymedeCoreModule } from './ganymede/components/ganymede.core.module';
 
 import { ganymedeLicenseCallbacks } from './ganymede/ganymede.license';
 import { PreInitUtils } from './ganymede/components/util/preinit.util';
-import { ganymedeAppData } from '../../ganymede.app';
+import { RouteReuser } from './ganymede/components/services/route-reuser';
+import { ganymedeAppData, otherModules, otherDeclarations, otherProviders } from '../../ganymede.app';
 
 import { UserRoutesModule } from './routes/routes.module';
 import { UserCustomAppModule } from './user-custom/custom.app.module';
@@ -34,7 +36,7 @@ export function preInitFactory() {
     if (ganymedeAppData.features.preinit) {
       await PreInitUtils.entrypoint();
     }
-    resolve();
+    resolve(true);
   });
 }
 
@@ -43,7 +45,7 @@ export function langInitFactory(translate: TranslateService, injector: Injector)
     injector.get(LOCATION_INITIALIZED, notFoundValue).then(() => {
       try {
         const defaultLanguage = 'en';
-        translate.use(defaultLanguage).subscribe(() => { resolve(); });
+        translate.use(defaultLanguage).subscribe(() => { resolve(true); });
       } catch (e) {
         // tslint:disable-next-line: no-console
         console.error(e);
@@ -88,15 +90,10 @@ export function langInitFactory(translate: TranslateService, injector: Injector)
     UserRoutesModule,
     UserCustomAppModule,
 
-    // BEGIN GANYMEDE AUTOGEN SECTION
-    <gany.APP_IMPORTS>
-    // END GANYMEDE AUTOGEN SECTION
-  ],
+  ].concat(otherModules),
   declarations: [
-    // BEGIN GANYMEDE AUTOGEN SECTION
-    <gany.APP_DECLARATIONS>
-    // END GANYMEDE AUTOGEN SECTION
-  ],
+    
+  ].concat(otherDeclarations),
   providers: [
     {
       provide: APP_INITIALIZER,
@@ -112,10 +109,13 @@ export function langInitFactory(translate: TranslateService, injector: Injector)
       provide: HTTP_INTERCEPTORS,
       useClass: RequestInterceptor,
       multi: true,
+    }, {
+      provide: RouteReuseStrategy,
+      useClass: RouteReuser
     },
     TranslateService,
     MarkedOptions,
-  ],
+  ].concat(otherProviders),
   bootstrap: [AppComponent]
 })
 export class AppModule { }

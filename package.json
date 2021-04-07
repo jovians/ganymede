@@ -1,8 +1,9 @@
 {
   "name": "@jovian/ganymede-clr",
-  "version": "0.0.5",
+  "version": "0.0.16",
   "scripts": {
     "clean-js": "find . -name '*.js' -delete; find . -name '*.js.map' -delete;",
+    "prepublish": "tsc ganymede.ts",
     "lint": "ng lint"
   },
   "dependencies": {

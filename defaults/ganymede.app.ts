@@ -22,3 +22,20 @@ export const ganymedeAppData = new GanymedeAppData({
 
   conf: ganymedeConfJson,
 });
+
+export const otherModules = [
+
+];
+
+export const otherDeclarations = [
+
+];
+
+export const otherProviders = [
+
+];
+
+const isNodeJs = (typeof process !== 'undefined') && (process.release.name === 'node');
+if (!isNodeJs) {
+  Object.defineProperty(window, 'ganymedeAppData', { get: () => ganymedeAppData });
+}

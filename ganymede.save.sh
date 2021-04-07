@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/bash
 
 if [ ! -f ganymede.conf.json ]; then
     echo "ERROR: Cannot execute scripts on working directory that doesn't have ganymede.conf.json file."

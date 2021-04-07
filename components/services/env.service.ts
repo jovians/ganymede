@@ -1,7 +1,7 @@
 /*
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
-import { Injectable } from '@angular/core';
+import { Injectable, isDevMode } from '@angular/core';
 import { ElectronInteractions } from '../util/electron.utils';
 
 @Injectable({
@@ -36,7 +36,10 @@ export class EnvService {
 
   licenseValid = true;
 
+  devMode: boolean = true;
+
   constructor() {
+    this.devMode = isDevMode();
     const env = this as any;
     const envPrepare = () => {
       const nv = navigator;

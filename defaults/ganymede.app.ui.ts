@@ -1,4 +1,5 @@
 import { ganymedeAppData } from './ganymede.app';
+import { HttpWrap } from './src/app/ganymede/components/util/http.wrapper';
 import { BasicContentsComponent } from './src/app/ganymede/components/pages/basic-contents/basic-contents.component';
 import { i18n } from './src/app/ganymede/components/util/i18n-helper';
 
@@ -16,4 +17,6 @@ ganymedeAppData.routes = [
 
 export const appRoutes = ganymedeAppData.routes;
 
-Object.defineProperty(window, 'ganymedeAppData', { get: () => ganymedeAppData });
+HttpWrap.loadInitialIntercepts(() => {
+
+});

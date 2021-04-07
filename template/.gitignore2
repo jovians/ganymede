@@ -50,6 +50,9 @@ testem.log
 .DS_Store
 Thumbs.db
 
+# electron temp
+ipc-preload.js
+
 # Ganymede
 src/app/ganymede
 src/app/ganymede/*

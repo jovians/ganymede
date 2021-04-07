@@ -47,7 +47,7 @@ var AuthServer = /** @class */ (function () {
     function AuthServer() {
         this.port = 7220;
     }
-    AuthServer.prototype.initialize = function () {
+    AuthServer.prototype.start = function (data) {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             return __generator(this, function (_a) {
@@ -62,22 +62,6 @@ var AuthServer = /** @class */ (function () {
                         res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
                         next();
                     });
-                    // this.apiRoot.get('/api/ganymede/auth/setDeviceTimestampSeed', async (req, res) => {
-                    //   console.log('setBrowserTimestampSeed');
-                    //   const cookieRaw = req.headers.cookie;
-                    //   if (cookieRaw) {
-                    //     const target = cookieRaw.split('gany_dev_id=');
-                    //     if (target.length > 1) { return res.end(''); }
-                    //   }
-                    //   const seed =  crypto.randomBytes(36).toString('base64')
-                    //                     .replace('+', '-').replace('/', '.').replace('=', '_');
-                    //   res.cookie('gany_dev_id', seed, {
-                    //     expires: new Date(Date.now() + 3155695200), // 100 years
-                    //     httpOnly: true,
-                    //     secure: false
-                    //   });
-                    //   res.end('');
-                    // });
                     this.apiRoot.get('/api/ganymede/auth/deviceTimestamp', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
                         var cookieRaw, target, secret, keypair, t, nonce, msg, hash;
                         return __generator(this, function (_a) {
@@ -108,10 +92,6 @@ var AuthServer = /** @class */ (function () {
                             return [2 /*return*/, res.end(Date.now() + "::" + nonce + "::" + hash)];
                         });
                     }); });
-                    // this.apiRoot.get('/api/ganymede/routes/happytree', async (req, res) => {
-                    //   console.log(req.query.path);
-                    //   res.end(JSON.stringify({ yes: true }));
-                    // });
                     if (ganymede_app_1.ganymedeAppData.features.preinit) {
                         this.apiRoot.get('/api/ganymede/preinit', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
                             var ret, ip, swMeta;
@@ -134,7 +114,7 @@ var AuthServer = /** @class */ (function () {
                             });
                         }); });
                     }
-                    console.log('Initialized...');
+                    console.log("Auth server initialized... (port=" + this.port + ")");
                     this.apiRoot.listen(this.port);
                 }
                 catch (e) {
@@ -143,14 +123,6 @@ var AuthServer = /** @class */ (function () {
                 return [2 /*return*/];
             });
         });
-    };
-    AuthServer.prototype.main = function () {
-        try {
-            this.initialize();
-        }
-        catch (e) {
-            console.log(e);
-        }
     };
     AuthServer.prototype.terminationHandler = function (e) {
         console.log(e, 'test');

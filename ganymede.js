@@ -55,7 +55,7 @@ var configReplacerTargets = [
     'angular.json',
     'karma.conf.js',
     'src/index.html',
-    'src/assets/ico/manifest.json',
+    'src/assets-root/manifest.json',
 ];
 var styleReplacesTargets = [
     'src/variables.scss',

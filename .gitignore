@@ -51,3 +51,4 @@ Thumbs.db
 
 # ignore ganymede real sources
 .ganysource
+jovian-ganymede-clr-*

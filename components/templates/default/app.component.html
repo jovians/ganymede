@@ -1,4 +1,4 @@
-<clr-main-container>
+<clr-main-container #mainContainer>
   <div #containerComponent class="main-container fade-in">
     <div class="alert alert-app-level">
     </div>
@@ -7,7 +7,7 @@
         <main #mainContentArea class="content-area" style="margin:0; padding:0; order:0;">
           <router-outlet></router-outlet>
         </main>
-        <nav *ngIf="leftSidebarVisible" class="sidenav" [clr-nav-level]="1">
+        <nav *ngIf="leftSidebarVisible" class="sidenav sidenav-narrow" [clr-nav-level]="1">
             <app-left-sidebar #leftSideBarComponent [navItems]="leftSidebarNavItems"></app-left-sidebar>
         </nav>
         <nav *ngIf="rightSidebarVisible" class="sidenav" style="order:1; border-left: 1px solid #ccc;"  [clr-nav-level]="2">

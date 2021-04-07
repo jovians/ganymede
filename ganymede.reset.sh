@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/bash
 
 NEW_NAME="$1"
 

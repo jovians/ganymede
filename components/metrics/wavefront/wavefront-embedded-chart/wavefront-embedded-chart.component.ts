@@ -3,7 +3,10 @@
  */
 import { Components } from '../../../../../ui.components';
 import { Component, Input, OnInit, OnChanges, SimpleChanges, ElementRef, OnDestroy } from '@angular/core';
-import { LifecycleLinkable, lifecycleEnd, DomTreeUtil, SizeUtil, MutationUtil } from '../../../util.exports';
+import { LifecycleLinkable, lifecycleEnd } from '../../../util/lifecycle.linker';
+import { DomTreeUtil } from '../../../util/dom.tree.util';
+import { SizeUtil } from '../../../util/size.util';
+import { MutationUtil } from '../../../util/mutation.observer';
 
 @Component({
   selector: 'app-wavefront-embedded-chart',

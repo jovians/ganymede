@@ -1,6 +1,7 @@
 /*
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
+import { ganylog } from './console.util';
 import { LifecycleLinkable, LifecycleLinker, LifecycleLinkType } from './lifecycle.linker';
 
 declare var window: any;
@@ -12,8 +13,13 @@ interface SizeUtilFullInfo {
   computedHeight: number;
 }
 
+export enum DisplayMode {
+  NONE = 'NONE', NARROW = 'NARROW', NORMAL = 'NORMAL', WIDE = 'WIDE',
+}
+
 export class SizeUtil {
   static computedStyleCacheExpire = 100;
+  static windowOnResizeHandlers: ((e) => any)[] = [];
   static getComputedStyle(el: any, noCache = false) {
     const last = el._computed_style_last;
     const now = Date.now();
@@ -52,5 +58,15 @@ export class SizeUtil {
         observer = null;
       };
     }
+  }
+  static addOnWindowResize(handler: (e) => any) {
+    if (SizeUtil.windowOnResizeHandlers.length === 0) {
+      window.addEventListener('resize', e => {
+        for (const resizeHandler of SizeUtil.windowOnResizeHandlers) {
+          try { resizeHandler(e); } catch (e) { ganylog('SizeUtil', e); }
+        }
+      });
+    }
+    SizeUtil.windowOnResizeHandlers.push(handler);
   }
 }

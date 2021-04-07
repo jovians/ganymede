@@ -19,14 +19,13 @@ export class FooterComponent implements OnInit, OnDestroy {
   licenseSubs: Subscription;
 
   constructor(
-    public app: AppService,
-    public env: EnvService,
+    public app: AppService
   ) {}
 
   ngOnInit() {
     this.licenseSubs = ganymedeLicense.subscribe(valid => {
-      this.env.licenseValid = valid;
-      setTimeout(() => { this.env.licenseValid = this.env.licenseValid; }, 500);
+      this.app.env.licenseValid = valid;
+      setTimeout(() => { this.app.env.licenseValid = this.app.env.licenseValid; }, 500);
     });
   }
 

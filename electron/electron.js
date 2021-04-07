@@ -21,7 +21,7 @@ function createWindow () {
       contextIsolation: true,
       enableRemoteModule: false,
       // devTools: testEnv ? true : false,
-      preload: `${baseDir}/src/app/ganymede/electron/ipc-preload.js`
+      preload: `${baseDir}/ipc-preload.js`
     }
   })
 

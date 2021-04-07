@@ -1,6 +1,7 @@
 "use strict";
 exports.__esModule = true;
 var rxjs_1 = require("rxjs");
+var debug_controller_1 = require("./util/debug.controller");
 var baseImgPath = '/assets/img';
 var baseIcoPath = '/assets/ico';
 var baseVidPath = '/assets/vid';
@@ -13,12 +14,12 @@ var GanymedeAppData = /** @class */ (function () {
         this.toptitle = "";
         this.subtitle = "";
         this.logo = baseIcoPath + "/apple-icon.png";
-        this.logoTitle = baseImgPath + "/.png";
+        // logoTitle = `${baseImgPath}/.png`;
         // logoTitleVertical = `${baseImgPath}/.png`;
         this.icon = baseIcoPath + "/apple-icon.png";
         this.loginImage = baseImgPath + "/s.jpg";
-        this.landingPath = '/';
-        this.landingVideo = baseVidPath + "/devops_landing.mp4";
+        this.landingPath = "/";
+        this.landingVideo = "";
         this.lang = 'en';
         this.langList = ['en'];
         this.defaultUserContentsPath = '/assets/user-contents';
@@ -27,6 +28,15 @@ var GanymedeAppData = /** @class */ (function () {
             preinit: {},
             licenseFooter: { messageHTML: 'Powered by Ganymede' }
         };
+        this.header = {
+            alwaysOn: true, exceptRoutes: [],
+            search: { enabled: false }
+        };
+        this.headerActions = [];
+        this.footer = { alwaysOn: false, exceptRoutes: [] };
+        this.footerActions = { left: [], middle: [], right: [] };
+        this.requestIntercept = { type: 'simple' };
+        this.debug = debug_controller_1.debugController;
         if (initializer) {
             var defaultFeatures = this.features;
             Object.assign(this, initializer);

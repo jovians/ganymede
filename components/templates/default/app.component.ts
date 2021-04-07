@@ -2,7 +2,7 @@
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
-import { Router, ActivationStart, NavigationEnd, ActivatedRoute } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { AppService } from '../../services/app.service';
 import { Subscription } from 'rxjs';
 import { RouteObservingService } from '../../services/route-observing.service';
@@ -10,6 +10,7 @@ import { LeftSidebarComponent } from './left-sidebar/left-sidebar.component';
 import { ResourceGuard } from '../../services/resource-guard';
 import { preResolvePath } from '../../util/route.pre-resolver';
 import { Components } from '../../../../ui.components';
+import { DisplayMode, SizeUtil } from '../../util/size.util';
 
 @Component({
   selector: 'app-root',
@@ -20,6 +21,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   static registration = Components.register(AppComponent, () => require('./app.component.json'));
 
   // @ViewChild('headerComponent') headerComponent: HeaderComponent;
+  @ViewChild('mainContainer') mainContainer: ElementRef;
   @ViewChild('containerComponent') containerComponent: ElementRef;
   @ViewChild('leftSideBarComponent') leftSideBarComponent: LeftSidebarComponent;
   @ViewChild('mainContentArea') mainContentArea: ElementRef;
@@ -38,42 +40,44 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
   constructor(
     private app: AppService,
-    private router: Router,
     private route: ActivatedRoute,
-    private routeObservingService: RouteObservingService,
+    private routeObserver: RouteObservingService,
     ) {
-    window.onresize = (e) => {
+    SizeUtil.addOnWindowResize(e => {
       if (window.innerWidth <= 768) {
+        this.app.displayMode = DisplayMode.NARROW;
         this.rightSidebarVisible = this.leftSidebarVisible = true;
       } else {
+        this.app.displayMode = DisplayMode.NORMAL;
         this.leftSidebarVisible = this.leftSidebarVisibleSaved;
         this.rightSidebarVisible = this.rightSidebarVisibleSaved;
       }
-    };
+    });
     preResolvePath().then(ngRoute => {
       if (ngRoute && ngRoute.data) { this.handleRouteData(ngRoute.data); }
     });
-    this.routerSubscription = this.router.events.subscribe(e => {
-      if (e instanceof NavigationEnd) {
-        this.routeObservingService.setUrlSegment(e.url);
-        if (!this.activatedRouteDataSubscribed) {
-          this.route.firstChild.data.subscribe(data => {
-            this.handleRouteData(data);
-          });
-          this.activatedRouteDataSubscribed = true;
-        }
-        window.dispatchEvent(new Event('resize'));
-      } else if (e instanceof ActivationStart) {
-        this.handleRouteData(e.snapshot.data);
-        this.leftSidebarVisibleSaved = this.leftSidebarVisible;
-        this.rightSidebarVisibleSaved = this.rightSidebarVisible;
+    this.routeObserver.setRoute(this.route);
+    this.routeObserver.eventRouteChange.subscribe(url => {
+      if (!this.activatedRouteDataSubscribed && this.route.firstChild) {
+        this.route.firstChild.data.subscribe(data => {
+          this.handleRouteData(data);
+        });
+        this.activatedRouteDataSubscribed = true;
       }
     });
-
+    this.routeObserver.eventActivationStart.subscribe(e => {
+      this.handleRouteData(e.snapshot.data);
+      this.leftSidebarVisibleSaved = this.leftSidebarVisible;
+      this.rightSidebarVisibleSaved = this.rightSidebarVisible;
+    });
   }
 
   ngAfterViewInit(): void {
+    this.routeObserver.scrollSaveTarget = this.mainContentArea;
     this.showApp();
+    setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 30);
+    const checker = setInterval(() => { window.dispatchEvent(new Event('resize')); }, 66);
+    setTimeout(() => { clearInterval(checker); }, 300);
   }
 
   showApp() {
@@ -103,7 +107,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
           break;
       }
       let footer = data.templateData.footer;
-      if (footer === undefined || footer === 'default') { footer = 'yes'; }
+      if (footer === undefined || footer === 'default') { footer = 'no'; } // no footer by default
       switch (footer) {
         case 'yes': this.footerVisible = true; break;
         case 'no': this.footerVisible = false; break;
@@ -120,6 +124,22 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
       this.leftSidebarNavItems = [];
       if (data.pageData.type === 'basic-contents') {
         this.leftSidebarNavItems = data.pageData.children;
+      }
+    } else {
+      this.leftSidebarNavItems = [];
+      this.leftSidebarVisible = false;
+      this.rightSidebarVisible = false;
+    }
+
+    if (this.app.header) {
+      if (this.app.header.alwaysOn) {
+        this.headerVisible = true;
+      }
+    }
+
+    if (this.app.footer) {
+      if (this.app.footer.alwaysOn) {
+        this.footerVisible = true;
       }
     }
 

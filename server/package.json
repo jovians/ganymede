@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@jovian/fourq": "0.0.19",
+    "@jovian/type-tools": "^6.0.3",
     "crypto": "^1.0.1"
   },
   "devDependencies": {

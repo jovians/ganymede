@@ -17,7 +17,7 @@ import { Components } from '../../../../../ui.components';
 export class HeaderComponent implements OnDestroy, AfterViewInit {
   static registration = Components.register(HeaderComponent, () => require('./header.component.json'));
 
-  @Input() public menuList;
+  @Input() menuList;
   private selectedRef = null;
   private routeSubscription: Subscription;
 
@@ -25,7 +25,7 @@ export class HeaderComponent implements OnDestroy, AfterViewInit {
     public app: AppService,
     public env: EnvService,
     public auth: AuthService,
-    private routeObservingService: RouteObservingService,
+    private routeObserver: RouteObservingService,
   ) {
     this.menuList = app.template.header.nav;
   }
@@ -47,8 +47,8 @@ export class HeaderComponent implements OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.handleUrlChange(this.routeObservingService.currentUrl);
-    this.routeSubscription = this.routeObservingService.subscribe((url) => {
+    this.handleUrlChange(this.routeObserver.currentUrl);
+    this.routeSubscription = this.routeObserver.eventRouteChange.subscribe(url => {
       this.handleUrlChange(url);
     });
   }
@@ -57,4 +57,8 @@ export class HeaderComponent implements OnDestroy, AfterViewInit {
     if (this.routeSubscription) { this.routeSubscription.unsubscribe(); }
   }
 
+  async runCommand(commandObject: any) {
+    if (!commandObject || !commandObject.command) { return; }
+    return this.app.run(commandObject);
+  }
 }

@@ -11,7 +11,7 @@ export class AuthServer {
   port: number = 7220;
   apiRoot: Express.Application;
 
-  async initialize() {
+  async start(data: any) {
     try {
       this.apiRoot = Express();
       // support application/json type post data
@@ -25,22 +25,6 @@ export class AuthServer {
         next();
       });
 
-      // this.apiRoot.get('/api/ganymede/auth/setDeviceTimestampSeed', async (req, res) => {
-      //   console.log('setBrowserTimestampSeed');
-      //   const cookieRaw = req.headers.cookie;
-      //   if (cookieRaw) {
-      //     const target = cookieRaw.split('gany_dev_id=');
-      //     if (target.length > 1) { return res.end(''); }
-      //   }
-      //   const seed =  crypto.randomBytes(36).toString('base64')
-      //                     .replace('+', '-').replace('/', '.').replace('=', '_');
-      //   res.cookie('gany_dev_id', seed, {
-      //     expires: new Date(Date.now() + 3155695200), // 100 years
-      //     httpOnly: true,
-      //     secure: false
-      //   });
-      //   res.end('');
-      // });
       this.apiRoot.get('/api/ganymede/auth/deviceTimestamp', async (req, res) => {
         const cookieRaw = req.headers.cookie;
         let target;
@@ -66,11 +50,6 @@ export class AuthServer {
         return res.end(`${Date.now()}::${nonce}::${hash}`);
       });
 
-      // this.apiRoot.get('/api/ganymede/routes/happytree', async (req, res) => {
-      //   console.log(req.query.path);
-      //   res.end(JSON.stringify({ yes: true }));
-      // });
-
       if (appData.features.preinit) {
         this.apiRoot.get('/api/ganymede/preinit', async (req, res) => {
           const ret: any = {};
@@ -88,18 +67,10 @@ export class AuthServer {
         });
       }
 
-      console.log('Initialized...');
+      console.log(`Auth server initialized... (port=${this.port})`);
       this.apiRoot.listen(this.port);
 
     } catch(e) { console.log(e); }
-  }
-
-  main(){
-    try {
-      this.initialize();
-    } catch(e) {
-      console.log(e);
-    }
   }
 
   terminationHandler(e) {

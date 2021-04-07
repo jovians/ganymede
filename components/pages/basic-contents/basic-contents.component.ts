@@ -1,7 +1,7 @@
 /*
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { consumeSubDir, RouteData, RouteDataNavigatableContent, RouteDataPage } from '../../util/route.helper';
 import { MarkdownFrameComponent } from '../../markdown/markdown-frame/markdown-frame.component';
@@ -11,6 +11,7 @@ import { HttpClient } from '@angular/common/http';
 import { ApiCallerService } from '../../services/api-caller.service';
 import { ResourceGuard } from '../../services/resource-guard';
 import { Components } from '../../../../ui.components';
+import { Subscription } from 'rxjs';
 
 export enum BasicContentType {
   HTML = 'HTML',
@@ -27,7 +28,7 @@ export interface BasicContentMetadata {
   templateUrl: './basic-contents.component.html',
   styleUrls: ['./basic-contents.component.scss']
 })
-export class BasicContentsComponent implements OnInit {
+export class BasicContentsComponent implements OnInit, OnDestroy {
   static registration = Components.register(BasicContentsComponent, () => require('./basic-contents.component.json'));
 
   public static asRoute(subdir: string, routeData: RouteData, otherParams?: any) {
@@ -36,6 +37,7 @@ export class BasicContentsComponent implements OnInit {
       component: BasicContentsComponent,
       canActivate: [ResourceGuard],
       data: routeData,
+      basePath: subdir,
     };
     if (otherParams) { Object.assign(routeDef, otherParams); }
     if (routeData.pageData) {
@@ -62,9 +64,15 @@ export class BasicContentsComponent implements OnInit {
   @ViewChild('outputArea') outputArea: ElementRef;
 
   contentPath = '';
+  contentPathLoaded = '';
   contentNotFound = true;
   contentNotCurrentLang = false;
   contentData: RouteDataPage | RouteDataNavigatableContent;
+  routerEventSubs: Subscription;
+
+  componentStowedAway: boolean = false;
+  rememberRoute = true;
+  rememberedRoute = '';
 
   constructor(
     public app: AppService,
@@ -72,11 +80,12 @@ export class BasicContentsComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private apiCaller: ApiCallerService,
-    private routeObservingService: RouteObservingService,
+    private routeObserver: RouteObservingService,
   ) {
-    this.router.events.subscribe(e => {
+    this.routerEventSubs = this.router.events.subscribe(e => {
       if (e instanceof NavigationEnd) {
         this.route.data.subscribe(data => {
+          if (this.componentStowedAway) { return; }
           this.contentData = this.getTargetFile(data as RouteData);
           if (this.contentData) { this.loadMarkdown(); }
         });
@@ -116,7 +125,9 @@ export class BasicContentsComponent implements OnInit {
   }
 
   async loadMarkdown() {
-    if (!this.contentPath || !this.markdownFrame) { return false; }
+    if (!this.contentPath || !this.markdownFrame || this.markdownFrame.destroyed) { return false; }
+    if (this.contentPath === this.contentPathLoaded) { return false; }
+    this.contentPathLoaded = this.contentPath;
     const metadataPath = this.getMetadataJsonPath();
     this.contentNotCurrentLang = false;
     this.http.get<BasicContentMetadata>(metadataPath, {responseType: 'json'}).subscribe(async contentMetadata => {
@@ -150,8 +161,22 @@ export class BasicContentsComponent implements OnInit {
     this.loadMarkdown();
   }
 
-  ngOnInit(): void {
-    
+  ngOnInit() {
+
+  }
+
+  ngOnDestroy() {
+    if (this.routerEventSubs) {
+      this.routerEventSubs.unsubscribe();
+    }
+  }
+
+  onRouteSave() {
+    this.componentStowedAway = true;
+  }
+
+  onRouteRestore() {
+    this.componentStowedAway = false;
   }
 
   private getMetadataJsonPath() {

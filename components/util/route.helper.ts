@@ -1,14 +1,14 @@
 /*
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
-import { Route, UrlMatchResult, UrlSegment, UrlSegmentGroup } from '@angular/router';
+import { RouterEvent, UrlMatchResult, UrlSegment } from '@angular/router';
 import { ResourceGuard } from '../services/resource-guard';
 
 const baseRouteData = {};
 
 export function getBaseRouteData(baseRoute: string) {
   const segs = location.pathname.split('/'); segs.shift();
-  console.log(segs);
+  // console.log(segs);
   return baseRouteData[baseRoute];
 }
 
@@ -104,6 +104,8 @@ export interface RouteDataPage {
 export interface RouteData {
   templateData: RouteDataTemplate;
   pageData: RouteDataPage;
+  reuse?: boolean;
+  pathOverwrite?: ({from: string, to: string} | ((path: string, e?: RouterEvent) => (string | void)))[];
   staticOnly?: boolean;
   dynamicRoutes?: { pattern: string; resolver: string | ((path: string) => Promise<any>); }[];
 }
