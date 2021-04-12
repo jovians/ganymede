@@ -1,3 +1,3 @@
-# Ganymede Default Markdown Index
+# Ganymede Sample Markdown Page
 
-Default Content
+Hello World!

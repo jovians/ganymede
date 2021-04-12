@@ -21,7 +21,8 @@ import { GanymedeCoreModule } from './ganymede/components/ganymede.core.module';
 import { ganymedeLicenseCallbacks } from './ganymede/ganymede.license';
 import { PreInitUtils } from './ganymede/components/util/preinit.util';
 import { RouteReuser } from './ganymede/components/services/route-reuser';
-import { ganymedeAppData, otherModules, otherDeclarations, otherProviders } from '../../ganymede.app';
+import { ganymedeAppData } from '../../ganymede.app';
+import { otherModules, otherDeclarations, otherProviders } from '../../ganymede.app.ui';
 
 import { UserRoutesModule } from './routes/routes.module';
 import { UserCustomAppModule } from './user-custom/custom.app.module';

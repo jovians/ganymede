@@ -39,6 +39,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+exports.GanymedeServerExtensions = void 0;
 var fs = require("fs");
 var child_process_1 = require("child_process");
 var http_shim_1 = require("./http.shim");

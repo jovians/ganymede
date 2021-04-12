@@ -17,6 +17,20 @@ ganymedeAppData.routes = [
 
 export const appRoutes = ganymedeAppData.routes;
 
+
+
+export const otherModules = [
+
+];
+
+export const otherDeclarations = [
+
+];
+
+export const otherProviders = [
+
+];
+
 HttpWrap.loadInitialIntercepts(() => {
 
 });

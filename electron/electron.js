@@ -1,10 +1,13 @@
 const baseDir = __dirname;
 const conf = require(`${baseDir}/ganymede.conf.json`);
+const userCustom = require(`${baseDir}/electron/entrypoint`).ElectronCustomLogics;
 const profile = process.argv[2];
 const testEnv = profile === 'test';
 const serveRootDir = `${baseDir}/dist/${conf.productName}`;
 
 const { app, BrowserWindow, protocol, shell, ipcMain } = require('electron');
+
+userCustom.initialize();
 
 const runtimeState = {
   unsavedChanges: false
@@ -21,7 +24,7 @@ function createWindow () {
       contextIsolation: true,
       enableRemoteModule: false,
       // devTools: testEnv ? true : false,
-      preload: `${baseDir}/ipc-preload.js`
+      preload: `${baseDir}/electron-ipc-preload.js`
     }
   })
 

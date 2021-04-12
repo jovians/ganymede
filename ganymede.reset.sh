@@ -17,6 +17,7 @@ if [[ $SOFT_RESET != "soft" ]]; then
   mkdir -p profiles
 
   rm -rf node_modules
+  rm -rf package-lock.json
   mkdir -p node_modules
 
   rm -rf src
@@ -49,8 +50,6 @@ gany cli template-load
 find . -name '*.TEMPLATE.*' -delete;
 
 npm install
-
-npm i typescript@3.7.4
 
 if [ ! -f src/global.scss ]; then
   touch src/global.scss

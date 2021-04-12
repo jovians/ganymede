@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+exports.GanymedePostHandler = exports.GanymedePreHandler = exports.GanymedeHttpResponse = exports.GanymedeHttpRequest = exports.GanymedeHttpServer = exports.GanymedeHttpServerApi = exports.HttpResponseText = exports.Post = exports.Pre = exports.HttpMethod = void 0;
 /*
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
@@ -118,7 +119,6 @@ var GanymedeHttpServer = /** @class */ (function () {
             case 'express':
                 switch (api.method) {
                     case HttpMethod.GET:
-                        console.log(api.path);
                         this.baseApp.get(api.path, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
                             var _a, q, r, a;
                             return __generator(this, function (_b) {
@@ -266,6 +266,9 @@ var GanymedeHttpResponse = /** @class */ (function () {
     GanymedeHttpResponse.prototype.status = function (num) {
         return this.oriRes.status(num);
     };
+    GanymedeHttpResponse.prototype.okJson = function (obj) {
+        return this.oriRes.end(JSON.stringify({ status: 'ok', data: obj }));
+    };
     return GanymedeHttpResponse;
 }());
 exports.GanymedeHttpResponse = GanymedeHttpResponse;
@@ -306,6 +309,7 @@ var GanymedePreHandler = /** @class */ (function () {
                             chunks.push(chunk);
                         });
                         a.req.on('end', function () {
+                            a.q.params = a.req.params;
                             a.q.bodyRaw = Buffer.concat(chunks);
                             a.q.body = a.q.bodyRaw.toString();
                             if ((a.q.body.startsWith('{') && a.q.body.endsWith('}')) || (a.q.body.startsWith('[') && a.q.body.endsWith(']'))) {

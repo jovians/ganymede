@@ -11,6 +11,8 @@ import { ResourceGuard } from '../../services/resource-guard';
 import { preResolvePath } from '../../util/route.pre-resolver';
 import { Components } from '../../../../ui.components';
 import { DisplayMode, SizeUtil } from '../../util/size.util';
+import { currentRouteChildData } from '../../util/route.helper';
+import { log } from '../../util/logger';
 
 @Component({
   selector: 'app-root',
@@ -73,6 +75,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    this.app.setMainContentArea(this.mainContentArea);
     this.routeObserver.scrollSaveTarget = this.mainContentArea;
     this.showApp();
     setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 30);
@@ -91,6 +94,9 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   async handleRouteData(data) {
     if (data.templateData) {
       let layout = data.templateData.layout;
+      if (currentRouteChildData && currentRouteChildData.layout) {
+        layout = currentRouteChildData.layout;
+      }
       if (layout === undefined || layout === 'default') { layout = 'one-sidebar'; }
       switch (layout) {
         case 'full':
@@ -104,6 +110,9 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
           break;
         case 'nothing':
           this.headerVisible = false; this.leftSidebarVisible = false; this.rightSidebarVisible = false;
+          break;
+        default:
+          log.info(`Unrecognized route layout spec: '${layout}'`);
           break;
       }
       let footer = data.templateData.footer;
@@ -122,7 +131,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
     if (data.pageData) {
       this.leftSidebarNavItems = [];
-      if (data.pageData.type === 'basic-contents') {
+      if (data.pageData.type === 'basic' || data.pageData.type === 'basic-contents') {
         this.leftSidebarNavItems = data.pageData.children;
       }
     } else {

@@ -1,5 +1,6 @@
 "use strict";
 exports.__esModule = true;
+exports.getGanymedeAppData = exports.GanymedeAppData = void 0;
 var rxjs_1 = require("rxjs");
 var debug_controller_1 = require("./util/debug.controller");
 var baseImgPath = '/assets/img';
@@ -28,6 +29,13 @@ var GanymedeAppData = /** @class */ (function () {
             preinit: {},
             licenseFooter: { messageHTML: 'Powered by Ganymede' }
         };
+        this.base = {};
+        this.extensions = {};
+        this.secretsResolution = {
+            type: 'local-json-file',
+            jsonFile: 'ganymede.secrets.json'
+        };
+        this.logger = null;
         this.header = {
             alwaysOn: true, exceptRoutes: [],
             search: { enabled: false }
@@ -51,6 +59,7 @@ var GanymedeAppData = /** @class */ (function () {
     return GanymedeAppData;
 }());
 exports.GanymedeAppData = GanymedeAppData;
+;
 function getGanymedeAppData() {
     if (!isNodeJs) {
         return self.ganymedeAppData;

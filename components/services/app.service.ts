@@ -1,7 +1,7 @@
 /*
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
-import { Injectable } from '@angular/core';
+import { ElementRef, Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Router } from '@angular/router';
 
@@ -25,6 +25,8 @@ export class AppService extends GanymedeAppData {
   httpForbidden: boolean = false;
   httpNotFound: boolean = false;
   displayMode: DisplayMode = DisplayMode.NORMAL;
+
+  private mainContentArea: ElementRef = null;
 
   constructor(
     public env: EnvService,
@@ -70,4 +72,18 @@ export class AppService extends GanymedeAppData {
     const output = CommandsRegistrar.run(cmd.namespace, cmd.command, cmd.params);
     return await Promise.resolve(output);
   }
+
+  setMainContentArea(mainContentArea: ElementRef) {
+    this.mainContentArea = mainContentArea;
+  }
+
+  setMainContentAreaScroll(scrollTop: number = 0, scrollLeft: number = null) {
+    if (this.mainContentArea) {
+      this.mainContentArea.nativeElement.scrollTop = scrollTop;
+      if (scrollLeft !== null) {
+        this.mainContentArea.nativeElement.scrollLeft = scrollLeft;
+      }
+    }
+  }
+
 }

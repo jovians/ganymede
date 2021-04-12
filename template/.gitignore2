@@ -51,10 +51,15 @@ testem.log
 Thumbs.db
 
 # electron temp
-ipc-preload.js
+/electron/**/*.js
+/electron.js
+/electron-*.js
 
 # Ganymede
 src/app/ganymede
 src/app/ganymede/*
 ganymede/**/*
 ganymede.app.js
+
+# secrets should not be committed
+ganymede.secrets.json

@@ -1,25 +1,24 @@
 {
   "name": "@jovian/ganymede-clr",
-  "version": "0.0.16",
+  "version": "0.11.2",
   "scripts": {
     "clean-js": "find . -name '*.js' -delete; find . -name '*.js.map' -delete;",
     "prepublish": "tsc ganymede.ts",
     "lint": "ng lint"
   },
   "dependencies": {
-    "@jovian/fourq": "0.0.18",
+    "@jovian/fourq": "^1.0.11",
     "@jovian/langster": "0.0.6",
-    "@jovian/type-tools": "^6.0.0",
+    "@jovian/type-tools": "^6.0.3",
     "aes-simple": "0.0.2",
-    "tslib": "^1.10.0",
-    "typescript": "^3.7.4"
+    "tslib": "^2.2.0",
+    "typescript": "^4.2.4"
   },
   "devDependencies": {
-    "@types/jasmine": "^3.6.1",
-    "@types/node": "^12.11.1",
-    "codelyzer": "^5.2.1",
-    "ts-node": "~7.0.0",
-    "tslint": "~5.15.0"
+    "@types/jasmine": "^3.6.9",
+    "@types/node": "^14.14.37",
+    "ts-node": "~9.1.1",
+    "tslint": "~5.20.1"
   },
   "bin": {
     "gany": "./ganymede.sh"

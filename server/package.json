@@ -5,7 +5,8 @@
   "dependencies": {
     "@jovian/fourq": "0.0.19",
     "@jovian/type-tools": "^6.0.3",
-    "crypto": "^1.0.1"
+    "crypto": "^1.0.1",
+    "tslib": "^2.2.0"
   },
   "devDependencies": {
     "@types/node": "^12.19.8",

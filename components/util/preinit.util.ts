@@ -22,9 +22,8 @@ export class PreInitUtils {
     PreInitUtils.initializing = true;
     const promise = new Promise<void>(resolve => {
       const appData = ganymedeAppData;
-      if (!appData.features.preinit) { return false; }
-      if (appData.features.preinit as any === true ||
-          appData.features.preinit as any === 1) {
+      if (!appData.features.preinit) { return resolve(); }
+      if (appData.features.preinit as any === true || appData.features.preinit as any === 1) {
         appData.features.preinit = {};
       }
       appData.features.preinit.versionInfo = {};
@@ -45,7 +44,7 @@ export class PreInitUtils {
           try {
             appData.features.preinit.versionInfo = JSON.parse(req.responseText);
           } catch (e) {
-            console.log(req.responseText);
+            // console.log(req.responseText);
             PreInitUtils.resolvedState = 'error';
             return resolve();
           }

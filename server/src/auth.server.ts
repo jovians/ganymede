@@ -12,6 +12,7 @@ export class AuthServer {
   apiRoot: Express.Application;
 
   async start(data: any) {
+    if (data.port) { this.port = data.port; }
     try {
       this.apiRoot = Express();
       // support application/json type post data

@@ -16,7 +16,10 @@ export class RouteObservingService {
   scrollSaveTarget: ElementRef = null;
   scrollSaveTargetOthers: ElementRef[] = [];
 
+  differentComponentSibiling = false;
+
   eventNavigationStart: Subject<NavigationStart> = new Subject<NavigationStart>();
+  eventNavigationdEnd: Subject<NavigationEnd> = new Subject<NavigationEnd>();
   eventActivationStart: Subject<ActivationStart> = new Subject<ActivationStart>();
   eventConfigLoadEnd: Subject<RouteConfigLoadEnd> = new Subject<RouteConfigLoadEnd>();
   eventRouteChange: Subject<string> = new Subject<string>();
@@ -34,6 +37,7 @@ export class RouteObservingService {
   setRouter(router: Router) {
     this.router = router;
     this.router.events.subscribe(e => {
+      // console.log(e);
       // Full list: https://angular.io/api/router/Event
       if (e instanceof NavigationStart) {
         this.eventNavigationStart.next(e);
@@ -43,6 +47,7 @@ export class RouteObservingService {
         this.eventConfigLoadEnd.next(e);
       } else if (e instanceof NavigationEnd) {
         this.setUrlSegment(e.url);
+        this.eventNavigationdEnd.next(e);
         setTimeout(() => {
           window.dispatchEvent(new Event('resize'));
         }, 0);

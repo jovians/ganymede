@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+exports.AuthServer = void 0;
 var Express = require("express");
 var BodyParser = require("body-parser");
 var crypto = require("crypto");
@@ -51,6 +52,9 @@ var AuthServer = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             return __generator(this, function (_a) {
+                if (data.port) {
+                    this.port = data.port;
+                }
                 try {
                     this.apiRoot = Express();
                     // support application/json type post data

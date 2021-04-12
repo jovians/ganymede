@@ -93,7 +93,6 @@ export class GanymedeHttpServer {
       case 'express':
         switch (api.method) {
           case HttpMethod.GET:
-            console.log(api.path);
             this.baseApp.get(api.path, async (req, res) => {
               const { q, r } =  this.newQR(req, res);
               const a: GanymedeHttpWrappedArgs = { api, q, r, req, res };
@@ -159,6 +158,7 @@ export class GanymedeHttpRequest {
   body: string = null;
   bodyRaw: Buffer = null;
   headers: {[headerName: string]: string};
+  params: {[paramName: string]: string};
   constructor(oriReq, oriRes) {
     this.oriReq = oriReq;
     this.oriRes = oriRes;
@@ -181,6 +181,9 @@ export class GanymedeHttpResponse {
   }
   status(num: number) {
     return this.oriRes.status(num);
+  }
+  okJson(obj: any) {
+    return this.oriRes.end(JSON.stringify({ status: 'ok', data: obj }));
   }
 }
 
@@ -214,6 +217,7 @@ export class GanymedePreHandler {
         chunks.push(chunk);
       });
       a.req.on('end', () => {
+        a.q.params = a.req.params;
         a.q.bodyRaw = Buffer.concat(chunks);
         a.q.body = a.q.bodyRaw.toString();
         if ((a.q.body.startsWith('{') && a.q.body.endsWith('}')) || (a.q.body.startsWith('[') && a.q.body.endsWith(']'))) {

@@ -18,6 +18,9 @@ interface SavedScroll {
 })
 export class RouteReuser {
 
+  differentComponentSibiling = false;
+  currentBasePath: string = null;
+  currentActivatedRoute: ActivatedRouteSnapshot = null;
   scrollLocker: {} = {};
   storedRoutes = new Map<string, DetachedRouteHandle>();
 
@@ -30,7 +33,8 @@ export class RouteReuser {
       const recognizedHandle: any = this.storedRoutes.get(e.url);
       if (recognizedHandle) {
         const lastUrl = recognizedHandle.componentRef.instance.lastUrl;
-        if (e.url !== lastUrl) {
+        const lastUrlBasePath = recognizedHandle.componentRef.instance.lastUrlBasePath;
+        if (e.url === lastUrlBasePath && e.url !== lastUrl) {
           window.ngRouter.navigate([lastUrl]);
         }
       }
@@ -59,13 +63,33 @@ export class RouteReuser {
           }
         }
       }
+      this.currentActivatedRoute = e.snapshot;
+    });
+    this.routeObserver.eventNavigationdEnd.subscribe(e => {
+      if (this.currentActivatedRoute) {
+        const snapshotUrl = '/' + this.currentActivatedRoute.url.map(seg => seg.path).join('/');
+        if (e.url === snapshotUrl) {
+          this.currentBasePath = this.getBasePath(this.currentActivatedRoute);
+        } else {
+          this.currentBasePath = '';
+        }
+      }
     });
   }
 
   shouldReuseRoute(before: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot): boolean {
+    const beforeBasePath = this.getBasePath(before);
+    const currBasePath = this.getBasePath(curr);
+    if (beforeBasePath && currBasePath && beforeBasePath === currBasePath && before.component !== curr.component) {
+      this.routeObserver.differentComponentSibiling = this.differentComponentSibiling = true;
+      return false;
+    } else {
+      this.routeObserver.differentComponentSibiling = this.differentComponentSibiling = false;
+    }
     return before.routeConfig === curr.routeConfig;
   }
   retrieve(route: ActivatedRouteSnapshot): DetachedRouteHandle {
+    if (this.differentComponentSibiling) { return null; }
     const path = this.getPath(route);
     if (path === null) { return null; }
     const cached = this.storedRoutes.get(path);
@@ -77,6 +101,7 @@ export class RouteReuser {
     return cached as DetachedRouteHandle;
   }
   shouldAttach(route: ActivatedRouteSnapshot): boolean {
+    if (this.differentComponentSibiling) { return false; }
     let doAttach = false;
     const path = this.getPath(route);
     if (path === null) { return false; }
@@ -120,19 +145,16 @@ export class RouteReuser {
     if (compoRef && compoRef.instance && compoRef.instance.onRouteSave) {
       compoRef.instance.onRouteSave();
     }
+    const basePath = this.getBasePath(route);
+    const effectivePath = (basePath && path !== basePath) ? basePath : path;
     const compo = compoRef.instance;
-    this.storedRoutes.set(path, detachedTree);
-    if (path !== this.routeObserver.currentUrl) {
-      this.storedRoutes.set(this.routeObserver.currentUrl, detachedTree);
-    }
+    this.storedRoutes.set(effectivePath, detachedTree);
+    this.storedRoutes.set(this.routeObserver.currentUrl, detachedTree);
     compo.lastUrl = this.routeObserver.currentUrl;
+    compo.lastUrlBasePath = effectivePath;
   }
   activatedRouteToPath(route: ActivatedRouteSnapshot) {
-    const paths = [];
-    for (const seg of route.url) {
-      paths.push(seg.path);
-    }
-    return `/${paths.join('/')}`;
+    return `/${route.url.map(seg => seg.path).join('/')}`;
   }
   private routeHasData(route: ActivatedRouteSnapshot) {
     return route && route.routeConfig && route.routeConfig.data;
@@ -146,5 +168,12 @@ export class RouteReuser {
       }
     }
     return null;
+  }
+  private getBasePath(route: ActivatedRouteSnapshot): string {
+    if (route.routeConfig && (route.routeConfig as any).basePath) {
+      return '/' + (route.routeConfig as any).basePath;
+    } else {
+      return null;
+    }
   }
 }

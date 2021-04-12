@@ -1,5 +1,6 @@
 "use strict";
 exports.__esModule = true;
+exports.ServerEntryPoint = void 0;
 var auth_server_1 = require("./auth.server");
 var const_1 = require("./const");
 var extensions_1 = require("./extensions");

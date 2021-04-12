@@ -3,7 +3,10 @@
  */
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { consumeSubDir, RouteData, RouteDataNavigatableContent, RouteDataPage } from '../../util/route.helper';
+import {
+  asRouteBasic, consumeSubDir, RouteData,
+  RouteDataNavigatableContent, RouteDataPage, RouteMatchableDefinition
+} from '../../util/route.helper';
 import { MarkdownFrameComponent } from '../../markdown/markdown-frame/markdown-frame.component';
 import { AppService } from '../../services/app.service';
 import { RouteObservingService } from '../../services/route-observing.service';
@@ -32,31 +35,9 @@ export class BasicContentsComponent implements OnInit, OnDestroy {
   static registration = Components.register(BasicContentsComponent, () => require('./basic-contents.component.json'));
 
   public static asRoute(subdir: string, routeData: RouteData, otherParams?: any) {
-    const routeDef =  {
-      matcher: consumeSubDir(subdir, routeData),
-      component: BasicContentsComponent,
-      canActivate: [ResourceGuard],
-      data: routeData,
-      basePath: subdir,
-    };
-    if (otherParams) { Object.assign(routeDef, otherParams); }
-    if (routeData.pageData) {
-      routeData.pageData.path = subdir;
-    }
-    if (routeData.pageData.children) {
-      const basepath = routeData.pageData.mountpath ?
-                        routeData.pageData.mountpath + '/' + routeData.pageData.path
-                      : routeData.pageData.path;
-      for (const childRoute of routeData.pageData.children) {
-        childRoute.link = basepath + '/' + childRoute.path;
-        if (childRoute.children) {
-          for (const childRoute2 of childRoute.children) {
-            childRoute2.link = basepath + '/' + childRoute.path + '/' + childRoute2.path;
-          }
-        }
-      }
-    }
-    return routeDef;
+    const routeDef = asRouteBasic(subdir, routeData, otherParams);
+    routeDef.main.component = BasicContentsComponent;
+    return [routeDef.main, ...routeDef.others];
   }
 
   @ViewChild('markdownFrame') markdownFrame: MarkdownFrameComponent;
@@ -152,6 +133,7 @@ export class BasicContentsComponent implements OnInit, OnDestroy {
                             + '.' + targetLang
                             + '.' + this.convertContentTypeToExtension(contentMetadata.type);
         const loaded = await this.markdownFrame.load(targetPath);
+        if (loaded) { this.app.setMainContentAreaScroll(0); }
     }, e => {
       console.log(e);
     });

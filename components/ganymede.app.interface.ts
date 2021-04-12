@@ -9,22 +9,10 @@ const baseVidPath = '/assets/vid';
 const self = new Function('return this')();
 const isNodeJs = self.btoa === undefined;
 
-export interface GanymedeAppFeatures {
-  preinit?: {
-    lastIp?: string;
-    versionInfo?: {
-      accessIp?: string;
-    }
-  };
-  licenseFooter?: {
-    messageHTML?: string;
-  };
-  serviceWorker?: {
-    enabled?: boolean;
-  };
-  geolocate?: {
-    enabled?: boolean;
-  };
+export interface GanymedeSecretsResolver {
+  type: 'local-json-file' | 'server',
+  jsonFile?: string;
+  serverUrl?: string;
 }
 
 export class GanymedeAppData {
@@ -61,6 +49,18 @@ export class GanymedeAppData {
     // serviceWorker: { enabled: true },
   };
 
+  base: GanymedeAppBase = {};
+
+  extensions: GanymedeAppExtensions = {};
+
+  secretsResolution: GanymedeSecretsResolver = {
+    type: 'local-json-file',
+    jsonFile: 'ganymede.secrets.json'
+  };
+
+  logger: any = null;
+  loggerSettings: GanymedeLoggerSettings;
+
   header = {
     alwaysOn: true, exceptRoutes: [],
     search: { enabled: false }
@@ -90,6 +90,55 @@ export class GanymedeAppData {
       }
     }
   }
+}
+
+export interface GanymedeAppFeatures {
+  preinit?: {
+    lastIp?: string;
+    versionInfo?: {
+      accessIp?: string;
+    }
+  };
+  licenseFooter?: {
+    messageHTML?: string;
+  };
+  serviceWorker?: {
+    enabled?: boolean;
+  };
+  geolocate?: {
+    enabled?: boolean;
+  };
+}
+
+export interface GanymedeAppBase {
+  modules?: {
+    auth?: {
+      type: string;
+      host: string;
+      port: number;
+    },
+    mailer?: {
+      type: string; 
+      data: any;
+    },
+  }
+};
+
+export interface GanymedeAppExtensions {
+  native?: {
+    infra?: {
+      port: number;
+      inventoryType: string;
+      inventory: any[];
+    }
+  },
+  external?: {
+
+  },
+}
+
+export interface GanymedeLoggerSettings {
+  formatter?: any;
 }
 
 export function getGanymedeAppData(): GanymedeAppData {

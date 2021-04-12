@@ -28,6 +28,7 @@ cp "ganymede.app.server.ts" "profiles/$PRODUCT_NAME/ganymede.app.server.ts"
 cp "ganymede.conf.json" "profiles/$PRODUCT_NAME/ganymede.conf.json"
 cp "ganymede.secrets.json" "profiles/$PRODUCT_NAME/ganymede.secrets.json"
 
+cp "README.md" "profiles/$PRODUCT_NAME/README.md"
 cp ".gitignore" "profiles/$PRODUCT_NAME/.gitignore"
 cp "angular.json" "profiles/$PRODUCT_NAME/angular.json"
 cp "karma.conf.js" "profiles/$PRODUCT_NAME/karma.conf.js"
