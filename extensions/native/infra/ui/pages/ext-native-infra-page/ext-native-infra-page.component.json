@@ -1,0 +1,12 @@
+{
+  "namespace": "@jovian/ganymede-clr",
+  "mounted": "ganymede",
+  "group": "extensions/native/infra/ui",
+
+  "name": "ExtNativeInfraPageComponent",
+  "folder": "pages/ext-native-infra-page",
+  "file": "ext-native-infra-page.component",
+  "selector": "app-ext-native-infra-page",
+
+  "attributes": ["ui", "angular", "clarity"]
+}

@@ -7,13 +7,13 @@ const serveRootDir = `${baseDir}/dist/${conf.productName}`;
 
 const { app, BrowserWindow, protocol, shell, ipcMain } = require('electron');
 
-userCustom.initialize();
+userCustom.preinit();
 
 const runtimeState = {
   unsavedChanges: false
 };
 
-function createWindow () {
+function createWindow() {
   const win = new BrowserWindow({
     width: 800,
     height: 600,
@@ -37,7 +37,7 @@ function createWindow () {
     win.loadURL('http://localhost:4200');
   }
 
-  win.webContents.on('new-window', function(e, url) {
+  win.webContents.on('new-window', (e, url) => {
     e.preventDefault();
     shell.openExternal(url);
   });

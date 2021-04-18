@@ -1,4 +1,7 @@
 "use strict";
+/*
+ * Copyright 2014-2021 Jovian, all rights reserved.
+ */
 exports.__esModule = true;
 exports.getGanymedeAppData = exports.GanymedeAppData = void 0;
 var rxjs_1 = require("rxjs");

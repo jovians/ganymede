@@ -6,6 +6,8 @@ import { NgModule, Injector, APP_INITIALIZER } from '@angular/core';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { RouteReuseStrategy } from '@angular/router';
 
+import { StoreModule } from '@ngrx/store';
+
 import { AppRoutingModule } from './app-routing.module';
 import { RequestInterceptor } from './http.wrapper';
 
@@ -22,7 +24,7 @@ import { ganymedeLicenseCallbacks } from './ganymede/ganymede.license';
 import { PreInitUtils } from './ganymede/components/util/preinit.util';
 import { RouteReuser } from './ganymede/components/services/route-reuser';
 import { ganymedeAppData } from '../../ganymede.app';
-import { otherModules, otherDeclarations, otherProviders } from '../../ganymede.app.ui';
+import { ngrxStores, otherModules, otherDeclarations, otherProviders } from '../../ganymede.app.ui';
 
 import { UserRoutesModule } from './routes/routes.module';
 import { UserCustomAppModule } from './user-custom/custom.app.module';

@@ -4,8 +4,11 @@
 import { ElementRef, Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { Store } from '@ngrx/store';
 
 import { EnvService } from '../services/env.service';
+import { AnyStore, NgrxStoreRoot } from '../util/ngrx.stores';
 
 import { GanymedeAppData } from '../ganymede.app.interface';
 import { globallyExtendTranslateParam } from '../util/translate.params';
@@ -25,11 +28,14 @@ export class AppService extends GanymedeAppData {
   httpForbidden: boolean = false;
   httpNotFound: boolean = false;
   displayMode: DisplayMode = DisplayMode.NORMAL;
+  state: any;
 
   private mainContentArea: ElementRef = null;
 
   constructor(
     public env: EnvService,
+    public store: Store<AnyStore>,
+    public http: HttpClient,
     private translateService: TranslateService,
     private router: Router,
     private routeObserver: RouteObservingService,
@@ -42,6 +48,9 @@ export class AppService extends GanymedeAppData {
     // tslint:disable-next-line: no-string-literal
     window['ngRouter'] = this.router;
     this.routeObserver.setRouter(this.router);
+
+    NgrxStoreRoot.setMainStore(this.store);
+    this.state = NgrxStoreRoot.getMainStoreProxy();
 
     globallyExtendTranslateParam();
 

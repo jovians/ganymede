@@ -1,0 +1,11 @@
+{
+  "namespace": "@jovian/ganymede-clr",
+  "mounted": "ganymede",
+  "group": "extensions/native/infra/ui",
+
+  "name": "GanymedeExtNativeInfraModule",
+  "folder": "",
+  "file": "ext.native.infra",
+
+  "attributes": ["ui", "angular", "clarity"]
+}

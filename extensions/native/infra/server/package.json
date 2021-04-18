@@ -1,0 +1,8 @@
+{
+  "name": "@jovian/ganymede-clr-ext-infra",
+  "version": "0.0.1",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "vsphere-infra": "0.0.12"
+  }
+}

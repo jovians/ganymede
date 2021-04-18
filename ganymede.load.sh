@@ -22,6 +22,7 @@ rm -rf "src/assets/*"
 rm -rf "src/assets-root/*"
 rm -rf "src/app/routes/*"
 rm -rf "src/app/user-custom/*"
+rm -rf "electron/*"
 
 echo "Loading product profile '$PRODUCT_NAME'..."
 

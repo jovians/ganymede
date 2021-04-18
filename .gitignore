@@ -47,7 +47,7 @@ testem.log
 Thumbs.db
 
 # ignore ganymede extensions (each its own git)
-/extensions
+/extensions/external
 
 # ignore ganymede real sources
 .ganysource

@@ -11,6 +11,8 @@ echo "Saving product profile '$PRODUCT_NAME'..."
 
 mkdir -p "profiles/$PRODUCT_NAME"
 
+mkdir -p "profiles/$PRODUCT_NAME/electron"
+
 mkdir -p "profiles/$PRODUCT_NAME/src/assets-root"
 mkdir -p "profiles/$PRODUCT_NAME/src/assets/i18n"
 mkdir -p "profiles/$PRODUCT_NAME/src/assets/img"
@@ -39,6 +41,8 @@ cp "src/index.html" "profiles/$PRODUCT_NAME/src/index.html"
 cp "src/global.scss" "profiles/$PRODUCT_NAME/src/global.scss"
 cp "src/variables.scss" "profiles/$PRODUCT_NAME/src/variables.scss"
 cp "src/app/app.module.ts" "profiles/$PRODUCT_NAME/src/app/app.module.ts"
+
+cp -R electron/* "profiles/$PRODUCT_NAME/electron"
 
 cp -R src/assets-root/* "profiles/$PRODUCT_NAME/src/assets-root"
 cp -R src/assets/i18n/* "profiles/$PRODUCT_NAME/src/assets/i18n"

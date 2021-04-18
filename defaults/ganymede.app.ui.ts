@@ -1,11 +1,11 @@
 import { ganymedeAppData } from './ganymede.app';
 import { HttpWrap } from './src/app/ganymede/components/util/http.wrapper';
+import { NgrxStoreRoot } from './src/app/ganymede/components/util/ngrx.stores';
 import { BasicContentsComponent } from './src/app/ganymede/components/pages/basic-contents/basic-contents.component';
-import { i18n } from './src/app/ganymede/components/util/i18n-helper';
 
 ganymedeAppData.routes = [
   { path: '', component: BasicContentsComponent, data: { templateData: { layout: 'full' } }, },
-  BasicContentsComponent.asRoute('ganymede-app', {
+  ...BasicContentsComponent.asRoute('ganymede-app', {
     templateData: { layout: 'full', scrollbar: 'hide' },
     pageData: {
       type: 'basic-contents',
@@ -17,7 +17,9 @@ ganymedeAppData.routes = [
 
 export const appRoutes = ganymedeAppData.routes;
 
+export const ngrxStores = NgrxStoreRoot.getForRoot({
 
+});
 
 export const otherModules = [
 
@@ -31,6 +33,6 @@ export const otherProviders = [
 
 ];
 
-HttpWrap.loadInitialIntercepts(() => {
+HttpWrap.loadInitialIntercepts(http => {
 
 });

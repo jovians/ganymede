@@ -1,3 +1,7 @@
+/*
+ * Copyright 2014-2021 Jovian, all rights reserved.
+ */
+
 import { Subject } from 'rxjs';
 import { debugController } from './util/debug.controller';
 import { HttpErrorResponse, HttpRequest, HttpResponse } from '@angular/common/http';
@@ -128,8 +132,12 @@ export interface GanymedeAppExtensions {
   native?: {
     infra?: {
       port: number;
-      inventoryType: string;
-      inventory: any[];
+      inventory: {
+        aws?: { type?: string; list: any[]; };
+        gcp?: { type?: string; list: any[]; };
+        azure?: { type?: string; list: any[]; };
+        vcenter?: { type?: string; list: any[]; };
+      }
     }
   },
   external?: {
