@@ -17,9 +17,13 @@ ganymedeAppData.routes = [
 
 export const appRoutes = ganymedeAppData.routes;
 
-export const ngrxStores = NgrxStoreRoot.getForRoot({
+export const ngrxStores = NgrxStoreRoot.getStores({
 
 });
+
+export const ngrxEffectClasses = NgrxStoreRoot.getEffectClasses([
+
+]);
 
 export const otherModules = [
 

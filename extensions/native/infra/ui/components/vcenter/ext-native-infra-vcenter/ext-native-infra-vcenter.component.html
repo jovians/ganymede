@@ -1,2 +1,3 @@
 <p>ext-native-infra-vcenter works!</p>
-<b>{{ app.state.extNativeInfra.test | async }}<b>
+{{ app.store.extNativeInfra.vcenter.quickStats.data$ | async }}
+<!-- <b *ngFor="let item of app.store.extNativeInfra.test.data$ | async; index as i">{{ item }}<br><b> -->

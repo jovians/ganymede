@@ -7,6 +7,7 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { RouteReuseStrategy } from '@angular/router';
 
 import { StoreModule } from '@ngrx/store';
+import { EffectsModule } from '@ngrx/effects';
 
 import { AppRoutingModule } from './app-routing.module';
 import { RequestInterceptor } from './http.wrapper';
@@ -24,7 +25,7 @@ import { ganymedeLicenseCallbacks } from './ganymede/ganymede.license';
 import { PreInitUtils } from './ganymede/components/util/preinit.util';
 import { RouteReuser } from './ganymede/components/services/route-reuser';
 import { ganymedeAppData } from '../../ganymede.app';
-import { ngrxStores, otherModules, otherDeclarations, otherProviders } from '../../ganymede.app.ui';
+import { ngrxStores, ngrxEffectClasses, otherModules, otherDeclarations, otherProviders } from '../../ganymede.app.ui';
 
 import { UserRoutesModule } from './routes/routes.module';
 import { UserCustomAppModule } from './user-custom/custom.app.module';
@@ -65,6 +66,8 @@ export function langInitFactory(translate: TranslateService, injector: Injector)
     AppRoutingModule,
     ClarityModule,
     BrowserAnimationsModule,
+    StoreModule.forRoot(ngrxStores),
+    EffectsModule.forRoot(ngrxEffectClasses),
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,

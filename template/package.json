@@ -36,6 +36,7 @@
     "@jovian/fourq": "^1.0.11",
     "@jovian/langster": "0.0.6",
     "@jovian/type-tools": "^6.0.5",
+    "@ngrx/effects": "^11.1.0",
     "@ngrx/store": "^11.1.0",
     "@ngx-translate/core": "^13.0.0",
     "@ngx-translate/http-loader": "^6.0.0",

@@ -303,6 +303,8 @@ var GanymedePreHandler = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 return [2 /*return*/, new Promise(function (resolve) {
+                        a.res.header('Access-Control-Allow-Origin', '*');
+                        a.res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
                         var errored = false;
                         var chunks = [];
                         a.req.on('data', function (chunk) {

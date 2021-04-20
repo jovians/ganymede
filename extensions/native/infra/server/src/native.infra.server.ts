@@ -82,6 +82,7 @@ export class NativeInfraExtensionServer {
           clusterSummary: null,
           hostStats: [],
           storageStats: [],
+          t: Date.now(),
         };
         for (const clusterId of Object.keys(vc.inventory.computeResource)) {
           const cluster = vc.inventory.computeResource[clusterId];

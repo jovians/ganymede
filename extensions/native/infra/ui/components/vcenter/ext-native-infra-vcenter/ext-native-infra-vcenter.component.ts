@@ -14,23 +14,17 @@ import { AppService } from '../../../../../../../components/services/app.service
 })
 export class ExtNativeInfraVcenterComponent implements OnInit, OnDestroy {
 
-  test$: Observable<string[]>;
-
   constructor(
     public app: AppService,
     private infraApi: ExtNativeInfraService
   ) {
     const ds = this.infraApi.rx.data;
-    this.test$ = ds.test.getLink();
-    ds.test.sub(this, t => {
-      console.log(t);
-    });
     setTimeout(() => {
-      ds.test.actions.RESET.invoke({});
+      ds.vcenter.quickStats.actions.FETCH.dispatch({key: 'sddc1'});
     }, 3000);
-    setTimeout(() => {
-      ds.test.actions.RESET.invoke({});
-    }, 8000);
+    // setTimeout(() => {
+    //   ds.test.actions.RESET.dispatch({});
+    // }, 8000);
   }
 
   ngOnInit(): void {

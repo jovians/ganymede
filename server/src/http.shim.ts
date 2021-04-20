@@ -211,6 +211,8 @@ export class GanymedePreHandler {
   }
   async basic(a: GanymedeHttpWrappedArgs) {
     return new Promise<boolean>(resolve => {
+      a.res.header('Access-Control-Allow-Origin', '*');
+      a.res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
       let errored = false;
       const chunks: Buffer[] = [];
       a.req.on('data', chunk => {

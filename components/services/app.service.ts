@@ -6,6 +6,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Store } from '@ngrx/store';
+import { Actions } from '@ngrx/effects';
 
 import { EnvService } from '../services/env.service';
 import { AnyStore, NgrxStoreRoot } from '../util/ngrx.stores';
@@ -17,6 +18,7 @@ import { CommandsRegistrar } from '../util/commands.registrar';
 import { RouteObservingService } from './route-observing.service';
 import { ServiceWorkerUtil } from '../util/service.worker.utils';
 import { DisplayMode } from '../util/size.util';
+import { NgrxCentralStoreInterface } from 'ganymede.app.ui';
 
 declare var window: any;
 
@@ -28,17 +30,18 @@ export class AppService extends GanymedeAppData {
   httpForbidden: boolean = false;
   httpNotFound: boolean = false;
   displayMode: DisplayMode = DisplayMode.NORMAL;
-  state: any;
+  store: NgrxCentralStoreInterface;
 
   private mainContentArea: ElementRef = null;
 
   constructor(
     public env: EnvService,
-    public store: Store<AnyStore>,
     public http: HttpClient,
+    public storeBase: Store<AnyStore>,
     private translateService: TranslateService,
     private router: Router,
     private routeObserver: RouteObservingService,
+    private actions$: Actions,
   ) {
     super();
     Object.assign(this, window.ganymedeAppData);
@@ -49,8 +52,10 @@ export class AppService extends GanymedeAppData {
     window['ngRouter'] = this.router;
     this.routeObserver.setRouter(this.router);
 
-    NgrxStoreRoot.setMainStore(this.store);
-    this.state = NgrxStoreRoot.getMainStoreProxy();
+    NgrxStoreRoot.initialize(this.storeBase, this.actions$, {
+      http: this.http
+    });
+    this.store = NgrxStoreRoot.getCentralStore() as any;
 
     globallyExtendTranslateParam();
 
