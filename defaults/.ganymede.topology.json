@@ -1,0 +1,10 @@
+{
+  "env": "dev",
+  "destor": {
+    "targets": [
+      { "endpoint": "http://host.docker.internal:17070", "token": "default", "trust": null },
+      { "endpoint": "http://localhost:17070", "token": "default", "trust": null }
+    ],
+    "info": "options: 'docker-local-default', custom url"
+  }
+}

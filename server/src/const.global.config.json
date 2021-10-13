@@ -1,0 +1,21 @@
+{
+  "http": {
+    "securityHeaders": {
+      "profile": "allow-all",
+      "allowRequestOrigin": "*",
+      "allowRequestHeaders": "*"
+    }
+  },
+  "api": {
+    "basePath": "/api"
+  },
+  "destor": {
+    "basePath": "/api-destor"
+  },
+  "auth": {
+    "basePath": "/api-auth"
+  },
+  "ext": {
+    "basePath": "/api-ext"
+  }
+}

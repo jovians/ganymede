@@ -8,11 +8,11 @@ import { Subscription } from 'rxjs';
 import { RouteObservingService } from '../../services/route-observing.service';
 import { LeftSidebarComponent } from './left-sidebar/left-sidebar.component';
 import { ResourceGuard } from '../../services/resource-guard';
-import { preResolvePath } from '../../util/route.pre-resolver';
+import { preResolvePath } from '../../util/common/route.pre-resolver';
 import { Components } from '../../../../ui.components';
-import { DisplayMode, SizeUtil } from '../../util/size.util';
-import { currentRouteChildData } from '../../util/route.helper';
-import { log } from '../../util/logger';
+import { DisplayMode, SizeUtil } from '../../util/common/size.util';
+import { currentRoute } from '../../util/common/route.model';
+import { log } from '../../util/shared/logger';
 
 @Component({
   selector: 'app-root',
@@ -92,41 +92,39 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async handleRouteData(data) {
-    if (data.templateData) {
-      let layout = data.templateData.layout;
-      if (currentRouteChildData && currentRouteChildData.layout) {
-        layout = currentRouteChildData.layout;
-      }
-      if (layout === undefined || layout === 'default') { layout = 'one-sidebar'; }
-      switch (layout) {
-        case 'full':
-          this.headerVisible = true; this.leftSidebarVisible = true; this.rightSidebarVisible = true;
-          break;
-        case 'one-sidebar':
-          this.headerVisible = true; this.leftSidebarVisible = true; this.rightSidebarVisible = false;
-          break;
-        case 'header-only':
-          this.headerVisible = true; this.leftSidebarVisible = false; this.rightSidebarVisible = false;
-          break;
-        case 'nothing':
-          this.headerVisible = false; this.leftSidebarVisible = false; this.rightSidebarVisible = false;
-          break;
-        default:
-          log.info(`Unrecognized route layout spec: '${layout}'`);
-          break;
-      }
-      let footer = data.templateData.footer;
-      if (footer === undefined || footer === 'default') { footer = 'no'; } // no footer by default
-      switch (footer) {
-        case 'yes': this.footerVisible = true; break;
-        case 'no': this.footerVisible = false; break;
-      }
+    let layout = data.templateData?.layout;
+    if (currentRoute.routeChildData && currentRoute.routeChildData.layout) {
+      layout = currentRoute.routeChildData.layout;
+    }
+    if (layout === undefined || layout === 'default') { layout = 'one-sidebar'; }
+    switch (layout) {
+      case 'full':
+        this.headerVisible = true; this.leftSidebarVisible = true; this.rightSidebarVisible = true;
+        break;
+      case 'one-sidebar':
+        this.headerVisible = true; this.leftSidebarVisible = true; this.rightSidebarVisible = false;
+        break;
+      case 'header-only':
+        this.headerVisible = true; this.leftSidebarVisible = false; this.rightSidebarVisible = false;
+        break;
+      case 'nothing':
+        this.headerVisible = false; this.leftSidebarVisible = false; this.rightSidebarVisible = false;
+        break;
+      default:
+        log.info(`Unrecognized route layout spec: '${layout}'`);
+        break;
+    }
+    let footer = data.templateData?.footer;
+    if (footer === undefined || footer === 'default') { footer = 'no'; } // no footer by default
+    switch (footer) {
+      case 'yes': this.footerVisible = true; break;
+      case 'no': this.footerVisible = false; break;
+    }
 
-      if (data.templateData.scrollbar === 'hide') {
-        this.mainContentArea.nativeElement.classList.add('no-scrollbar');
-      } else {
-        this.mainContentArea.nativeElement.classList.remove('no-scrollbar');
-      }
+    if (data.templateData && data.templateData.scrollbar === 'hide') {
+      this.mainContentArea.nativeElement.classList.add('no-scrollbar');
+    } else {
+      this.mainContentArea.nativeElement.classList.remove('no-scrollbar');
     }
 
     if (data.pageData) {

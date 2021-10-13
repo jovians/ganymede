@@ -1,0 +1,23 @@
+version: "3.3"
+services:
+  ui:
+    image: gany-ui
+    container_name: gany_local_ui
+    ports:
+      - 80:80
+  server:
+    image: gany-server
+    container_name: gany_local_server
+    volumes:
+      - ${PWD}/:/usr/nodejs_server/config
+    depends_on: 
+      - destor
+    ports:
+      - 90:90
+  destor:
+    image: gany-destor
+    container_name: gany_local_destor
+    volumes:
+      - ${PWD}/:/usr/destor_server/config
+    ports:
+      - 17070:17070

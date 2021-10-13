@@ -1,0 +1,11 @@
+version: "3.3"
+services:
+  server:
+    image: gany-server
+    container_name: gany_local_server
+    volumes:
+      - ${PWD}/:/usr/nodejs_server/config
+    depends_on: 
+      - destor
+    ports:
+      - 90:90

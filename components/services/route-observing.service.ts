@@ -3,7 +3,8 @@
  */
 import { ElementRef, Injectable } from '@angular/core';
 import { ActivatedRoute, ActivationStart, NavigationEnd, NavigationStart, RouteConfigLoadEnd, Router } from '@angular/router';
-import { Subject, Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
+import { currentRoute } from '../util/common/route.model';
 
 @Injectable({
   providedIn: 'root'
@@ -29,6 +30,8 @@ export class RouteObservingService {
   constructor() {}
 
   get currentUrl() { return this.currentUrlSegmentString; }
+  get routeData() { return currentRoute.routeData; }
+  get routeChildData() { return currentRoute.routeChildData; }
 
   setRoute(route: ActivatedRoute) {
     this.route = route;

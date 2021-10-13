@@ -12,7 +12,10 @@ if [[ $ACTION_NAME == "" ]]; then
   exit 1
 fi
 
-if [[ $ACTION_NAME == "load" ]]; then
+if [[ $ACTION_NAME == "h" ]] || [[ $ACTION_NAME == "help" ]]; then
+  echo "set load save reset new update pwd cli cli-update"
+
+elif [[ $ACTION_NAME == "load" ]]; then
   bash "$GANY_CLI_DIR/ganymede.load.sh" "$2"
 
 elif [[ $ACTION_NAME == "save" ]]; then
@@ -31,17 +34,29 @@ elif [[ $ACTION_NAME == "checkout" ]]; then
   bash "$GANY_CLI_DIR/ganymede.save.sh"
   bash "$GANY_CLI_DIR/ganymede.load.sh" "$2"
 
+elif [[ $ACTION_NAME == "set" ]]; then
+  bash "$GANY_CLI_DIR/ganymede.set.sh" "$2"
+
 elif [[ $ACTION_NAME == "reset" ]]; then
   bash "$GANY_CLI_DIR/ganymede.reset.sh" "$2"
 
 elif [[ $ACTION_NAME == "new" ]]; then
   if [[ "$2" == "" ]]; then
-    echo "ERROR: gany new requires product name"
+    echo "ERROR: gany new requires project slug"
     exit 1
   fi
-  echo "Creating new project '$2'..."
-  bash "$GANY_CLI_DIR/ganymede.save.sh"
+  PROJECT_SLUG="$2"
+  if [ -d "$PROJECT_SLUG" ]; then
+    echo "ERROR: project directory '$PROJECT_SLUG' already exists."
+    exit 1
+  fi
+  echo "Creating new project '$PROJECT_SLUG'..."
+  mkdir -p "$PROJECT_SLUG"
+  cd "$PROJECT_SLUG"
+  cp "$GANY_CLI_DIR/defaults/ganymede.conf.default.json" "ganymede.conf.json"
+  sed -i '' "s/<DEFAULT_GANY_CONF_APP_SLUG>/$PROJECT_SLUG/g" "ganymede.conf.json"
   bash "$GANY_CLI_DIR/ganymede.reset.sh" "$2"
+  echo "New ganymede project created on $PROJECT_SLUG"
 
 elif [[ $ACTION_NAME == "update" ]]; then
   echo "Updating ganymede modules..."
@@ -59,6 +74,10 @@ elif [[ $ACTION_NAME == "cli" ]]; then
       exit 1
   fi
   node "$GANY_CLI_DIR/ganymede.js" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9"
+
+elif [[ $ACTION_NAME == "cli-update" ]]; then
+  echo "Updating ganymede cli package..."
+  npm i -g @jovian/ganymede-clr  
 
 else
   echo "ERROR unknown gany command '$ACTION_NAME'"

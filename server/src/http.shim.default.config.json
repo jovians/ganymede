@@ -1,0 +1,36 @@
+{
+  "type": "EXPRESS",
+  "scopeName": "(httpshim)",
+  "debug": {
+    "showErrorStack": false
+  },
+  "cache": {
+    "defaultCacheParser": "JSON"
+  },
+  "security": {
+    "noauth": true,
+    "accessor": {
+      "baseToken": "",
+      "baseTokenBuffer": null,
+      "timeHashed": true,
+      "timeWindow": 5000,
+      "required": false
+    },
+    "secureChannel": {
+      "enabled": true,
+      "strict": false,
+      "required": false,
+      "encryption": "ECC_4Q",
+      "publicKey": "",
+      "signingKey": ""
+    }
+  },
+  "workers": {
+    "secureChannelWorkers": {
+      "initialCount": 1
+    }
+  },
+  "startOptions": {
+    "port": 0
+  }
+}

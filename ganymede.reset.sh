@@ -24,7 +24,10 @@ if [[ $SOFT_RESET != "soft" ]]; then
   mkdir -p src/app/ganymede
 
   npm install @jovian/ganymede-clr@latest --save-dev
-  cp -R node_modules/@jovian/ganymede-clr/* src/app/ganymede
+  rm -rf src/app/ganymede
+  rsync -r node_modules/@jovian/ganymede-clr/* src/app/ganymede
+  rm -rf src/app/ganymede/node_modules
+  npm uninstall @jovian/ganymede-clr@latest
 fi
 
 LANGSTER_INSTALLED=$(node -p "try{typeof require('@jovian/langster')==='object'}catch(e){''}")
@@ -36,6 +39,7 @@ fi
 echo "Syncing all ganymede workspace files..."
 rsync -r src/app/ganymede/template/* .
 rsync -r src/app/ganymede/defaults/* .
+cp src/app/ganymede/defaults/.ganymede.topology.json .ganymede.topology.json
 
 cp node_modules/@jovian/ganymede-clr/template/.gitignore2 .gitignore
 

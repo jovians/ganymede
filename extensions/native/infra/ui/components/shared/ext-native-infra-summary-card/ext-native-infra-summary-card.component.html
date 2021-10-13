@@ -1,0 +1,107 @@
+<div class="card" style="margin: 0;">
+  <div class="card-header">
+    <button *ngIf="!entryData?.defunct" class="btn btn-sm btn-link nav-button" [routerLink]="['/' + entryData?.link]">View</button>
+    <div style="width: calc(100% - 2rem);">{{ entryData?.name }}</div>
+  </div>
+  <div class="card-block card-block-content">
+    <div class="card-text card-content">
+      <div *ngIf="entryData?.defunct" class="entity-defunct">DEFUNCT</div>
+      <div *ngIf="!dataLoaded && dataLoadFailed && !entryData?.defunct" class="loading-failure">Data Load Failed</div>
+      <clr-spinner *ngIf="dataLoadingShow && !dataLoaded && !dataLoadFailed && !entryData?.defunct" class="loading-spinner"></clr-spinner>
+      <ng-container *ngIf="entryData?.type==='vcenter' && !entryData?.defunct">
+        <ng-container *ngIf="(vcenter.quickStats.data$ | async)[key]; let stats;">
+          <div class="clr-row" style="margin-top: -0.25rem;">
+            <!-- utilization bars -->
+            <div class="clr-col">
+              <div class="prog-label">CPU
+                <span style="font-size: 70%; opacity: 0.8;">@</span>
+                <span style="font-size: 75%; opacity: 0.9;">&nbsp;{{ numFormat(stats.overview.consumedCpu, 'G') }}
+                <span style="font-size: 80%; opacity: 0.8; display: inline;">GHz</span></span>
+              </div>
+              <clr-progress-bar class="prog-gauge"
+                [id]="'infra-summary-card-for-' + key + '-cpu-bar'"
+                [clrLabeled]="true" [clrValue]="stats?.percent?.cpu?.toFixed(0)"
+                [ngClass]="{'util-orange': stats?.percent?.cpu >= 60, 'util-red': stats?.percent?.cpu > 85, 'util-black': stats?.percent?.cpu >= 98 }">
+              </clr-progress-bar>
+              <div class="prog-margin"></div>
+              <div class="prog-label">Mem
+                <span style="font-size: 70%; opacity: 0.8;">@</span>
+                <span style="font-size: 75%; opacity: 0.9;">&nbsp;{{ numFormat(stats.overview.consumedMem / 1024) }}
+                <span style="font-size: 80%; opacity: 0.8; display: inline;">TiB</span></span>
+              </div>
+              <clr-progress-bar class="prog-gauge"
+                [id]="'infra-summary-card-for-' + key + '-mem-bar'"
+                [clrLabeled]="true" [clrValue]="stats?.percent?.mem?.toFixed(0)"
+                [ngClass]="{'util-orange': stats?.percent?.mem >= 60, 'util-red': stats?.percent?.mem > 85, 'util-black': stats?.percent?.mem >= 98 }"></clr-progress-bar>
+              <div class="prog-margin"></div>
+              <div class="prog-label">Disk
+                <span style="font-size: 70%; opacity: 0.8;">@</span>
+                <span style="font-size: 75%; opacity: 0.9;">&nbsp;{{ numFormat(stats.overview.consumedStorage / 1024) }}
+                <span style="font-size: 80%; opacity: 0.8; display: inline;">TiB</span></span>
+              </div>
+              <clr-progress-bar class="prog-gauge"
+                [id]="'infra-summary-card-for-' + key + '-disk-bar'"
+                [clrLabeled]="true" [clrValue]="stats?.percent?.disk?.toFixed(0)"
+                [ngClass]="{'util-orange': stats?.percent?.disk >= 60, 'util-red': stats?.percent?.disk > 85, 'util-black': stats?.percent?.disk >= 98 }"></clr-progress-bar>
+              <div class="prog-margin"></div>
+              <div class="prog-margin"></div>
+            </div>
+            <!-- info details -->
+            <div class="clr-col">
+              <div class="other-details" style="margin-top: 0.4rem;">
+                <div class="aligned-right">
+                  <clr-icon shape="vm" size="16" style="margin-right: 0.3rem; transform: translate(0, -0.03rem);"></clr-icon>
+                  <b>{{ stats.vmCount }}</b>
+                  <!-- &nbsp;<span style="font-size: 90%;">{{ stats.vmCount > 1 ? 'VMs' : 'VM' }}</span> -->
+                  <span class="num-div">&nbsp; | &nbsp;</span>
+                  <span style="width: 0.3rem;">&nbsp;</span>
+                  <clr-icon shape="host-group" size="16" style="margin-right: 0.3rem; transform: translate(0, -0.03rem);"></clr-icon>
+                  <b>{{ stats.hostCount }}</b>
+                  <!-- &nbsp;<span style="font-size: 90%;">{{ stats.hostCount > 1 ? 'Hosts' : 'Host' }}</span> -->
+                </div>
+                <br>
+                <div style="height: 0.5rem;"></div>
+                <div class="aligned-right small-stats">
+                  <!-- <span style="font-size: 80%">CPU: </span> -->
+                  <b>{{ numFormat(stats.overview.totalCpu - stats.overview.consumedCpu, 'G') }}</b><span style="font-size: 80%"> GHz free</span>
+                  <span class="num-div"> / </span>
+                  {{ numFormat(stats.overview.totalCpu, 'G') }}
+                  <span style="font-size: 80%">GHz</span>
+                  <!-- <clr-icon shape="cpu" size="16" style="margin-left: 0.2rem;"></clr-icon> -->
+                </div>
+                <br>
+                <div class="aligned-right small-stats">
+                  <!-- <span style="font-size: 80%">Mem: </span> -->
+                  <!-- <clr-icon shape="memory" size="15" style="margin-right: 0.2rem;"></clr-icon> -->
+                  <b>{{ numFormat((stats.overview.totalMem - stats.overview.consumedMem) / 1024, 'Ti') }}</b><span style="font-size: 80%"> TiB free</span>
+                  <span class="num-div"> / </span>
+                  {{ numFormat(stats.overview.totalMem / 1024) }}
+                  <span style="font-size: 80%">TiB</span>
+                </div>
+                <br>
+                <div class="aligned-right small-stats">
+                  <!-- <span style="font-size: 80%">Disk: </span> -->
+                  <clr-icon shape="storage" size="13" style="margin-right: 0.3rem; transform: translate(0, -0.03rem);"></clr-icon>
+                  <b>{{ numFormat((stats.overview.totalStorage - stats.overview.consumedStorage) / 1024, 'Ti') }}</b><span style="font-size: 80%"> TiB free</span>
+                  <span class="num-div"> / </span>
+                  {{ numFormat(stats.overview.totalStorage / 1024) }}
+                  <span style="font-size: 80%">TiB</span>
+                </div>
+                <br>
+                <div style="height: 0.3rem;"></div>
+                <div *ngIf="entryData.desc" class="aligned-right desc-box"><b>{{ entryData.desc }}</b></div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </ng-container>
+      <ng-container *ngIf="entryData?.type==='aws' && !entryData?.defunct">
+        <div *ngIf="!dataLoaded && dataLoadFailed" class="loading-failure">Data Load Failed</div>
+        <clr-spinner *ngIf="dataLoadingShow && !dataLoaded && !dataLoadFailed" class="loading-spinner"></clr-spinner>
+      </ng-container>
+    </div>
+  </div>
+  <!-- <div class="card-footer">
+    <button class="btn btn-sm btn-link" [routerLink]="['/' + entryData?.link]">Open</button>
+  </div> -->
+</div>

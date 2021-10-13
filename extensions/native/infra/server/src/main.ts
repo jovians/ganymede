@@ -4,11 +4,10 @@
 
 import { NativeInfraExtensionServer } from './native.infra.server';
 
-let extData = process.env.EXT_DATA_BASE64;
+let extData: any = process.env.EXT_DATA_BASE64;
 if (extData) { extData = JSON.parse(Buffer.from(extData, 'base64').toString('utf8')); }
 
-let globalConfData = process.env.GLOBAL_CONF_DATA_BASE64;
+let globalConfData: any = process.env.GLOBAL_CONF_DATA_BASE64;
 if (globalConfData) { globalConfData = JSON.parse(Buffer.from(globalConfData, 'base64').toString('utf8')); }
 
-new NativeInfraExtensionServer().start(extData, globalConfData);
-
+new NativeInfraExtensionServer(extData, globalConfData).start({ port: extData.port });

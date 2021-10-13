@@ -1,3 +1,7 @@
+/*
+ * Copyright 2014-2021 Jovian, all rights reserved.
+ */
+
 /**
  * Define abstract layer for 
  * 1) Store definitions (tables & collections)

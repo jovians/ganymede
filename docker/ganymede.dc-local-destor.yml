@@ -1,0 +1,9 @@
+version: "3.3"
+services:
+  destor:
+    image: gany-destor
+    container_name: gany_local_destor
+    volumes:
+      - ${PWD}/:/usr/destor_server/config
+    ports:
+      - 17070:17070

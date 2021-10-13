@@ -1,3 +1,73 @@
-<p>ext-native-infra-vcenter works!</p>
-{{ app.store.extNativeInfra.vcenter.quickStats.data$ | async }}
-<!-- <b *ngFor="let item of app.store.extNativeInfra.test.data$ | async; index as i">{{ item }}<br><b> -->
+<ng-container *ngIf="(vcenter.quickStats.data$ | async)[key]; let stats;">
+  <h3 class="vcenter-title">
+    {{ vCenter.name }}
+    <span class="vcenter-url">{{ vCenter.url }} (key={{ key }})</span>
+  </h3>
+  <clr-tabs>
+    <clr-tab>
+      <button clrTabLink style="margin-left: 1.25rem;" (click)="tabSelect('summary')">
+        Summary
+      </button>
+      <clr-tab-content *clrIfActive="currentTab === 'summary'">
+        Dashboard content
+      </clr-tab-content>
+    </clr-tab>
+    <clr-tab>
+      <button clrTabLink (click)="tabSelect('hosts')">
+        Hosts
+      </button>
+      <clr-tab-content *clrIfActive="currentTab === 'hosts'">
+        Dashboard content 2
+      </clr-tab-content>
+    </clr-tab>
+    <clr-tab>
+      <button clrTabLink (click)="tabSelect('metrics')">
+        Metrics
+      </button>
+      <clr-tab-content *clrIfActive="currentTab === 'metrics'">
+        <div class="tab-inner">
+          <!-- <div>Watcher Metrics</div> -->
+          <div class="gany-grid" style="width: 98%;">
+            <div class="card" style="min-width: 30%; height: 10rem;">
+              <swimlane-timeseries-graph-content
+                *ngIf="quickStatsGraphData"
+                [timeStart]="timeStart"
+                [timeEnd]="timeEnd"
+                [dataFetcher]="dataFetcherCpu"
+                [graphConfig]="graphConfigs.cpu"
+                [timeSpansEnabled]="false">
+                </swimlane-timeseries-graph-content>
+            </div>
+            <div class="card" style="min-width: 30%; height: 10rem;">
+              <swimlane-timeseries-graph-content
+                *ngIf="quickStatsGraphData"
+                [timeStart]="timeStart"
+                [timeEnd]="timeEnd"
+                [dataFetcher]="dataFetcherMem"
+                [graphConfig]="graphConfigs.mem"
+                [timeSpansEnabled]="false">
+                </swimlane-timeseries-graph-content>
+            </div>
+            <div class="card" style="min-width: 30%; height: 10rem;">
+              <swimlane-timeseries-graph-content
+                *ngIf="quickStatsGraphData"
+                [timeStart]="timeStart"
+                [timeEnd]="timeEnd"
+                [dataFetcher]="dataFetcherDisk"
+                [graphConfig]="graphConfigs.disk"
+                [timeSpansEnabled]="false">
+                </swimlane-timeseries-graph-content>
+            </div>
+          </div>
+        </div>
+      </clr-tab-content>
+    </clr-tab>
+    <clr-tab>
+      <button clrTabLink>Events</button>
+      <clr-tab-content>
+        Cloud content
+      </clr-tab-content>
+    </clr-tab>
+  </clr-tabs>
+</ng-container>
+

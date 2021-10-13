@@ -1,6 +1,6 @@
 import { ganymedeAppData } from './ganymede.app';
-import { HttpWrap } from './src/app/ganymede/components/util/http.wrapper';
-import { NgrxStoreRoot } from './src/app/ganymede/components/util/ngrx.stores';
+import { HttpWrap } from './src/app/ganymede/components/util/common/http.wrapper';
+import { rx } from './src/app/ganymede/components/util/common/ngrx.stores';
 import { BasicContentsComponent } from './src/app/ganymede/components/pages/basic-contents/basic-contents.component';
 
 ganymedeAppData.routes = [
@@ -17,11 +17,11 @@ ganymedeAppData.routes = [
 
 export const appRoutes = ganymedeAppData.routes;
 
-export const ngrxStores = NgrxStoreRoot.getStores({
+export const ngrxStores = rx.NgrxStoreRoot.getStores({
 
 });
 
-export const ngrxEffectClasses = NgrxStoreRoot.getEffectClasses([
+export const ngrxEffectClasses = rx.NgrxStoreRoot.getEffectClasses([
 
 ]);
 

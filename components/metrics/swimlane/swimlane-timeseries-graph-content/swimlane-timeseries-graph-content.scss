@@ -1,0 +1,211 @@
+
+
+// :host ::ng-deep {
+//   g.line-chart > g:last-of-type {
+//     > g:nth-child(1) g.line-series > path {
+//       stroke: #72b4ec;
+//       // stroke-dasharray: 6 10;
+//     }
+//     > g:nth-child(2) g.line-series > path {
+//       stroke: #5bc55c;
+//       // stroke-dasharray: 6 10;
+//     }
+//     > g:nth-child(3) g.line-series > path {
+//       stroke: #e2956e;
+//       // stroke-dasharray: 6 10;
+//     }
+//   }
+// }
+
+.title {
+  height: 8px;
+  font-size: 0.5833333rem;
+  font-weight: 500;
+  letter-spacing: normal;
+  margin-bottom: 14px; 
+}
+
+.details {
+  float: right;
+  height: 0px;
+  margin-right: 16px;
+  font-size: 0.45rem;
+  opacity: 0.7;
+  text-transform: uppercase;
+  transition: opacity 0.3s ease-in-out;
+  transform: translate(0, -5px);
+}
+
+.chart-container {
+  width: 100%;
+  height: 100%; //calc(100% - 30px);
+}
+.chart-container:hover .timespan-pick {
+  opacity: 1;
+}
+.timespan-pick[timespan="true"] {
+  opacity: 1;
+}
+.chart-container:hover .details {
+  opacity: 0.7;
+}
+
+:host ::ng-deep {
+  svg {
+    overflow: visible;
+    margin-top: 4px;
+  }
+  .gridline-path-vertical {
+    display: block;
+    opacity: 0.5;
+  }
+  g.line-chart g.line-series > path {
+    stroke-width: 1px;
+    text-shadow: 2px 2px 2px rgba(0,0,0,0.5);
+    opacity: 0.9;
+  }
+  ngx-charts-legend {
+    header {
+      visibility: hidden;
+    }
+  }
+}
+
+
+.time-summary {
+  font-size: 0.4rem;
+}
+
+.timespan-pick {
+  font-size: 0.5rem;
+  transition: opacity 0.3s ease-in-out;
+  opacity: 0;
+  height: 0px;
+  float: right;
+  transform: translate(0, -4px);
+  // color: rgba(128,128,128,0.9);
+  margin-right: 10px;
+}
+.timespan-pick-button {
+  display: inline-block;
+  height: 17px;
+  line-height: 16px;
+  padding: 1px 4px;
+  margin: 0px 1px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.timespan-pick-button:hover {
+  text-decoration: underline;
+}
+.timespan-pick-button-selected {
+  color: white;
+  background-color: #0088ee;
+}
+
+.tooltip-container {
+  min-width: 400px;
+}
+
+.tooltip-series-table {
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+.tooltip-series {
+  text-align: left;
+  min-width: 300px;
+  font-size: 0.45rem;
+  margin: 0;
+  padding: 0;
+  height: 15px;
+  line-height: 15px;
+  th { margin: 0; padding: 0; }
+  td { margin: 0; padding: 0; }
+}
+
+.tooltip-datapoint {
+  text-align: left;
+  min-width: 300px;
+}
+
+.tooltip-series-color {
+  width: 11px;
+  height: 11px;
+  display: inline-block;
+  border-radius: 2px;
+  opacity: 0.9;
+  vertical-align: middle;
+  transform: translate(0, -1px);
+  margin-right: 5px;
+}
+
+.tooltip-series-value {
+  text-align: right;
+}
+
+.tooltip-divider {
+  position:absolute;
+  width: calc(100% - 18px);
+  border-top: 1.5px solid rgba(128,128,128,0.9);
+  transform: translate(0, -3px);
+}
+
+.tooltip-divider-spacer {
+  height:4px;
+}
+
+.no-data {
+  width: 100%;
+  height: 90%;
+  display: table;
+  position: absolute;
+  font-size: 1.25rem;
+  opacity: 0.33;
+}
+.no-data-inner {
+  width: 97%;
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+.loading-overlay {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  text-align: center;
+  background-color:rgba(140, 140, 140, 0.2);
+  .spinner-spacer {
+    width: 100%;
+    height: 35%;
+  }
+}
+
+.nodata-overlay {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  text-align: center;
+  .nodata-spacer {
+    height: 45%;
+  }
+  .nodata-text {
+    width: 100%;
+    text-align: center;
+    font-size: 2rem;
+    color: rgba(140, 140, 140, 0.35);
+  }
+}

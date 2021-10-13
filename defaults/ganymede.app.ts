@@ -17,7 +17,7 @@ export const ganymedeAppData = new GanymedeAppData({
   },
 
   features: {
-    preinit: {}
+
   },
 
   conf: ganymedeConfJson,

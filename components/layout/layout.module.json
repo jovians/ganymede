@@ -1,0 +1,11 @@
+{
+  "namespace": "@jovian/ganymede-clr",
+  "mounted": "ganymede",
+  "group": "components/layout",
+
+  "name": "GanymedeLayoutModule",
+  "folder": "",
+  "file": "layout.module",
+
+  "attributes": ["ui", "angular", "clarity"]
+}

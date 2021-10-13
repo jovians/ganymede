@@ -1,0 +1,110 @@
+
+:host {
+  display: flex;
+  min-width: 15.5rem;
+  max-width: 35rem;
+  display: inline-block;
+
+  .card-block-content {
+    min-height: 7rem;
+  }
+
+  .entity-defunct {
+    font-size: 1.75rem;
+    width: 100%;
+    height: 0;
+    margin-top: 1.8rem;
+    line-height: 1;
+    opacity: 0.35;
+    letter-spacing: 0.05rem;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  .loading-spinner {
+    margin-top: 0.9rem;
+    margin-left: calc(50% - 42px);
+    opacity: 0.33; 
+  }
+
+  .loading-failure {
+    opacity: 0.6;
+  }
+
+  .nav-button {
+    float: right;
+    margin-top: 0.1rem;
+  }
+  .card-content {
+    word-wrap: break-word;
+    min-height: 4rem;
+  }
+  .prog-label {
+    width: 100%;
+    transform: translate(0.07rem, 0.225rem) !important;
+  }
+  .other-details {
+    line-height: 1.25;
+    float: right;
+    // max-width: 55%;
+    .small-stats {
+      font-size: 85%;
+    }
+    .aligned-right {
+      float: right;
+    }
+    .num-div {
+      opacity: 0.5;
+    }
+    .desc-box {
+      background-color: rgba(0,0,0,0.04);
+      max-width: 100%;
+      border-radius: 0.2rem;
+      font-size: 80%;
+      padding: 0.3rem 0.4rem;
+    }
+  }
+  .prog-gauge {
+    width: calc(55% - 2rem);
+    min-width: 6rem;
+    margin: 1rem;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    height: 0.5rem !important;
+    max-height: 0.5rem !important;
+    min-height: 0.5rem !important;
+    overflow: visible !important;
+  }
+  .prog-margin {
+    height: 0.5rem;
+  }
+}
+
+:host ::ng-deep {
+  .util-orange {
+    progress { filter: hue-rotate(-135deg) saturate(14); }
+  }
+  .util-red {
+    progress { filter: hue-rotate(180deg) saturate(1.7); }
+  }
+  .util-black {
+    progress {
+      filter: hue-rotate(110deg) saturate(1.8) brightness(0);
+      animation: blinker 1.5s linear infinite;
+    }
+  }
+  clr-progress-bar {
+    progress {
+      height: 0.5rem !important;
+      filter: saturate(2);
+    }
+    span {
+      font-size: 0.65rem !important;
+      transform: translate(-0.04rem, -0.75rem);
+    }
+  }
+}
+
+@keyframes blinker {
+  50% { opacity: 0; }
+}

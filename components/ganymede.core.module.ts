@@ -4,6 +4,7 @@
 import { NgModule } from '@angular/core';
 import { Modules } from '../../ui.modules';
 import { GanymedeMarkdownModule } from './markdown/markdown.module';
+import { GanymedeSwimlaneModule } from './metrics/swimlane/swimlane.module';
 import { GanymedeWavefrontModule } from './metrics/wavefront/wavefront.module';
 import { GanymedePagesModule } from './pages/pages.module';
 import { GanymedeServicesModule } from './services/services.module';
@@ -15,11 +16,14 @@ import { GanymedeTemplateModule } from './templates/default/template.module';
     GanymedeServicesModule,
     GanymedeMarkdownModule,
     GanymedePagesModule,
+    GanymedeSwimlaneModule,
     GanymedeWavefrontModule,
 
     GanymedeTemplateModule,
   ],
-  declarations: [],
+  declarations: [
+
+  ],
   exports: [
     GanymedeServicesModule,
     GanymedeMarkdownModule,

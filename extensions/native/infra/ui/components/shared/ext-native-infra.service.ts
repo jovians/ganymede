@@ -3,56 +3,65 @@
  */
 
 import { Injectable } from '@angular/core';
-import { PartialAny } from '@jovian/type-tools';
-
 import { ganymedeAppData } from '../../../../../../../../../ganymede.app';
-import { AppService } from '../../../../../../components/services/app.service';
-import { RxStoreEntry, RxDataCollection, RxData, RxAction, rxSet } from '../../../../../../components/util/ngrx.stores';
+import { rx, AppService } from '../../../../../../components/services/app.service';
+import { WavefrontEntry } from '../../../../../../components/metrics/wavefront/wavefront.models';
 
-export interface VCenterFethedData {
-  quickStats: any;
-}
+const extData = ganymedeAppData.extensions?.native?.infra;
 
-export interface VCenterRegistry {
-  [key: string]: VCenterFethedData;
-}
+export class ExtNativeInfraDataCollection {
+  static namespace = 'extInfra';
+  static conf = { baseUrl: 'https://localhost.firestack.com:7005/api-ext/native/infra/v1', data: extData };
+  static rx: rx.StoreEntry<ExtNativeInfraDataCollection>;
+  static registered = extData ? ExtNativeInfraDataCollection.rxRegister() : false;
+  static rxRegister() { return this.registered ? null : this.rx = new rx.StoreEntry(this.namespace, this); }
 
-export class ExtNativeInfraDataCollection implements PartialAny<RxDataCollection> {
-  static namespace = 'extNativeInfra';
-  static rx: RxStoreEntry<ExtNativeInfraDataCollection>;
-  static rxRegister() { this.rx = new RxStoreEntry(this.namespace, this); }
+  inventory = new rx.Data<any>({ firstValue: extData?.inventory, actions: {
+    FETCH: rx.Action.common.static(extData?.inventory, { }),
+  }});
 
   vcenter = {
-    quickStats: new RxData<any>({
-      firstValue: {},
-      actions: {
-        FETCH: new RxAction({}, async (state, params, tools) => {
-          const key = params.key;
-          const url = `http://localhost:7001/api-ext/json/native/infra/vcenter/${key}/quick-stats111`;
-          const data = await tools.http.get<any>(url).toPromise();
-          if (!data || data.status !== 'ok') { return state; }
-          return rxSet(state, key, data.data);
-        }),
-      }
-    })
+    quickStats: new rx.Data<any>({ firstValue: {}, actions: {
+      FETCH: rx.Action.common.propertyByKey('$BASE_URL/vcenter/:key/quick-stats', { }),
+    }}),
+    allObjects: new rx.Data<any>({ firstValue: {}, actions: {
+      FETCH: rx.Action.common.propertyByKey('$BASE_URL/vcenter/:key/all-objects', { }),
+    }}),
   };
 
 }
 
-@Injectable({
-  providedIn: 'root'
-})
-export class ExtNativeInfraService {
 
-  extData = ganymedeAppData.extensions?.native?.infra;
+@Injectable({ providedIn: 'root' })
+export class ExtNativeInfraService {
+  static skel: ExtNativeInfraService;
+
+  extData = extData;
   rx = ExtNativeInfraDataCollection.rx;
+  ds = ExtNativeInfraDataCollection.rx.data;
 
   constructor(public app: AppService) {
-    // rx.
+
+  }
+
+  async getWavefrontData(start: number, end: number) {
+    const testQuery = `ts("vsphere.host.cpu.used.summation", vcenter="vcenter.sddc-54-145-245-241.vmwarevmc.com" and cpu="instance-total")`;
+    const entry = new WavefrontEntry({ endpoint: `https://vmware.wavefront.com`});
+    const access = entry.setAccess({
+      name: 'default-access',
+      token: 'dc4d5106-b2cb-4284-864e-26ab99622e6e',
+      useProxy: true,
+    });
+    return await access.getChartData({ queryString: testQuery, start, end, shownTags: ['host', 'vcenter'] });
   }
 
 }
 
-if (ganymedeAppData.extensions?.native?.infra) {
-  ExtNativeInfraDataCollection.rxRegister();
+
+export interface VCenterFethedData {
+  quickStats?: any;
+}
+
+export interface VCenterRegistry {
+  [key: string]: VCenterFethedData;
 }

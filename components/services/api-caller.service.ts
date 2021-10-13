@@ -3,7 +3,7 @@
  */
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ServiceWorkerUtil } from '../util/service.worker.utils';
+import { ServiceWorkerUtil } from '../util/common/service.worker.utils';
 
 @Injectable({
   providedIn: 'root'

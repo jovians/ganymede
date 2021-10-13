@@ -3,6 +3,6 @@
   "version": "0.0.1",
   "license": "UNLICENSED",
   "dependencies": {
-    "vsphere-infra": "0.0.12"
+    "vsphere-infra": "0.0.40"
   }
 }

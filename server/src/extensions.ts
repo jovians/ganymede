@@ -3,8 +3,8 @@
  */
 
 import * as fs from 'fs';
-import { exec } from 'child_process';
-import { GanymedeHttpServer } from './http.shim';
+import { exec, spawn } from 'child_process';
+import { GanymedeHttpServer, HttpBaseLib, GanymedeHttpServerConfig } from './http.shim';
 import { ServerConst } from './const';
 
 export interface GanymedeServerExtension {
@@ -13,21 +13,22 @@ export interface GanymedeServerExtension {
 
 export class GanymedeServerExtensions {
   static registry: { [key: string]: GanymedeServerExtension } = {};
+  static globalConf: typeof ServerConst.data.global;
   static register(key: string, serverDefinition: GanymedeServerExtension) {
     GanymedeServerExtensions.registry[key] = serverDefinition;
   }
-  static globalConf: typeof ServerConst.data.global; 
-  static async run(key: string) {
+  static async run(key: string, compileOnly = false) {
     const ganyBasePath = __dirname.split('/').slice(0, -2).join('/');
     const extPath = `${ganyBasePath}/extensions/${key.split('.').join('/')}`;
+    fs.writeFileSync(`${extPath}/server/.extension.build.uuid`, process.env.BUILD_UUID, 'utf8');
     if (!fs.existsSync(`${extPath}`)) {
       return console.log(`ganymede server extension '${key}' not found.`);
     }
     const alwaysCompile = true;
-    if (alwaysCompile || !fs.existsSync(`${extPath}/server/src/main.js`)) {
+    if (alwaysCompile || compileOnly || !fs.existsSync(`${extPath}/server/src/main.js`)) {
       let compiled;
       try {
-        await execAsync(`tsc ${extPath}/server/src/main.ts`); 
+        await execAsync(`tsc --target es5 --experimentalDecorators --resolveJsonModule ${extPath}/server/src/main.ts`);
         compiled = true;
       } catch (e) {
         console.log(e.message);
@@ -36,17 +37,32 @@ export class GanymedeServerExtensions {
         return console.log(`ganymede server extension '${key}' failed to compile.`);
       }
     }
-    const proc = exec(`node ${extPath}/server/src/main.js --max-old-space-size=8192`, { env: process.env });
-    proc.stdout.pipe(process.stdout);
-    proc.stderr.pipe(process.stderr);
+    if (compileOnly) { console.log(`ganymede server extension '${key}' has been compiled.`); process.exit(0); }
+    const extData = process.env.EXT_DATA_BASE64 ?
+                      JSON.parse(Buffer.from(process.env.EXT_DATA_BASE64, 'base64').toString('utf8')) : {};
+    const profilingLogFile = extData.v8Profiling ? `--logfile=prof.ext.${key}.log` : '';
+    console.log(`Ganymede server extension '${key}' running (pid=${process.pid})`);
+    const procArgs = ['--max-old-space-size=262144', `${extPath}/server/src/main.js`];
+    if (profilingLogFile) { procArgs.unshift('--prof'); procArgs.unshift(profilingLogFile); }
+    const proc = spawn('node', procArgs, {
+      stdio: ['inherit', 'inherit', 'inherit', 'ipc'], env: { ...process.env, }
+    });
+    proc.on('message', messageSerial => {
+      // const message = messageSerial as string;
+      // if (this.responseFor) {
+      //   this.handleResponse(this.responseFor, message);
+      // } else {
+      //   this.responseFor = message;
+      // }
+    });
     proc.on('exit', (...a) => {
       console.log(a)
       console.log(`ganymede server extension '${key}' exited.`);
     });
   }
-  static getBaseAppApi(type: string, globalConfData: any) {
+  static getBaseAppApi(config: GanymedeHttpServerConfig, globalConfData: any) {
     // TODO
-    const app = new GanymedeHttpServer(type, globalConfData);
+    const app = new GanymedeHttpServer(config, globalConfData);
     return app;
   }
   static getGlobalConfData(globalConfData: any) {

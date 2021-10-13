@@ -3,7 +3,7 @@
  */
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, DetachedRouteHandle } from '@angular/router';
-import { ganylog } from '../util/console.util';
+import { ganylog } from '../util/common/console.util';
 import { RouteObservingService } from './route-observing.service';
 
 declare var window: any;

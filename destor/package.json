@@ -1,0 +1,18 @@
+{
+  "name": "@jovian/ganymede-destor-module",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "@jovian/fourq": "^1.0.14",
+    "@jovian/type-tools": "^6.0.43",
+    "express": "^4.17.1",
+    "tslib": "^2.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^16.10.5",
+    "codelyzer": "^6.0.2",
+    "ts-node": "~10.3.0",
+    "tslint": "~5.20.1",
+    "typescript": "^4.4.4"
+  }
+}

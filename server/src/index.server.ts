@@ -1,3 +1,6 @@
+/*
+ * Copyright 2014-2021 Jovian, all rights reserved.
+ */
 import * as Express from 'express';
 import * as BodyParser from 'body-parser';
 

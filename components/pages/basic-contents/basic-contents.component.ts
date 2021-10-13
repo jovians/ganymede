@@ -6,7 +6,7 @@ import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import {
   asRouteBasic, consumeSubDir, RouteData,
   RouteDataNavigatableContent, RouteDataPage, RouteMatchableDefinition
-} from '../../util/route.helper';
+} from '../../util/common/route.helper';
 import { MarkdownFrameComponent } from '../../markdown/markdown-frame/markdown-frame.component';
 import { AppService } from '../../services/app.service';
 import { RouteObservingService } from '../../services/route-observing.service';

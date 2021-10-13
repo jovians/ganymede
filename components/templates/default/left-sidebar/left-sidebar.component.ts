@@ -59,6 +59,10 @@ export class LeftSidebarComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  navActiveStatus(itemData) {
+    return this.router.url.startsWith('/' + itemData.link);
+  }
+
   endHere(e) { e.stopPropagation(); }
 
   ngOnDestroy() {

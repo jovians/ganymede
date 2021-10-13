@@ -2,7 +2,7 @@
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 import { Injectable, isDevMode } from '@angular/core';
-import { ElectronInteractions } from '../util/electron.utils';
+import { ElectronInteractions } from '../util/common/electron.utils';
 
 @Injectable({
   providedIn: 'root'

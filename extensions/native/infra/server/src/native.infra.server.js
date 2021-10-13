@@ -1,4 +1,36 @@
 "use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -35,218 +67,276 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.NativeInfraExtensionServer = void 0;
+/*
+ * Copyright 2014-2021 Jovian, all rights reserved.
+ */
 var http_shim_1 = require("../../../../../server/src/http.shim");
-var vsphere_infra_1 = require("vsphere-infra");
-var unit_utils_1 = require("../../../../../components/util/unit.utils");
-var secrets_resolver_1 = require("../../../../../components/util/secrets.resolver");
-var logger_1 = require("../../../../../components/util/logger");
-var NativeInfraExtensionServer = /** @class */ (function () {
-    function NativeInfraExtensionServer() {
-        this.iface = 'json';
-        this.vsphereDcs = [];
-        this.vcenters = {};
+var secrets_resolver_1 = require("../../../../../components/util/server/secrets.resolver");
+var logger_1 = require("../../../../../components/util/shared/logger");
+var native_infra_server_worker_1 = require("./native.infra.server.worker");
+var scopeName = "ext-infra;pid=" + process.pid;
+var NativeInfraExtensionServer = /** @class */ (function (_super) {
+    __extends(NativeInfraExtensionServer, _super);
+    function NativeInfraExtensionServer(extData, globalConfData) {
+        var _this = _super.call(this, { type: http_shim_1.HttpBaseLib.EXPRESS }, globalConfData) || this;
+        _this.vcenters = {};
+        _this.vcentersDefunct = {};
+        _this.cache = {
+            inventoryData: _this.cacheDefine({ path: "native.infra.inventoryData" }),
+            allObjects: _this.cacheDefine({ path: "native.infra.allObjects/:key", matchExactly: true }),
+            quickStats: _this.cacheDefine({ path: "native.infra.quickStats/:key", matchExactly: true }),
+        };
+        _this.extData = extData;
+        _this.apiVersion = 'v1';
+        _this.apiPath = _this.configGlobal.ext.basePath + "/native/infra";
+        _this.addDefaultProcessor(http_shim_1.ReqProcessor.BASIC);
+        _this.enumerateVCenters();
+        return _this;
     }
-    NativeInfraExtensionServer.prototype.start = function (data, globalConfData) {
+    NativeInfraExtensionServer.prototype.enumerateVCenters = function () {
         return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        this.globalConfData = globalConfData;
-                        this.data = data;
-                        logger_1.log.info('Ganymede native.infra extension server started.');
-                        if (!data) {
-                            return [2 /*return*/];
-                        }
-                        return [4 /*yield*/, this.initialize(true)];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    NativeInfraExtensionServer.prototype.initialize = function (andStart) {
-        if (andStart === void 0) { andStart = false; }
-        return __awaiter(this, void 0, void 0, function () {
-            var vinfra, _i, _a, inv, _b, _c, vcProm;
-            var _this = this;
+            var _i, _a, invData, inv, _b, _c, workerData;
             return __generator(this, function (_d) {
                 switch (_d.label) {
                     case 0:
-                        vsphere_infra_1.VsphereInfra.grant();
-                        vinfra = new vsphere_infra_1.VsphereInfra();
-                        vinfra.behavior.setVerbose(true);
-                        vinfra.behavior.setJsonLogs(true);
-                        this.registerApis();
-                        if (!this.data.inventory.vcenter) return [3 /*break*/, 5];
-                        if (!(this.data.inventory.vcenter.type === 'fixed')) return [3 /*break*/, 5];
-                        _i = 0, _a = this.data.inventory.vcenter.list;
+                        if (!this.extData.inventory.vcenter) {
+                            return [2 /*return*/];
+                        }
+                        if (!(this.extData.inventory.vcenter.type === 'fixed')) return [3 /*break*/, 8];
+                        _i = 0, _a = this.extData.inventory.vcenter.list;
                         _d.label = 1;
                     case 1:
-                        if (!(_i < _a.length)) return [3 /*break*/, 5];
-                        inv = _a[_i];
-                        if (!(inv.type === 'vsphere')) return [3 /*break*/, 4];
+                        if (!(_i < _a.length)) return [3 /*break*/, 8];
+                        invData = _a[_i];
+                        inv = JSON.parse(JSON.stringify(invData));
+                        if (!(inv.type === 'aws')) return [3 /*break*/, 2];
+                        return [3 /*break*/, 7];
+                    case 2:
+                        if (!(inv.type === 'gcp')) return [3 /*break*/, 3];
+                        return [3 /*break*/, 7];
+                    case 3:
+                        if (!(inv.type === 'azure')) return [3 /*break*/, 4];
+                        return [3 /*break*/, 7];
+                    case 4:
+                        if (!(inv.type === 'vcenter')) return [3 /*break*/, 7];
+                        // continue;
                         _b = inv;
                         return [4 /*yield*/, secrets_resolver_1.secrets.resolve(inv.username)];
-                    case 2:
+                    case 5:
+                        // continue;
                         _b.username = _d.sent();
                         _c = inv;
                         return [4 /*yield*/, secrets_resolver_1.secrets.resolve(inv.password)];
-                    case 3:
+                    case 6:
                         _c.password = _d.sent();
-                        vcProm = vinfra.getDatacenter(inv);
-                        this.vcenters[inv.key] = vcProm;
-                        vcProm.then(function (vc) {
-                            _this.vcenters[vc.key] = vc;
-                            vc.startInventoryWatch();
-                        });
-                        _d.label = 4;
-                    case 4:
+                        if (!inv.username || !inv.password) {
+                            console.log("Failed to resolve credentials for '" + inv.key + "'");
+                            return [3 /*break*/, 7];
+                        }
+                        inv.watch = true;
+                        workerData = __assign(__assign({ workerFile: native_infra_server_worker_1.ExtInfraWorkerClient.workerFile }, inv), { scopeName: scopeName });
+                        if (!inv.defunct) {
+                            this.vcenters[inv.key] = this.addWorker(native_infra_server_worker_1.ExtInfraWorkerClient, workerData);
+                        }
+                        else {
+                            this.vcentersDefunct[inv.key] = {
+                                deprecated: inv.deprecated ? true : false,
+                                defunct: inv.defunct ? true : false,
+                            };
+                        }
+                        _d.label = 7;
+                    case 7:
                         _i++;
                         return [3 /*break*/, 1];
-                    case 5:
+                    case 8:
                         logger_1.log.info('Ganymede native.infra extension initialized.');
-                        if (andStart) {
-                            this.app.start({ port: this.data.port });
-                            logger_1.log.info("Ganymede native.infra extension listening on " + this.data.port);
-                        }
                         return [2 /*return*/];
                 }
             });
         });
     };
-    NativeInfraExtensionServer.prototype.registerApis = function () {
-        var _this = this;
-        this.app = new http_shim_1.GanymedeHttpServer('express', this.globalConfData);
-        var basePath = this.globalConfData.ext.basePath;
-        var iface = this.iface;
-        var extName = 'native/infra';
-        var extBasePath = basePath + "/" + iface + "/" + extName;
-        this.app.register({
-            method: http_shim_1.HttpMethod.GET,
-            path: extBasePath + "/vcenter/:key/all-objects-map",
-            pre: [http_shim_1.Pre.AUTH, http_shim_1.Pre.BASIC],
-            handler: function (q, r) { return __awaiter(_this, void 0, void 0, function () {
-                var key, vc;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            key = this.getPathParam('key', q, r);
-                            if (!key) {
-                                return [2 /*return*/];
-                            }
-                            return [4 /*yield*/, this.getVCenterByKey(key, r)];
-                        case 1:
-                            vc = _a.sent();
-                            if (!vc) {
-                                return [2 /*return*/];
-                            }
-                            r.okJson({ all: vc.inventory.byGUID });
-                            return [2 /*return*/];
-                    }
-                });
-            }); }
-        });
-        this.app.register({
-            method: http_shim_1.HttpMethod.GET,
-            path: extBasePath + "/vcenter/:key/quick-stats",
-            pre: [http_shim_1.Pre.AUTH, http_shim_1.Pre.BASIC],
-            handler: function (q, r) { return __awaiter(_this, void 0, void 0, function () {
-                var key, vc, data, _i, _a, clusterId, cluster, _b, _c, hostId, host, _d, _e, dsId, ds, capBytes, freeBytes, usedBytes;
-                return __generator(this, function (_f) {
-                    switch (_f.label) {
-                        case 0:
-                            key = this.getPathParam('key', q, r);
-                            if (!key) {
-                                return [2 /*return*/];
-                            }
-                            return [4 /*yield*/, this.getVCenterByKey(key, r)];
-                        case 1:
-                            vc = _f.sent();
-                            if (!vc) {
-                                return [2 /*return*/];
-                            }
-                            data = {
-                                overview: {
-                                    totalCpu: 0, consumedCpu: 0, percentCpu: 0,
-                                    totalMem: 0, consumedMem: 0, percentMem: 0,
-                                    totalStorage: 0, consumedStorage: 0, percentStorage: 0
-                                },
-                                clusterSummary: null,
-                                hostStats: [],
-                                storageStats: []
-                            };
-                            for (_i = 0, _a = Object.keys(vc.inventory.computeResource); _i < _a.length; _i++) {
-                                clusterId = _a[_i];
-                                cluster = vc.inventory.computeResource[clusterId];
-                                data.clusterSummary = cluster.summary;
-                                if (data.clusterSummary) {
-                                    data.overview.totalCpu = parseInt(data.clusterSummary.totalCpu + '', 10) / 1000; // in GHz
-                                    data.overview.totalMem = parseInt(data.clusterSummary.totalMemory + '', 10) / unit_utils_1.Unit.GiB; // in GiB
-                                }
-                                break;
-                            }
-                            for (_b = 0, _c = Object.keys(vc.inventory.hostSystem); _b < _c.length; _b++) {
-                                hostId = _c[_b];
-                                host = vc.inventory.hostSystem[hostId];
-                                data.overview.consumedCpu += host.summary.quickStats.overallCpuUsage / 1000;
-                                data.overview.consumedMem += host.summary.quickStats.overallMemoryUsage / 1024;
-                                data.hostStats.push({ iid: hostId, name: host.name, networksCount: host.network.length, stats: host.summary.quickStats });
-                            }
-                            for (_d = 0, _e = Object.keys(vc.inventory.datastore); _d < _e.length; _d++) {
-                                dsId = _e[_d];
-                                ds = vc.inventory.datastore[dsId];
-                                if (ds.info.containerId === ds.info.aliasOf) {
-                                    capBytes = parseInt(ds.summary.capacity, 10);
-                                    freeBytes = parseInt(ds.summary.freeSpace, 10);
-                                    usedBytes = capBytes - freeBytes;
-                                    data.overview.totalStorage += capBytes / unit_utils_1.Unit.GiB;
-                                    data.overview.consumedStorage += usedBytes / unit_utils_1.Unit.GiB;
-                                }
-                                data.storageStats.push({ iid: dsId, name: ds.name, info: ds.info, summary: ds.summary });
-                            }
-                            data.overview.percentCpu = data.overview.consumedCpu / data.overview.totalCpu * 100;
-                            data.overview.percentMem = data.overview.consumedMem / data.overview.totalMem * 100;
-                            data.overview.percentStorage = data.overview.consumedStorage / data.overview.totalStorage * 100;
-                            r.okJson(data);
-                            return [2 /*return*/];
-                    }
-                });
-            }); }
-        });
-    };
-    NativeInfraExtensionServer.prototype.getPathParam = function (name, q, r) {
-        var value = q.params[name];
-        if (!value) {
-            r.status(400).end("'" + value + "' path parameter not defined.");
-            return null;
-        }
-        return value;
-    };
-    NativeInfraExtensionServer.prototype.getVCenterByKey = function (key, r) {
+    NativeInfraExtensionServer.prototype.beforeStart = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var vc;
+            return __generator(this, function (_a) {
+                logger_1.log.info('Ganymede native.infra extension server started.');
+                return [2 /*return*/];
+            });
+        });
+    };
+    NativeInfraExtensionServer.prototype.getInventory = function (op) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                op.cache.handler(this.cache.inventoryData, {}, function (resolve) { return __awaiter(_this, void 0, void 0, function () {
+                    return __generator(this, function (_a) {
+                        resolve(this.extData.inventory);
+                        return [2 /*return*/];
+                    });
+                }); });
+                return [2 /*return*/];
+            });
+        });
+    };
+    NativeInfraExtensionServer.prototype.getAllObjects = function (op) {
+        return __awaiter(this, void 0, void 0, function () {
+            var vc, cacheAccess;
+            var _a;
+            var _this = this;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, this.getVCenterByKey(op)];
+                    case 1:
+                        vc = _b.sent();
+                        if (op.error) {
+                            return [2 /*return*/, op.endWithError()];
+                        }
+                        _a = {};
+                        return [4 /*yield*/, vc.inventoryChangedLast()];
+                    case 2:
+                        cacheAccess = (_a.version = _b.sent(), _a.matchExactly = true, _a);
+                        op.cache.handler(this.cache.allObjects, cacheAccess, function (resolve) { return __awaiter(_this, void 0, void 0, function () {
+                            var inventorySerialized;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0: return [4 /*yield*/, vc.inventorySerialized()];
+                                    case 1:
+                                        inventorySerialized = _a.sent();
+                                        if (!inventorySerialized) {
+                                            return [2 /*return*/, op.endWithError(500, "NOT_READY_INV", "[" + op.req.params.key + "] utilization summary not ready yet")];
+                                        }
+                                        resolve(JSON.parse(inventorySerialized));
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); });
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    NativeInfraExtensionServer.prototype.getQuickStats = function (op) {
+        return __awaiter(this, void 0, void 0, function () {
+            var vc, cacheAccess;
+            var _a;
+            var _this = this;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, this.getVCenterByKey(op)];
+                    case 1:
+                        vc = _b.sent();
+                        if (op.error) {
+                            return [2 /*return*/, op.endWithError()];
+                        }
+                        _a = {};
+                        return [4 /*yield*/, vc.u9nChangedLast()];
+                    case 2:
+                        cacheAccess = (_a.version = _b.sent(), _a.matchExactly = true, _a);
+                        if (cacheAccess.version < 0) {
+                            return [2 /*return*/, op.endWithError(500, "NOT_READY_UTIL_SUMMARY", "[" + op.req.params.key + "] utilization summary not ready yet")];
+                        }
+                        op.cache.handler(this.cache.quickStats, cacheAccess, function (resolve) { return __awaiter(_this, void 0, void 0, function () {
+                            var _a, _b, _c;
+                            return __generator(this, function (_d) {
+                                switch (_d.label) {
+                                    case 0:
+                                        _a = resolve;
+                                        _c = (_b = JSON).parse;
+                                        return [4 /*yield*/, vc.u9nSerialized()];
+                                    case 1:
+                                        _a.apply(void 0, [_c.apply(_b, [_d.sent()])]);
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); });
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    NativeInfraExtensionServer.prototype.getWatcherResource = function (op) {
+        return __awaiter(this, void 0, void 0, function () {
+            var vc, processResourceSnapshot;
             return __generator(this, function (_a) {
                 switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.getVCenterByKey(op)];
+                    case 1:
+                        vc = _a.sent();
+                        if (op.error) {
+                            return [2 /*return*/, op.endWithError()];
+                        }
+                        return [4 /*yield*/, vc.processResourceSnapshot()];
+                    case 2:
+                        processResourceSnapshot = _a.sent();
+                        return [2 /*return*/, op.res.returnJson(processResourceSnapshot)];
+                }
+            });
+        });
+    };
+    NativeInfraExtensionServer.prototype.getWatcherFailureHeat = function (op) {
+        return __awaiter(this, void 0, void 0, function () {
+            var vc, heatData;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.getVCenterByKey(op)];
+                    case 1:
+                        vc = _a.sent();
+                        if (op.error) {
+                            return [2 /*return*/, op.endWithError()];
+                        }
+                        return [4 /*yield*/, vc.failureHeat()];
+                    case 2:
+                        heatData = _a.sent();
+                        return [2 /*return*/, op.res.returnJson(heatData)];
+                }
+            });
+        });
+    };
+    NativeInfraExtensionServer.prototype.getVCenterByKey = function (op) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function () {
+            var key, vc;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
+                        key = (_a = op.req.params) === null || _a === void 0 ? void 0 : _a.key;
+                        if (!key) {
+                            return [2 /*return*/, op.raise(http_shim_1.HttpCode.BAD_REQUEST, "PATH_PARAM_NOT_FOUND", "'" + key + "' path parameter not defined.")];
+                        }
+                        if (this.vcentersDefunct[key]) {
+                            return [2 /*return*/, op.raise(http_shim_1.HttpCode.BAD_REQUEST, "VCENTER_DEFUNCT", "[" + key + "] vCenter is defunct")];
+                        }
                         vc = this.vcenters[key];
                         if (!(vc && vc.then)) return [3 /*break*/, 2];
                         return [4 /*yield*/, vc];
                     case 1:
-                        vc = _a.sent();
-                        _a.label = 2;
+                        vc = _b.sent();
+                        _b.label = 2;
                     case 2:
                         if (!vc) {
-                            r.status(404).end(JSON.stringify({ status: 'not_found', message: "Cannot find vCenter by key: '" + key + "'" }));
-                            return [2 /*return*/, null];
+                            return [2 /*return*/, op.raise(http_shim_1.HttpCode.BAD_REQUEST, "NO_VCENTER_KEY", "[" + key + "] cannot find vCenter by key " + key)];
                         }
                         return [2 /*return*/, vc];
                 }
             });
         });
     };
+    __decorate([
+        http_shim_1.HTTP.GET("/inventory")
+    ], NativeInfraExtensionServer.prototype, "getInventory", null);
+    __decorate([
+        http_shim_1.HTTP.GET("/vcenter/:key/all-objects")
+    ], NativeInfraExtensionServer.prototype, "getAllObjects", null);
+    __decorate([
+        http_shim_1.HTTP.GET("/vcenter/:key/quick-stats")
+    ], NativeInfraExtensionServer.prototype, "getQuickStats", null);
+    __decorate([
+        http_shim_1.HTTP.GET("/vcenter/:key/watcher-resource")
+    ], NativeInfraExtensionServer.prototype, "getWatcherResource", null);
+    __decorate([
+        http_shim_1.HTTP.GET("/vcenter/:key/watcher-failure-heat")
+    ], NativeInfraExtensionServer.prototype, "getWatcherFailureHeat", null);
     return NativeInfraExtensionServer;
-}());
+}(http_shim_1.GanymedeHttpServer));
 exports.NativeInfraExtensionServer = NativeInfraExtensionServer;

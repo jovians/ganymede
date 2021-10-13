@@ -3,10 +3,11 @@
  */
 import { Components } from '../../../../../ui.components';
 import { Component, Input, OnInit, OnChanges, SimpleChanges, ElementRef, OnDestroy } from '@angular/core';
-import { LifecycleLinkable, lifecycleEnd } from '../../../util/lifecycle.linker';
-import { DomTreeUtil } from '../../../util/dom.tree.util';
-import { SizeUtil } from '../../../util/size.util';
-import { MutationUtil } from '../../../util/mutation.observer';
+import { LifecycleLinkable, lifecycleEnd } from '../../../util/common/lifecycle.linker';
+import { DomTreeUtil } from '../../../util/common/dom.tree.util';
+import { SizeUtil } from '../../../util/common/size.util';
+import { MutationUtil } from '../../../util/common/mutation.observer';
+import { topMomentOut } from '../../../util/shared/common';
 
 @Component({
   selector: 'app-wavefront-embedded-chart',
@@ -22,7 +23,6 @@ export class WavefrontEmbeddedChartComponent implements OnInit, OnChanges, OnDes
   @Input() percentDimension = false;
   @Input() width: number | string = 300;
   @Input() height: number | string = null;
-  locker = {};
 
   constructor(private host: ElementRef) {}
 
@@ -41,9 +41,7 @@ export class WavefrontEmbeddedChartComponent implements OnInit, OnChanges, OnDes
   }
 
   nudgeChart() {
-    const locker = this.locker = {};
-    setTimeout(() => {
-      if (locker !== this.locker) { return; }
+    topMomentOut(this, 'nudgeChart', 50, () => {
       this.clearChartArea();
       const id = this.getCurrentId();
       const el = document.getElementById(id);
@@ -79,7 +77,7 @@ export class WavefrontEmbeddedChartComponent implements OnInit, OnChanges, OnDes
       embedder.src = `${this.protocol}://${this.domain}/embedded/${this.chartId}/js`;
       embedder.id = id;
       el.parentElement.appendChild(embedder);
-    }, 50);
+    });
   }
 
   ngOnDestroy() {

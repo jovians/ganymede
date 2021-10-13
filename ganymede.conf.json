@@ -16,13 +16,6 @@
   "template": {
     "main": "default"
   },
-  "modules": {
-    "geolocate": {
-      "server": "https://ipinfo.io/json",
-      "tokenParam": { "name": "token", "type": "query" },
-      "token": "d4c99332d01ff3"
-    }
-  },
   "replacer": {
     "<gany.APP_TITLE>": "Ganymede App", 
     "<gany.ANGULAR_APP_NAME>": "ganymede-app",

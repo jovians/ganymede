@@ -1,3 +1,7 @@
+/*
+ * Copyright 2014-2021 Jovian, all rights reserved.
+ */
+
 import * as Sendgrid from '@sendgrid/mail';
 
 export enum EmailServiceProvider {

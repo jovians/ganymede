@@ -1,0 +1,7 @@
+version: "3.3"
+services:
+  ui:
+    image: gany-ui
+    container_name: gany_local_ui
+    ports:
+      - 80:80

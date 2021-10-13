@@ -2,6 +2,17 @@
 /*
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -38,7 +49,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.GanymedeServerExtensions = void 0;
 var fs = require("fs");
 var child_process_1 = require("child_process");
@@ -49,24 +60,26 @@ var GanymedeServerExtensions = /** @class */ (function () {
     GanymedeServerExtensions.register = function (key, serverDefinition) {
         GanymedeServerExtensions.registry[key] = serverDefinition;
     };
-    GanymedeServerExtensions.run = function (key) {
+    GanymedeServerExtensions.run = function (key, compileOnly) {
+        if (compileOnly === void 0) { compileOnly = false; }
         return __awaiter(this, void 0, void 0, function () {
-            var ganyBasePath, extPath, alwaysCompile, compiled, e_1, proc;
+            var ganyBasePath, extPath, alwaysCompile, compiled, e_1, extData, profilingLogFile, procArgs, proc;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         ganyBasePath = __dirname.split('/').slice(0, -2).join('/');
                         extPath = ganyBasePath + "/extensions/" + key.split('.').join('/');
+                        fs.writeFileSync(extPath + "/server/.extension.build.uuid", process.env.BUILD_UUID, 'utf8');
                         if (!fs.existsSync("" + extPath)) {
                             return [2 /*return*/, console.log("ganymede server extension '" + key + "' not found.")];
                         }
                         alwaysCompile = true;
-                        if (!(alwaysCompile || !fs.existsSync(extPath + "/server/src/main.js"))) return [3 /*break*/, 5];
+                        if (!(alwaysCompile || compileOnly || !fs.existsSync(extPath + "/server/src/main.js"))) return [3 /*break*/, 5];
                         compiled = void 0;
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, execAsync("tsc " + extPath + "/server/src/main.ts")];
+                        return [4 /*yield*/, execAsync("tsc --target es5 --experimentalDecorators --resolveJsonModule " + extPath + "/server/src/main.ts")];
                     case 2:
                         _a.sent();
                         compiled = true;
@@ -81,9 +94,30 @@ var GanymedeServerExtensions = /** @class */ (function () {
                         }
                         _a.label = 5;
                     case 5:
-                        proc = child_process_1.exec("node " + extPath + "/server/src/main.js --max-old-space-size=8192", { env: process.env });
-                        proc.stdout.pipe(process.stdout);
-                        proc.stderr.pipe(process.stderr);
+                        if (compileOnly) {
+                            console.log("ganymede server extension '" + key + "' has been compiled.");
+                            process.exit(0);
+                        }
+                        extData = process.env.EXT_DATA_BASE64 ?
+                            JSON.parse(Buffer.from(process.env.EXT_DATA_BASE64, 'base64').toString('utf8')) : {};
+                        profilingLogFile = extData.v8Profiling ? "--logfile=prof.ext." + key + ".log" : '';
+                        console.log("Ganymede server extension '" + key + "' running (pid=" + process.pid + ")");
+                        procArgs = ['--max-old-space-size=262144', extPath + "/server/src/main.js"];
+                        if (profilingLogFile) {
+                            procArgs.unshift('--prof');
+                            procArgs.unshift(profilingLogFile);
+                        }
+                        proc = (0, child_process_1.spawn)('node', procArgs, {
+                            stdio: ['inherit', 'inherit', 'inherit', 'ipc'], env: __assign({}, process.env)
+                        });
+                        proc.on('message', function (messageSerial) {
+                            // const message = messageSerial as string;
+                            // if (this.responseFor) {
+                            //   this.handleResponse(this.responseFor, message);
+                            // } else {
+                            //   this.responseFor = message;
+                            // }
+                        });
                         proc.on('exit', function () {
                             var a = [];
                             for (var _i = 0; _i < arguments.length; _i++) {
@@ -97,9 +131,9 @@ var GanymedeServerExtensions = /** @class */ (function () {
             });
         });
     };
-    GanymedeServerExtensions.getBaseAppApi = function (type, globalConfData) {
+    GanymedeServerExtensions.getBaseAppApi = function (config, globalConfData) {
         // TODO
-        var app = new http_shim_1.GanymedeHttpServer(type, globalConfData);
+        var app = new http_shim_1.GanymedeHttpServer(config, globalConfData);
         return app;
     };
     GanymedeServerExtensions.getGlobalConfData = function (globalConfData) {
@@ -113,7 +147,7 @@ function execAsync(cmd) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             return [2 /*return*/, new Promise(function (resolve) {
-                    child_process_1.exec(cmd, function (e, stdout) {
+                    (0, child_process_1.exec)(cmd, function (e, stdout) {
                         if (e) {
                             console.log("ERROR: " + stdout);
                             return resolve(false);

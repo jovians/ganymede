@@ -1,5 +1,12 @@
 @import './variables.scss';
 
+@if variable-exists(i18n_fonts_hebrew_default) {
+  @import url('https://fonts.googleapis.com/earlyaccess/notosanshebrew.css');
+  .i18n-hebrew * {
+    font-family: 'Noto Sans Hebrew', sans-serif !important;
+  }
+}
+
 @if variable-exists(i18n_fonts_hindi_default) {
   @import url('https://fonts.googleapis.com/css2?family=Hind&display=swap');
   .i18n-hindi * {
@@ -39,12 +46,5 @@
   @import url('https://fonts.googleapis.com/earlyaccess/nanumgothic.css');
   .i18n-korean * {
     font-family: 'Nanum Gothic', sans-serif !important;
-  }
-}
-
-@if variable-exists(i18n_fonts_hebrew_default) {
-  @import url('https://fonts.googleapis.com/earlyaccess/notosanshebrew.css');
-  .i18n-korean * {
-    font-family: 'Noto Sans Hebrew', sans-serif !important;
   }
 }

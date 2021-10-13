@@ -9,16 +9,17 @@ import { Store } from '@ngrx/store';
 import { Actions } from '@ngrx/effects';
 
 import { EnvService } from '../services/env.service';
-import { AnyStore, NgrxStoreRoot } from '../util/ngrx.stores';
+import { rx } from '../util/common/ngrx.stores';
+import { debugController } from '../util/shared/debug.controller';
 
 import { GanymedeAppData } from '../ganymede.app.interface';
-import { globallyExtendTranslateParam } from '../util/translate.params';
-import { GeolocateUtils } from '../util/geolocation.utils';
-import { CommandsRegistrar } from '../util/commands.registrar';
+import { globallyExtendTranslateParam } from '../util/common/translate.params';
+import { GeolocateUtils } from '../util/common/geolocation.utils';
+import { CommandsRegistrar } from '../util/common/commands.registrar';
 import { RouteObservingService } from './route-observing.service';
-import { ServiceWorkerUtil } from '../util/service.worker.utils';
-import { DisplayMode } from '../util/size.util';
-import { NgrxCentralStoreInterface } from 'ganymede.app.ui';
+import { ServiceWorkerUtil } from '../util/common/service.worker.utils';
+import { DisplayMode } from '../util/common/size.util';
+import { Subject } from 'rxjs';
 
 declare var window: any;
 
@@ -26,24 +27,31 @@ declare var window: any;
   providedIn: 'root'
 })
 export class AppService extends GanymedeAppData {
+  static config = window.ganymedeAppData;
 
   httpForbidden: boolean = false;
   httpNotFound: boolean = false;
   displayMode: DisplayMode = DisplayMode.NORMAL;
-  store: NgrxCentralStoreInterface;
+  store: any;
+  config: GanymedeAppData;
+
+  routeData = new Subject<any>();
+
+  debug = debugController;
 
   private mainContentArea: ElementRef = null;
 
   constructor(
     public env: EnvService,
     public http: HttpClient,
-    public storeBase: Store<AnyStore>,
+    public storeBase: Store<rx.AnyStore>,
     private translateService: TranslateService,
     private router: Router,
     private routeObserver: RouteObservingService,
     private actions$: Actions,
   ) {
     super();
+    this.config = window.ganymedeAppData;
     Object.assign(this, window.ganymedeAppData);
 
     // tslint:disable-next-line: no-string-literal
@@ -52,10 +60,9 @@ export class AppService extends GanymedeAppData {
     window['ngRouter'] = this.router;
     this.routeObserver.setRouter(this.router);
 
-    NgrxStoreRoot.initialize(this.storeBase, this.actions$, {
+    this.store = rx.NgrxStoreRoot.initialize(this.storeBase, this.actions$, {
       http: this.http
     });
-    this.store = NgrxStoreRoot.getCentralStore() as any;
 
     globallyExtendTranslateParam();
 
@@ -101,3 +108,13 @@ export class AppService extends GanymedeAppData {
   }
 
 }
+
+export function extRegisterRx(extKey: string) {
+
+}
+
+export function extGetData(extKey: string) {
+
+}
+
+export { rx };

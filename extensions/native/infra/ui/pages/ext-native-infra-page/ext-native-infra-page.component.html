@@ -1,3 +1,29 @@
-<app-ext-native-infra-vcenter>
-  
-</app-ext-native-infra-vcenter>
+<!-- <ng-container *ngIf="(vcenter.quickStats.data$ | async)[key]; let stats;">
+  <p>ext-native-infra-vcenter works!</p>
+  <div>{{ stats.overview | json }}</div>
+</ng-container> -->
+
+<ng-container *ngIf="type==='overview'">
+  <ng-container *ngIf="(inventory.data$ | async); let inv;">
+    <div class="gany-content-cont" *ngIf="inv">
+      <ng-template ngFor [ngForOf]="overviewOrder" let-invType>
+        <div *ngIf="inv[invType] && inv[invType].list && inv[invType].list.length > 0">
+          <h2>{{ getProviderName(invType) }}</h2>
+          <div class="gany-grid mtop">
+            <ng-template ngFor [ngForOf]="inv[invType].list | keyvalue" let-entryData>
+              <gany-ext-native-infra-summary-card [listData]="inv[invType]" [entryData]="entryData.value">
+              </gany-ext-native-infra-summary-card>
+            </ng-template>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+  </ng-container>
+</ng-container>
+
+<ng-container *ngIf="type==='vcenter'">
+  <div *ngIf="isDefunct" style="margin: 2rem; font-size: 2rem; opacity: 0.5">Defunct vCenter entry</div>
+  <gany-ext-native-infra-vcenter *ngIf="!isDefunct" [key]="key"></gany-ext-native-infra-vcenter>
+</ng-container>
+
+<div class="mbot5"></div>

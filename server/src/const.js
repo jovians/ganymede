@@ -1,10 +1,13 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.ServerConst = void 0;
 var ServerConst = /** @class */ (function () {
     function ServerConst() {
     }
-    ServerConst.setData = function (data) { ServerConst.data = data; ServerConst.initialized = true; };
+    ServerConst.setData = function (data) {
+        ServerConst.data = data;
+        ServerConst.initialized = true;
+    };
     ServerConst.initialized = false;
     ServerConst.data = {
         prod: false,
@@ -17,19 +20,28 @@ var ServerConst = /** @class */ (function () {
                 securityHeaders: {
                     profile: 'allow-all',
                     allowRequestOrigin: '*',
-                    allowRequestHeaders: '*'
+                    allowRequestHeaders: '*',
                 }
             },
+            destor: {
+                basePath: '/api-destor',
+            },
+            auth: {
+                basePath: '/api-auth',
+            },
             ext: {
-                basePath: '/api-ext'
-            }
+                basePath: '/api-ext',
+            },
         },
         base: {
             modules: {
-                auth: { type: 'default' },
+                auth: {
+                    type: 'default',
+                },
                 mailer: {
-                    type: '', data: { id: '', key: '' }
-                }
+                    type: '',
+                    data: { id: '', key: '' },
+                },
             }
         },
         extensions: {

@@ -1,0 +1,47 @@
+
+.gany-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  grid-gap: 0.9rem 0.6rem;
+}
+
+.gany-content-cont {
+  width: calc(100% - 3.5rem);
+  margin-left: 1.25rem;
+}
+
+.mtop { margin-top: 0.75rem; }
+.mbot { margin-bottom: 2rem; }
+.mbot5 { margin-bottom: 10rem; }
+
+.hollow {
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+.hollow-disabled {
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  opacity: 0.5 !important;
+}
+
+
+
+@media screen and (max-width: 768px) {
+
+  .gany-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    grid-gap: 0.75rem 0.5rem;
+  }
+
+  .gany-content-cont {
+    width: calc(100% - 2rem);
+    margin-left: 1rem;
+  }
+
+}

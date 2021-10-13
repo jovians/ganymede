@@ -19,18 +19,20 @@ import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-transla
 
 import { MarkdownModule, MarkedOptions } from 'ngx-markdown';
 
+import { miscWarningsSuppression } from './ganymede/misc/warning.suppress';
 import { GanymedeCoreModule } from './ganymede/components/ganymede.core.module';
 
 import { ganymedeLicenseCallbacks } from './ganymede/ganymede.license';
-import { PreInitUtils } from './ganymede/components/util/preinit.util';
+import { PreInitUtils } from './ganymede/components/util/common/preinit.util';
 import { RouteReuser } from './ganymede/components/services/route-reuser';
 import { ganymedeAppData } from '../../ganymede.app';
 import { ngrxStores, ngrxEffectClasses, otherModules, otherDeclarations, otherProviders } from '../../ganymede.app.ui';
 
 import { UserRoutesModule } from './routes/routes.module';
-import { UserCustomAppModule } from './user-custom/custom.app.module';
+import { UserCustomAppModule } from './main/main.module';
 
 import { AppComponent } from './ganymede/components/templates/default/template.module';
+import { MessageCenter } from './ganymede/components/util/common/message.center';
 
 const notFoundValue = Promise.resolve();
 const translateBasePath = 'assets/i18n/';
@@ -98,7 +100,7 @@ export function langInitFactory(translate: TranslateService, injector: Injector)
 
   ].concat(otherModules),
   declarations: [
-    
+
   ].concat(otherDeclarations),
   providers: [
     {
@@ -130,7 +132,6 @@ ganymedeLicenseCallbacks.push((valid, license) => {
   if (!valid) {
     const msg = `Ganymede license is not valid; registration="${license.org}|${license.user}|${license.domain}|${license.scope}"\n`
                 + `Registration License Signature: ${license.key}`;
-    // tslint:disable-next-line: no-console
-    console.warn(msg);
+    MessageCenter.addWarning(msg);
   }
 });

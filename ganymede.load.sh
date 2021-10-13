@@ -17,11 +17,11 @@ if [[ ! -d "profiles/$PRODUCT_NAME" ]]; then
   exit 2
 fi
 
-echo "Cleaning product content folders... (assets, assets-root, routes, user-custom)"
+echo "Cleaning product content folders... (assets, assets-root, routes, main)"
 rm -rf "src/assets/*"
 rm -rf "src/assets-root/*"
 rm -rf "src/app/routes/*"
-rm -rf "src/app/user-custom/*"
+rm -rf "src/app/main/*"
 rm -rf "electron/*"
 
 echo "Loading product profile '$PRODUCT_NAME'..."

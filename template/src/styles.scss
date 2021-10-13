@@ -1,6 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
 @import './variables.scss';
 
+@import './app/ganymede/styles/global.default.scss';
+
 * {
   margin: 0;
   padding: 0;

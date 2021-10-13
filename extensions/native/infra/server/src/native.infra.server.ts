@@ -1,139 +1,138 @@
 /*
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
-import { GanymedeServerExtensions } from '../../../../../server/src/extensions';
-import { GanymedeHttpRequest, GanymedeHttpResponse, GanymedeHttpServer, HttpMethod, Pre } from '../../../../../server/src/http.shim';
-import { VsphereInfra, VsphereDataCenter } from 'vsphere-infra';
-import { Unit } from '../../../../../components/util/unit.utils';
-import { secrets } from '../../../../../components/util/secrets.resolver';
-import { log } from '../../../../../components/util/logger';
+import { GanymedeHttpServer, HttpOp, HttpBaseLib, HTTP, ReqProcessor, HttpCode } from '../../../../../server/src/http.shim';
+import { secrets } from '../../../../../components/util/server/secrets.resolver';
+import { log } from '../../../../../components/util/shared/logger';
 
-export class NativeInfraExtensionServer {
-  app: GanymedeHttpServer;
-  iface = 'json';
-  globalConfData: typeof GanymedeServerExtensions.globalConf;
-  data: any;
+import { ExtInfraWorkerClient } from './native.infra.server.worker';
 
-  vsphereDcs: VsphereDataCenter[] = [];
-  vcenters: {[key: string]: (VsphereDataCenter | Promise<VsphereDataCenter>) } = {};
+const scopeName = `ext-infra;pid=${process.pid}`;
 
-  async start(data: any, globalConfData: any) {
-    this.globalConfData = globalConfData;
-    this.data = data;
-    log.info('Ganymede native.infra extension server started.');
-    if (!data) { return; }
-    await this.initialize(true);
+export class NativeInfraExtensionServer extends GanymedeHttpServer {
+  // appServer: GanymedeHttpServer;
+  // iface = 'json';
+  extData: any;
+  vcenters: { [key: string]: ExtInfraWorkerClient } = {};
+  vcentersDefunct: {[key: string]: any } = {};
+
+  cache = {
+    inventoryData: this.cacheDefine<object>({ path: `native.infra.inventoryData` }),
+    allObjects: this.cacheDefine<object>({ path: `native.infra.allObjects/:key`, matchExactly: true }),
+    quickStats: this.cacheDefine<object>({ path: `native.infra.quickStats/:key`, matchExactly: true }),
+  };
+
+  constructor(extData: any, globalConfData: any) {
+    super({ type: HttpBaseLib.EXPRESS }, globalConfData);
+    this.extData = extData;
+    this.apiVersion = 'v1';
+    this.apiPath = `${this.configGlobal.ext.basePath}/native/infra`;
+    this.addDefaultProcessor(ReqProcessor.BASIC);
+    this.enumerateVCenters();
   }
 
-  async initialize(andStart: boolean = false) {
-    VsphereInfra.grant();
-    const vinfra = new VsphereInfra();
-    vinfra.behavior.setVerbose(true);
-    vinfra.behavior.setJsonLogs(true);
-    this.registerApis();
-    if (this.data.inventory.vcenter) {
-      if (this.data.inventory.vcenter.type === 'fixed') {
-        for (const inv of this.data.inventory.vcenter.list) {
-          if (inv.type === 'vsphere') {
-            inv.username = await secrets.resolve(inv.username);
-            inv.password = await secrets.resolve(inv.password);
-            const vcProm = vinfra.getDatacenter(inv);
-            this.vcenters[inv.key] = vcProm;
-            vcProm.then(vc => {
-              this.vcenters[vc.key] = vc;
-              vc.startInventoryWatch();
-            });
+  async enumerateVCenters() {
+    if (!this.extData.inventory.vcenter) { return; }
+    if (this.extData.inventory.vcenter.type === 'fixed') {
+      for (const invData of this.extData.inventory.vcenter.list) {
+        const inv = JSON.parse(JSON.stringify(invData));
+        if (inv.type === 'aws') {
+          // TODO
+        } else if (inv.type === 'gcp') {
+          // TODO
+        } else if (inv.type === 'azure') {
+          // TODO
+        } else if (inv.type === 'vcenter') {
+          // continue;
+          inv.username = await secrets.resolve(inv.username);
+          inv.password = await secrets.resolve(inv.password);
+          if (!inv.username || !inv.password) {
+            console.log(`Failed to resolve credentials for '${inv.key}'`);
+            continue;
+          }
+          inv.watch = true;
+
+          const workerData = {
+            workerFile: ExtInfraWorkerClient.workerFile,
+            ...inv,
+            scopeName,
+          };
+          if (!inv.defunct) {
+            this.vcenters[inv.key] = this.addWorker(ExtInfraWorkerClient, workerData);
+          } else {
+            this.vcentersDefunct[inv.key] = {
+              deprecated: inv.deprecated ? true : false,
+              defunct: inv.defunct ? true : false,
+            };
           }
         }
       }
     }
     log.info('Ganymede native.infra extension initialized.');
-    if (andStart) {
-      this.app.start({ port: this.data.port });
-      log.info(`Ganymede native.infra extension listening on ${this.data.port}`);
-    }
   }
 
-  registerApis() {
-    this.app = new GanymedeHttpServer('express', this.globalConfData);
-    const basePath = this.globalConfData.ext.basePath;
-    const iface = this.iface;
-    const extName = 'native/infra';
-    const extBasePath = `${basePath}/${iface}/${extName}`;
-    this.app.register({
-      method: HttpMethod.GET, path: `${extBasePath}/vcenter/:key/all-objects-map`,
-      pre: [ Pre.AUTH, Pre.BASIC ], handler: async (q, r) => {
-        const key = this.getPathParam('key', q, r); if (!key) { return; }
-        const vc = await this.getVCenterByKey(key, r); if (!vc) { return; }
-        r.okJson({ all: vc.inventory.byGUID });
-      }
-    });
-    this.app.register({
-      method: HttpMethod.GET, path: `${extBasePath}/vcenter/:key/quick-stats`,
-      pre: [ Pre.AUTH, Pre.BASIC ], handler: async (q, r) => {
-        const key = this.getPathParam('key', q, r); if (!key) { return; }
-        const vc = await this.getVCenterByKey(key, r); if (!vc) { return; }
-        const data = {
-          overview: {
-            totalCpu: 0, consumedCpu: 0, percentCpu: 0,
-            totalMem: 0, consumedMem: 0, percentMem: 0,
-            totalStorage: 0, consumedStorage: 0, percentStorage: 0,
-          },
-          clusterSummary: null,
-          hostStats: [],
-          storageStats: [],
-          t: Date.now(),
-        };
-        for (const clusterId of Object.keys(vc.inventory.computeResource)) {
-          const cluster = vc.inventory.computeResource[clusterId];
-          data.clusterSummary = cluster.summary;
-          if (data.clusterSummary) {
-            data.overview.totalCpu = parseInt(data.clusterSummary.totalCpu + '', 10) / 1000; // in GHz
-            data.overview.totalMem = parseInt(data.clusterSummary.totalMemory + '', 10) / Unit.GiB; // in GiB
+  async beforeStart() {
+    log.info('Ganymede native.infra extension server started.');
+  }
 
-          }
-          break;
-        }
-        for (const hostId of Object.keys(vc.inventory.hostSystem)) {
-          const host = vc.inventory.hostSystem[hostId];
-          data.overview.consumedCpu += host.summary.quickStats.overallCpuUsage / 1000;
-          data.overview.consumedMem += host.summary.quickStats.overallMemoryUsage / 1024;
-          data.hostStats.push({ iid: hostId, name: host.name, networksCount: host.network.length, stats: host.summary.quickStats });
-        }
-        for (const dsId of Object.keys(vc.inventory.datastore)) {
-          const ds = vc.inventory.datastore[dsId];
-          if (ds.info.containerId === ds.info.aliasOf) {
-            const capBytes = parseInt(ds.summary.capacity, 10);
-            const freeBytes = parseInt(ds.summary.freeSpace, 10);
-            const usedBytes = capBytes - freeBytes;
-            data.overview.totalStorage += capBytes / Unit.GiB;
-            data.overview.consumedStorage += usedBytes / Unit.GiB;
-          }
-          data.storageStats.push({ iid: dsId, name: ds.name, info: ds.info, summary: ds.summary });
-        }
-        data.overview.percentCpu = data.overview.consumedCpu / data.overview.totalCpu * 100;
-        data.overview.percentMem = data.overview.consumedMem / data.overview.totalMem * 100;
-        data.overview.percentStorage = data.overview.consumedStorage / data.overview.totalStorage * 100;
-        r.okJson(data);
-      }
+  @HTTP.GET(`/inventory`)
+  async getInventory(op: HttpOp) {
+    op.cache.handler(this.cache.inventoryData, {}, async resolve => {
+      resolve(this.extData.inventory);
     });
   }
 
-  getPathParam(name: string, q: GanymedeHttpRequest, r: GanymedeHttpResponse): string {
-    const value = q.params[name];
-    if (!value) {
-      r.status(400).end(`'${value}' path parameter not defined.`);
-      return null;
-    }
-    return value;
+  @HTTP.GET(`/vcenter/:key/all-objects`)
+  async getAllObjects(op: HttpOp) {
+    const vc = await this.getVCenterByKey(op); if (op.error) { return op.endWithError(); }
+    const cacheAccess = { version: await vc.inventoryChangedLast(), matchExactly: true };
+    op.cache.handler(this.cache.allObjects, cacheAccess, async resolve => {
+      const inventorySerialized = await vc.inventorySerialized();
+      if (!inventorySerialized) {
+        return op.endWithError(500, `NOT_READY_INV`, `[${op.req.params.key}] utilization summary not ready yet`);
+      }
+      resolve(JSON.parse(inventorySerialized));
+    });
   }
 
-  async getVCenterByKey(key: string, r: GanymedeHttpResponse) {
+  @HTTP.GET(`/vcenter/:key/quick-stats`)
+  async getQuickStats(op: HttpOp) {
+    const vc = await this.getVCenterByKey(op); if (op.error) { return op.endWithError(); }
+    const cacheAccess = { version: await vc.u9nChangedLast(), matchExactly: true };
+    if (cacheAccess.version < 0) {
+      return op.endWithError(500, `NOT_READY_UTIL_SUMMARY`, `[${op.req.params.key}] utilization summary not ready yet`);
+    }
+    op.cache.handler(this.cache.quickStats, cacheAccess, async resolve => {
+      resolve(JSON.parse(await vc.u9nSerialized()));
+    });
+  }
+
+  @HTTP.GET(`/vcenter/:key/watcher-resource`)
+  async getWatcherResource(op: HttpOp) {
+    const vc = await this.getVCenterByKey(op); if (op.error) { return op.endWithError(); }
+    const processResourceSnapshot = await vc.processResourceSnapshot();
+    return op.res.returnJson(processResourceSnapshot);
+  }
+
+  @HTTP.GET(`/vcenter/:key/watcher-failure-heat`)
+  async getWatcherFailureHeat(op: HttpOp) {
+    const vc = await this.getVCenterByKey(op); if (op.error) { return op.endWithError(); }
+    const heatData = await vc.failureHeat();
+    return op.res.returnJson(heatData);
+  }
+
+  async getVCenterByKey(op: HttpOp) {
+    const key = op.req.params?.key;
+    if (!key) {
+      return op.raise(HttpCode.BAD_REQUEST, `PATH_PARAM_NOT_FOUND`, `'${key}' path parameter not defined.`);
+    }
+    if (this.vcentersDefunct[key]) {
+      return op.raise(HttpCode.BAD_REQUEST, `VCENTER_DEFUNCT`, `[${key}] vCenter is defunct`);
+    }
     let vc = this.vcenters[key];
     if (vc && (vc as any).then) { vc = await vc; }
     if (!vc) {
-      r.status(404).end(JSON.stringify({ status: 'not_found', message: `Cannot find vCenter by key: '${key}'`}));
-      return null;
+      return op.raise(HttpCode.BAD_REQUEST, `NO_VCENTER_KEY`, `[${key}] cannot find vCenter by key ${key}`);
     }
     return vc;
   }

@@ -1,0 +1,80 @@
+<div #chartContainer class="chart-container">
+    <div *ngIf="!dataLoaded" class="loading-overlay">
+      <div class="spinner-spacer"></div>
+      <clr-spinner class="spinner"></clr-spinner>
+    </div>
+    <div *ngIf="noData" class="nodata-overlay">
+      <div class="nodata-spacer"></div>
+      <div class="nodata-text">NO DATA</div>
+    </div>
+    <div #timeSpanPick class="timespan-pick" *ngIf="timeSpansEnabled">
+      <div *ngFor="let spanName of timeSpans" class="timespan-pick-button" (click)="timeSpanOverride(spanName, $event)">{{ spanName }}</div>
+    </div>
+    <div #titleDiv class="title">{{ graphConfig?.title }}</div>
+    <div #descriptionDiv class="details">{{ graphConfig?.description }}</div>
+    <div *ngIf="graphData?.length == 0" class="no-data"><div class="no-data-inner">NO DATA</div></div>
+    <ngx-charts-line-chart
+      *ngIf="!noData"
+      [scheme]="graphConfig?.colorScheme"
+      [view]="graphConfig?.view"
+      [legend]="graphConfig?.legend"
+      [showXAxisLabel]="graphConfig?.showXAxisLabel"
+      [showYAxisLabel]="graphConfig?.showYAxisLabel"
+      [showGridLines]="graphConfig?.showGridLines"
+      [xAxis]="graphConfig?.xAxis"
+      [yAxis]="graphConfig?.yAxis"
+      [xAxisLabel]="graphConfig?.xAxisLabel"
+      [yAxisLabel]="graphConfig?.yAxisLabel"
+      [yScaleMin]="graphConfig?.yScaleMin"
+      [yScaleMax]="graphConfig?.yScaleMax"
+      [autoScale]="graphConfig?.autoScale"
+      [timeline]="graphConfig?.timeline"
+      [curve]="curves[graphConfig?.curveName]"
+      [animations]="graphConfig?.animation"
+
+      [results]="graphData"
+
+      [xAxisTickFormatting]="dateTickFormatting"
+
+      (select)="onSelect($event)"
+      (activate)="onActivate($event)"
+      (deactivate)="onDeactivate($event)"
+      >
+      <ng-template #tooltipTemplate let-model="model">
+        <div [attr.id]="'swimlane-tooltip-container-' + id" class="tooltip-container">
+          <div class="time-summary">{{ nameResolve(model.name) }}</div>
+          <table class="tooltip-series-table">
+            <tr class="tooltip-series">
+              <th></th>
+              <td *ngFor="let tagName of graphConfig?.target?.shownTags" class="tooltip-series-tag">{{ tagName }}</td>
+              <th class="tooltip-series-value">{{ graphConfig?.valueName }}</th>
+            </tr>
+            <tr class="tooltip-series">
+              <td><div class="tooltip-series-color" [ngStyle]="applyToolTipColor(model.color)"></div></td>
+              <td *ngFor="let tagValue of model.shownTagsValues" class="tooltip-series-tag">{{ tagValue }}</td>
+              <td class="tooltip-series-value">{{ trimValue(model.value) }}</td>
+            </tr>
+          </table>
+        </div>
+      </ng-template>
+      <ng-template #seriesTooltipTemplate let-model="model">
+        <div [attr.id]="'swimlane-series-tooltip-container-' + id" class="tooltip-container">
+          <div class="time-summary">{{ nameResolve(model[0].name) }}</div>
+          <table class="tooltip-series-table">
+            <tr class="tooltip-series">
+              <th></th>
+              <td *ngFor="let tagName of graphConfig?.target?.shownTags" class="tooltip-series-tag">{{ tagName }}</td>
+              <th class="tooltip-series-value">{{ graphConfig?.valueName }}</th>
+            </tr>
+            <div class="tooltip-divider-spacer"></div>
+            <div class="tooltip-divider"></div>
+            <tr *ngFor="let series of valueSort(model); let i = index" class="tooltip-series">
+              <td><div class="tooltip-series-color" [ngStyle]="applyToolTipColor(series.color, i)"></div></td>
+              <td *ngFor="let tagValue of series.shownTagsValues" class="tooltip-series-tag">{{ tagValue }}</td>
+              <td class="tooltip-series-value">{{ trimValue(series.value) }}</td>
+            </tr>
+          </table>
+        </div>
+      </ng-template>
+    </ngx-charts-line-chart>
+</div>

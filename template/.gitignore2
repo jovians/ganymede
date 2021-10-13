@@ -2,7 +2,10 @@
 
 # compiled output
 /dist
+/dist-server
+/dist-server-deps
 /dist-electron
+/dist-electron-src
 /tmp
 /out-tsc
 # Only exists if Bazel was run
@@ -56,10 +59,19 @@ Thumbs.db
 /electron-*.js
 
 # Ganymede
+.build.uuid
+.ganymede.topology.json
+/ganymede.js
 src/app/ganymede
 src/app/ganymede/*
 ganymede/**/*
 ganymede.app.js
+ganymede.app.interface.js
+ganymede.app.interface.ts
+ganymede.patch.ts
+
+# node.js profiles
+/isolate-*
 
 # secrets should not be committed
 ganymede.secrets.json

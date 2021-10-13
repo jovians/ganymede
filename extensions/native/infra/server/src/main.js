@@ -2,7 +2,7 @@
 /*
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 var native_infra_server_1 = require("./native.infra.server");
 var extData = process.env.EXT_DATA_BASE64;
 if (extData) {
@@ -12,4 +12,4 @@ var globalConfData = process.env.GLOBAL_CONF_DATA_BASE64;
 if (globalConfData) {
     globalConfData = JSON.parse(Buffer.from(globalConfData, 'base64').toString('utf8'));
 }
-new native_infra_server_1.NativeInfraExtensionServer().start(extData, globalConfData);
+new native_infra_server_1.NativeInfraExtensionServer(extData, globalConfData).start({ port: extData.port });
