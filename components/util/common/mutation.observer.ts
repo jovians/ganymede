@@ -2,7 +2,8 @@
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 
-import { LifecycleLinkable, LifecycleLinker, LifecycleLinkType } from './lifecycle.linker';
+import { ix } from '@jovian/type-tools';
+import { LifecycleLinker, LifecycleLinkType } from './lifecycle.linker';
 
 interface MutationWatcherConfig {
   childList?: boolean;
@@ -69,7 +70,7 @@ export class MutationWatcher {
 }
 
 export class MutationUtil {
-  static link(component: LifecycleLinkable, target: HTMLElement, onMutations: (mutations: MutationRecord[]) => void) {
+  static link(component: ix.Entity, target: HTMLElement, onMutations: (mutations: MutationRecord[]) => void) {
     const link = LifecycleLinker.link(LifecycleLinkType.MUTATION_SUBTREE, component, target);
     if (link) {
       let observer = new MutationWatcher(target, { childList: true, subtree: true, attributes: false });

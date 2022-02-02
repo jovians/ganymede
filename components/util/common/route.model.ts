@@ -52,9 +52,10 @@ export interface RouteMatchableDefinition {
   basePath: string;
 }
 
-export interface RouteData {
+export interface RouteData<T = any> {
   templateData: RouteDataTemplate;
   pageData: RouteDataPage;
+  pageParams?: T;
   reuse?: boolean;
   pathOverwrite?: ({from: string, to: string} | ((path: string, e?: RouterEvent) => (string | void)))[];
   staticOnly?: boolean;

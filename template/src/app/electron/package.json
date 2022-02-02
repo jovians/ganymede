@@ -1,0 +1,11 @@
+{
+  "name": "ganymede-customer-app-electron-internal",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "@jovian/type-tools": "^6.0.26",
+    "tslib": "^2.2.0",
+    "typescript": "^4.2.4"
+  },
+  "devDependencies": {}
+}

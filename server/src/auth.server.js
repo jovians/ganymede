@@ -61,15 +61,32 @@ exports.AuthServer = void 0;
 /*
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
-var fs = require("fs");
 var axios = require("axios");
 var http_shim_1 = require("./http.shim");
+var config_importer_1 = require("./config.importer");
+var shell_passthru_worker_1 = require("./workers/shell.passthru.worker");
+var WebSocket = require("ws");
+var uuid_1 = require("uuid");
+var common_1 = require("../../components/util/shared/common");
 var scopeName = "authsrv;pid=" + process.pid;
-var conf = fs.existsSync('config/ganymede.secrets.json') ?
-    JSON.parse(fs.readFileSync('config/ganymede.secrets.json', 'utf8'))
-    : JSON.parse(fs.readFileSync('ganymede.secrets.json', 'utf8'));
-var authServerData = conf === null || conf === void 0 ? void 0 : conf.authServer;
-var authData = authServerData === null || authServerData === void 0 ? void 0 : authServerData.auth;
+var authServerConfig = config_importer_1.secretsConfig === null || config_importer_1.secretsConfig === void 0 ? void 0 : config_importer_1.secretsConfig.authServer;
+var authData = authServerConfig === null || authServerConfig === void 0 ? void 0 : authServerConfig.auth;
+var wsDefaultOptions = {
+    port: 7002,
+    perMessageDeflate: {
+        zlibDeflateOptions: {
+            // See zlib defaults.
+            chunkSize: 1024, memLevel: 7, level: 3
+        },
+        zlibInflateOptions: { chunkSize: 10 * 1024 },
+        // Other options settable:
+        clientNoContextTakeover: true,
+        serverNoContextTakeover: true,
+        serverMaxWindowBits: 10,
+        concurrencyLimit: 10,
+        threshold: 1024 // Size (in bytes) below which messages should not be compressed.
+    }
+};
 var AuthServer = /** @class */ (function (_super) {
     __extends(AuthServer, _super);
     function AuthServer() {
@@ -80,11 +97,74 @@ var AuthServer = /** @class */ (function (_super) {
                 accessor: { required: true, baseToken: authData.tokenRoot },
                 secureChannel: { enabled: true, required: true, signingKey: authData.key },
             },
-            startOptions: { port: 7000 },
+            startOptions: { port: 7010 },
         }) || this;
+        _this.handlers = {};
         _this.apiVersion = 'v1';
         _this.apiPath = _this.configGlobal.api.basePath;
         _this.addDefaultProcessor(http_shim_1.ReqProcessor.BASIC);
+        _this.shellWorker = _this.addWorker(shell_passthru_worker_1.ShellPassthruWorkerClient);
+        var config = (0, common_1.completeConfig)({ port: 7002 }, wsDefaultOptions);
+        _this.wss = new WebSocket.Server(config);
+        var client;
+        _this.wss.on('connection', function (ws, req) {
+            try {
+                var target_1 = (0, uuid_1.v4)();
+                var reqArgsStr = Buffer.from(req.url.split('/wss/__xterm_wss__/?a=').pop(), 'base64').toString('utf8');
+                var args = JSON.parse(reqArgsStr);
+                var sessionId = args.sessionId;
+                var ctrlSequence = String.fromCharCode(16, 16) + sessionId;
+                var ctrlSequenceBuffer_1 = Buffer.from(ctrlSequence, 'ascii');
+                var ctrlSequenceLength_1 = ctrlSequence.length;
+                ws.sessionId = sessionId;
+                ws.ip = req.headers['x-real-ip'];
+                _this.handlers[target_1] = ws; // single handler per target
+                ws.on('message', function (message) {
+                    try {
+                        if (message.length > 1 && message[0] === 16 && message[1] === 16 &&
+                            message.compare(ctrlSequenceBuffer_1, 0, ctrlSequenceLength_1, 0, ctrlSequenceLength_1) === 0) {
+                            var ctrlPayload = message.slice(ctrlSequenceLength_1).toString('utf8');
+                            var ctrlLines = ctrlPayload.split('\n');
+                            var ctrlAction = ctrlLines.shift();
+                            var ctrlEncoding = ctrlLines.shift();
+                            var ctrlData = ctrlLines.join('\n');
+                            switch (ctrlAction) {
+                                case 'resize': {
+                                    var decoded = JSON.parse(ctrlData);
+                                    var cols = decoded.cols ? decoded.cols : 80;
+                                    var rows = decoded.rows ? decoded.rows : 24;
+                                    _this.shellWorker.resize(cols, rows);
+                                    break;
+                                }
+                            }
+                            return;
+                        }
+                        _this.shellWorker.inputData(message.toString('base64'));
+                    }
+                    catch (e) {
+                        console.log(e);
+                    }
+                });
+                ws.on('close', function () {
+                    _this.handlers[target_1] = null;
+                    // console.log(`Handler for '${target}' disconnected. (ip=${ws.ip}, wsid=${ws.uuid})`);
+                });
+                client = ws;
+            }
+            catch (e) {
+                console.log(e);
+            }
+        });
+        _this.shellWorker.output$.subscribe(function (data) {
+            if (client) {
+                client.send(data);
+            }
+        });
+        _this.shellWorker.close$.subscribe(function (_) {
+            if (client) {
+                client.send(client.ctrlPattern + 'closed');
+            }
+        });
         return _this;
     }
     AuthServer.prototype.proxyRequest = function (op) {
@@ -166,9 +246,17 @@ var AuthServer = /** @class */ (function (_super) {
             });
         });
     };
+    AuthServer.prototype.terminalIn = function (op) {
+        console.log('terminal-called');
+        this.shellWorker.inputData(op.req.params.command);
+        op.res.returnJson({});
+    };
     __decorate([
         http_shim_1.HTTP.GET("/proxy-request")
     ], AuthServer.prototype, "proxyRequest", null);
+    __decorate([
+        http_shim_1.HTTP.GET("/terminal-in")
+    ], AuthServer.prototype, "terminalIn", null);
     return AuthServer;
 }(http_shim_1.GanymedeHttpServer));
 exports.AuthServer = AuthServer;

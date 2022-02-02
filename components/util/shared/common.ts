@@ -29,7 +29,7 @@ export function completeConfigDirectly(targetConfig, defaultConfig) {
   return completeConfig(targetConfig, defaultConfig, true);
 }
 
-export function completeConfig(targetConfig, defaultConfig, directAssign = false, depth = 0) {
+export function completeConfig<T>(targetConfig: Partial<T>, defaultConfig: Partial<T>, directAssign = false, depth = 0): T {
   // clone both configs for base depth
   if (depth === 0) {
     if (targetConfig && typeof targetConfig === 'object' || Array.isArray(targetConfig)) {
@@ -42,18 +42,18 @@ export function completeConfig(targetConfig, defaultConfig, directAssign = false
     }
   }
   if (targetConfig === null || targetConfig === undefined) {
-    return defaultConfig;
+    return defaultConfig as T;
   }
   if (defaultConfig) {
     if (Array.isArray(defaultConfig)) {
-      return targetConfig;
+      return targetConfig as T;
     } else if (typeof defaultConfig === 'object') {
       for (const key of Object.keys(defaultConfig)) {
         targetConfig[key] = completeConfig(targetConfig[key], defaultConfig[key], false, depth + 1);
       }
     }
   }
-  return targetConfig;
+  return targetConfig as T;
 }
 
 export function topMomentOut(srcComponent: any, lockname: string, momentMs: number,

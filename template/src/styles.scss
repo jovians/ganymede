@@ -10,6 +10,11 @@
   scrollbar-width: none;
 }
 
+body {
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
 ::-webkit-scrollbar {
   width: 0px;
 }
@@ -20,5 +25,7 @@
 }
 
 @import './i18n-fonts.scss';
+
+@import './app/ganymede/styles/theme/themes-override.scss';
 
 @import './global.scss';

@@ -1,18 +1,40 @@
 /*
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
-import * as fs from 'fs';
 import * as axios from 'axios';
 import { GanymedeHttpServer, HTTP, HttpBaseLib, HttpMethod, HttpOp, ReqProcessor } from './http.shim';
+import { secretsConfig } from './config.importer';
+import { ShellPassthruWorkerClient } from './workers/shell.passthru.worker';
+import * as WebSocket from 'ws';
+import { v4 as uuidv4 } from 'uuid';
+import { completeConfig } from '../../components/util/shared/common';
 
 const scopeName = `authsrv;pid=${process.pid}`;
-const conf = fs.existsSync('config/ganymede.secrets.json') ?
-                JSON.parse(fs.readFileSync('config/ganymede.secrets.json', 'utf8'))
-              : JSON.parse(fs.readFileSync('ganymede.secrets.json', 'utf8'));
-const authServerData = conf?.authServer;
-const authData = authServerData?.auth;
+const authServerConfig = secretsConfig?.authServer;
+const authData = authServerConfig?.auth;
+
+const wsDefaultOptions = {
+  port: 7002,
+  perMessageDeflate: {
+    zlibDeflateOptions: {
+      // See zlib defaults.
+      chunkSize: 1024, memLevel: 7, level: 3
+    },
+    zlibInflateOptions: { chunkSize: 10 * 1024 },
+    // Other options settable:
+    clientNoContextTakeover: true, // Defaults to negotiated value.
+    serverNoContextTakeover: true, // Defaults to negotiated value.
+    serverMaxWindowBits: 10, // Defaults to negotiated value.
+    concurrencyLimit: 10, // Limits zlib concurrency for perf.
+    threshold: 1024 // Size (in bytes) below which messages should not be compressed.
+  }
+};
 
 export class AuthServer extends GanymedeHttpServer {
+
+  shellWorker: ShellPassthruWorkerClient;
+  wss: any;
+  handlers: {[key: string]: any} = {};
 
   constructor() {
     super({
@@ -22,11 +44,65 @@ export class AuthServer extends GanymedeHttpServer {
         accessor: { required: true, baseToken: authData.tokenRoot },
         secureChannel: { enabled: true, required: true, signingKey: authData.key },
       },
-      startOptions: { port: 7000 },
+      startOptions: { port: 7010 },
     });
     this.apiVersion = 'v1';
     this.apiPath = this.configGlobal.api.basePath;
     this.addDefaultProcessor(ReqProcessor.BASIC);
+    this.shellWorker = this.addWorker(ShellPassthruWorkerClient);
+    const config = completeConfig<typeof wsDefaultOptions>({ port: 7002 }, wsDefaultOptions);
+    this.wss = new WebSocket.Server(config);
+    let client;
+    this.wss.on('connection', (ws, req) => {
+      try {
+        const target = uuidv4();
+        const reqArgsStr = Buffer.from(req.url.split('/wss/__xterm_wss__/?a=').pop(), 'base64').toString('utf8');
+        const args = JSON.parse(reqArgsStr);
+        const sessionId = args.sessionId;
+        const ctrlSequence = String.fromCharCode(16, 16) + sessionId;
+        const ctrlSequenceBuffer = Buffer.from(ctrlSequence, 'ascii');
+        const ctrlSequenceLength = ctrlSequence.length;
+        ws.sessionId = sessionId;
+        ws.ip = req.headers['x-real-ip'];
+        this.handlers[target] = ws; // single handler per target
+        ws.on('message', (message: Buffer) => {
+          try {
+            if (message.length > 1 && message[0] === 16 && message[1] === 16 &&
+                message.compare(ctrlSequenceBuffer, 0, ctrlSequenceLength, 0, ctrlSequenceLength) === 0) {
+              const ctrlPayload = message.slice(ctrlSequenceLength).toString('utf8');
+              const ctrlLines = ctrlPayload.split('\n');
+              const ctrlAction = ctrlLines.shift();
+              const ctrlEncoding = ctrlLines.shift();
+              const ctrlData = ctrlLines.join('\n');
+              switch (ctrlAction) {
+                case 'resize': {
+                  const decoded = JSON.parse(ctrlData);
+                  const cols = decoded.cols ? decoded.cols : 80;
+                  const rows = decoded.rows ? decoded.rows : 24;
+                  this.shellWorker.resize(cols, rows);
+                  break;
+                }
+              }
+              return;
+            }
+            this.shellWorker.inputData(message.toString('base64'));
+          } catch (e) { console.log(e); }
+        });
+        ws.on('close', () => {
+          this.handlers[target] = null;
+          // console.log(`Handler for '${target}' disconnected. (ip=${ws.ip}, wsid=${ws.uuid})`);
+        });
+        client = ws;
+      } catch (e) {
+        console.log(e);
+      }
+    });
+    this.shellWorker.output$.subscribe(data => {
+      if (client) { client.send(data); }
+    });
+    this.shellWorker.close$.subscribe(_ => {
+      if (client) { client.send(client.ctrlPattern + 'closed'); }
+    });
   }
 
   @HTTP.GET(`/proxy-request`)
@@ -73,6 +149,13 @@ export class AuthServer extends GanymedeHttpServer {
         resolve();
       });
     });
+  }
+
+  @HTTP.GET(`/terminal-in`)
+  terminalIn(op: HttpOp) {
+    console.log('terminal-called');
+    this.shellWorker.inputData(op.req.params.command);
+    op.res.returnJson({});
   }
 
 }

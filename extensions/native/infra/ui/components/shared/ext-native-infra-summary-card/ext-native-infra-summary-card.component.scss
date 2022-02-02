@@ -82,14 +82,14 @@
 
 :host ::ng-deep {
   .util-orange {
-    progress { filter: hue-rotate(-135deg) saturate(14); }
+    progress { filter: hue-rotate(-135deg) saturate(9); }
   }
   .util-red {
-    progress { filter: hue-rotate(180deg) saturate(1.7); }
+    progress { filter: hue-rotate(180deg) saturate(1.9); }
   }
   .util-black {
     progress {
-      filter: hue-rotate(110deg) saturate(1.8) brightness(0);
+      filter: brightness(0);
       animation: blinker 1.5s linear infinite;
     }
   }

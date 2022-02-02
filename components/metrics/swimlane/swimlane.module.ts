@@ -1,26 +1,26 @@
 /*
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
-import { Modules } from '../../../../ui.modules';
-import { CommonModule } from '@angular/common';
-import { ClarityModule } from '@clr/angular';
 import { NgModule } from '@angular/core';
+import { Modules, ganyBaseModulesImport } from '../../../../ui.modules';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { GanymedeLayoutModule } from '../../layout/layout.module';
 import { SwimlaneTimeseriesGraphContent } from './swimlane-timeseries-graph-content/swimlane-timeseries-graph-content';
+import { SwimlaneAdvPieChartComponent } from './swimlane-adv-pie-chart/swimlane-adv-pie-chart.component';
 
 @NgModule({
   imports: [
-    ClarityModule,
+    ...ganyBaseModulesImport,
     NgxChartsModule,
-    CommonModule,
     GanymedeLayoutModule,
   ],
   declarations: [
     SwimlaneTimeseriesGraphContent,
+    SwimlaneAdvPieChartComponent,
   ],
   exports: [
     SwimlaneTimeseriesGraphContent,
+    SwimlaneAdvPieChartComponent,
   ],
 })
 export class GanymedeSwimlaneModule {

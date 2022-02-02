@@ -1,0 +1,78 @@
+<clr-tabs *ngIf="summary">
+  <clr-tab>
+    <button style="margin-left: 1.25rem;" clrTabLink>Overview</button>
+    <clr-tab-content *clrIfActive="true">
+      <div class="gany-content-cont">
+        <div class="gany-grid">
+          <div class="card summary-card">
+            <div class="card-header">
+              Filtered Issues ({{ summary.byOccurrence.issueList.length }})
+            </div>
+            <div class="card-block" style="overflow-x: hidden;">
+              <div style="height: 10rem;">
+                <swimlane-adv-pie-chart
+                  [graphConfig]="issueGraphConfig"
+                  [fetcher]="issueDataFetcher"
+                >
+                </swimlane-adv-pie-chart>
+              </div>
+            </div>
+          </div>
+          <div class="card summary-card">
+            <div class="card-header">
+              Total Issues Incl. 3rd Party ({{ summary.byOccurrence.issueListTotal.length }})
+            </div>
+            <div class="card-block" style="overflow-x: hidden;">
+              <div style="height: 10rem;">
+                <swimlane-adv-pie-chart
+                  [graphConfig]="issueTotalGraphConfig"
+                  [fetcher]="issueTotalDataFetcher"
+                >
+                </swimlane-adv-pie-chart>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="height: 10rem;"></div>
+    </clr-tab-content>
+  </clr-tab>
+  <clr-tab>
+    <button clrTabLink>Filtered Issues ({{ summary.byOccurrence.issueList.length }})</button>
+    <clr-tab-content>
+      <gany-ext-native-sec-cov-report-preview-issues
+        [title]="'Scan Result'"
+        [issueMap]="summary.byFile.issueMap"
+        [summary]="summary"
+        >
+      </gany-ext-native-sec-cov-report-preview-issues>
+      <div style="height: 10rem;"></div>
+    </clr-tab-content>
+  </clr-tab>
+  <clr-tab>
+    <button clrTabLink>All Issues ({{ summary.byOccurrence.issueListTotal.length }})</button>
+    <clr-tab-content>
+      <gany-ext-native-sec-cov-report-preview-issues
+        [title]="'Scan Result'"
+        [caveatDescription]="', Including 3rd Party Code'"
+        [issueMap]="summary.byFile.issueMapTotal"
+        [summary]="summary"
+        >
+      </gany-ext-native-sec-cov-report-preview-issues>
+      <div style="height: 10rem;"></div>
+    </clr-tab-content>
+  </clr-tab>
+  <clr-tab>
+    <button clrTabLink>Delta ({{ summary.byOccurrence.deltaIssueList?.length }})</button>
+    <clr-tab-content>
+      <gany-ext-native-sec-cov-report-preview-issues
+        [title]="'Compared to ' + summary?.settings?.comparisonReportName"
+        [isDeltaView]="false"
+        [issueMap]="summary.byFile.deltaIssueMap"
+        [summary]="summary"
+        >
+      </gany-ext-native-sec-cov-report-preview-issues>
+      <div style="height: 10rem;"></div>
+    </clr-tab-content>
+  </clr-tab>
+</clr-tabs>

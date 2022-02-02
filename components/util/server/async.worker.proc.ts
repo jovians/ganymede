@@ -2,7 +2,7 @@
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 import { ChildProcess, spawn, execSync } from 'child_process';
-import { ix } from '@jovian/type-tools';
+import { Class, ix } from '@jovian/type-tools';
 import { v4 as uuidv4 } from 'uuid';
 import * as os from 'os';
 
@@ -14,12 +14,13 @@ export interface AsyncActionHandlers {
   [actionName: string]: AsyncActionHandler;
 }
 
-export class AsyncWorkerClient {
+export class AsyncWorkerClient extends ix.Entity {
   static logger = log;
   static nullAction() {}
   workerData: any;
   proc: ChildProcess;
   responseFor = '';
+  handlerMap: {[name: string]: (msg: string, name: string) => any} = {};
   invokeMap: {[callId: string]: (msg: string) => any} = {};
   initPromise: Promise<void> = null;
   initResolver: any;
@@ -30,6 +31,7 @@ export class AsyncWorkerClient {
   endTime: number = null;
   onterminate: (() => any)[] = [];
   constructor(workerData: any, workerFile: string) {
+    super('async-worker-client');
     if (!workerData) { workerData = {}; }
     this.initPromise = new Promise<void>(resolve => { this.initResolver = resolve; });
     workerData.workerFile = workerFile;
@@ -41,6 +43,7 @@ export class AsyncWorkerClient {
         WORKER_DATA_BASE64: Buffer.from(JSON.stringify(workerData), 'utf8').toString('base64')
       }
     });
+    this.addDefaultHandlers();
     this.proc.on('message', messageSerial => {
       const message = messageSerial as string;
       if (this.responseFor) {
@@ -51,12 +54,12 @@ export class AsyncWorkerClient {
     });
   }
 
-  call<T = string>(action: string, payload: string = '', parser?: (response: string) => T) {
+  call<T = string, R = T>(action: string, payload: string = '', parser?: (response: string) => R) {
     const callId = `${action}::${uuidv4()}`;
-    return new Promise<T>(async resolve => {
+    return new Promise<R>(async resolve => {
       if (this.terminating || this.terminated) { return resolve(null); }
       if (!payload) { payload = ''; }
-      if (!parser) { parser = response => response as unknown as T; }
+      if (!parser) { parser = response => response as unknown as R; }
       await Promise.resolve(this.initPromise);
       this.invokeMap[callId] = response => {
         try {
@@ -78,41 +81,50 @@ export class AsyncWorkerClient {
   }
 
   import(scriptFile: string) {
-    return this.call<boolean>(`$import`, scriptFile, r => r ? true : false);
+    return this.call<boolean>(`$__import`, scriptFile, r => r ? true : false);
   }
 
   terminate(exitCode: number = 0) {
-    return this.call('$terminate', exitCode + '');
+    return this.call('$__terminate', exitCode + '');
+  }
+
+  setHandler(name: string, handler: (message: string, name: string) => any) {
+    if (!name.startsWith('$')) {
+      throw new Error(`handler name must start with $`);
+    }
+    this.handlerMap[name] = handler;
   }
 
   handleResponse(callId: string, message: string) {
     this.responseFor = '';
     if (callId.startsWith('$')) {
-      switch (callId) {
-        case '$init':
-          if (this.initResolver) { this.initResolver(); }
-          this.initResolver = this.initPromise = null;
-          return;
-        case '$termination_set':
-          this.terminating = true;
-          for (const cb2 of this.onterminate) { try { cb2(); } catch (e) {} }
-          return;
-        case '$terminated':
-          this.terminated = true;
-          this.endTime = Date.now();
-          this.duration = this.endTime - this.startTime;
-          return;
-      }
+      const hcb = this.handlerMap[callId];
+      if (hcb) { hcb(message, callId); delete this.invokeMap[callId]; }
+      return;
     }
     const cb = this.invokeMap[callId];
     if (cb) { cb(message); delete this.invokeMap[callId]; }
   }
 
-
+  private addDefaultHandlers() {
+    this.setHandler('$__init', (message, name) => {
+      if (this.initResolver) { this.initResolver(); }
+      this.initResolver = this.initPromise = null;
+    });
+    this.setHandler('$__termination_set', (message, name) => {
+      this.terminating = true;
+      for (const cb2 of this.onterminate) { try { cb2(); } catch (e) {} }
+    });
+    this.setHandler('$__terminated', (message, name) => {
+      this.terminated = true;
+      this.endTime = Date.now();
+      this.duration = this.endTime - this.startTime;
+    });
+  }
 
 }
 
-export class AsyncWorkerExecutor {
+export class AsyncWorkerExecutor extends ix.Entity {
   static logger = log;
   terminating = false;
   mainScope: ix.MajorScope;
@@ -122,6 +134,7 @@ export class AsyncWorkerExecutor {
   invokeMap: {[callId: string]: (msg: string) => any} = {};
   customAction: {[actionName: string]: AsyncActionHandler} = {};
   constructor(workerData: any) {
+    super('async-worker-logic');
     process.on('unhandledRejection', e => {
       // tslint:disable-next-line: no-console
       console.warn('[WARNING] UnhandledRejection:', e);
@@ -142,11 +155,13 @@ export class AsyncWorkerExecutor {
       if (core === 'auto' && workerData.workerId !== null && workerData.workerId !== undefined) {
         core = (workerData.workerId % os.cpus().length) + '';
       }
-      if (process.platform === 'linux') { execSync(`taskset -cp ${core} ${process.pid}`, {stdio: 'inherit'}); }
+      if (process.platform === 'linux') {
+        execSync(`taskset -cp ${core} ${process.pid}`, {stdio: 'inherit'});
+      }
     }
   }
   getSelf() { return this; }
-  setAsReady() { this.returnCall('$init'); }
+  setAsReady() { this.returnCall('$__init'); }
   returnCall(callId: string, response?: string) {
     if (!response) { response = ''; }
     process.send(callId);
@@ -159,17 +174,17 @@ export class AsyncWorkerExecutor {
     this.requestFor = '';
     const action = callId.split('::')[0];
     switch (action) {
-      case '$terminate': {
+      case '$__terminate': {
         if (this.terminating) { break; }
         this.terminating = true;
         const exitCode = payload ? parseInt(payload, 10) : 0;
         this.ontermination().finally(() => {
-          this.returnCall('$terminated');
+          this.returnCall('$__terminated');
           setTimeout(() => process.exit(exitCode), 1000);
         });
-        return this.returnCall('$termination_set');
+        return this.returnCall('$__termination_set');
       }
-      case '$import': {
+      case '$__import': {
         try {
           const module = require(payload);
           if (module.workerExtension) {
@@ -190,4 +205,14 @@ export class AsyncWorkerExecutor {
   }
   handleAction(callId: string, action: string, payload?: string): any {}
   async ontermination() {}
+}
+
+export function startWorker(workerFile: string, logic: Class<AsyncWorkerExecutor>) {
+  if (process.env.WORKER_DATA_BASE64) {
+    const workerData = JSON.parse(Buffer.from(process.env.WORKER_DATA_BASE64, 'base64').toString('utf8'));
+    if (workerData.workerFile === workerFile) {
+      return new logic(workerData).getSelf();
+    }
+  }
+  return false;
 }

@@ -17,8 +17,8 @@ import { ExtNativeInfraService } from '../../components/shared/ext-native-infra.
 export class ExtNativeInfraPageComponent extends ix.Entity implements OnInit, OnDestroy {
   static registration = Components.register(ExtNativeInfraPageComponent, () => require('./ext-native-infra-page.component.json'));
 
-  public static asRoute(subdir: string, routeData: RouteData, otherParams?: any) {
-    const routeDef = asRouteBasic(subdir, routeData, otherParams);
+  public static asRoute<T = any>(subdir: string, routeData: RouteData<T>) {
+    const routeDef = asRouteBasic(subdir, routeData);
     routeDef.main.component = ExtNativeInfraPageComponent;
     return [routeDef.main, ...routeDef.others];
   }

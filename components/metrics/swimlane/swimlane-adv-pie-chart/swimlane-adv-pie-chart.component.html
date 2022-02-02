@@ -1,0 +1,23 @@
+<div #chartContainer class="chart-container">
+  <div *ngIf="!fetcher.dataReady" class="loading-overlay">
+    <div class="spinner-spacer"></div>
+    <clr-spinner class="spinner"></clr-spinner>
+  </div>
+  <div *ngIf="fetcher.noData" class="nodata-overlay">
+    <div class="nodata-spacer"></div>
+    <div class="nodata-text">NO DATA</div>
+  </div>
+  <ngx-charts-advanced-pie-chart
+    *ngIf="fetcher.dataReady && !fetcher.noData"
+    [results]="fetcher.data"
+    [view]="graphConfig.view"
+    [scheme]="graphConfig.colorScheme"
+    [gradient]="graphConfig.gradient"
+    [animations]="graphConfig.animations"
+    [label]="graphConfig.label"
+    (select)="graphConfig.onSelect($event)"
+    (activate)="graphConfig.onActivate($event)"
+    (deactivate)="graphConfig.onDeactivate($event)"
+    >
+  </ngx-charts-advanced-pie-chart>
+</div>

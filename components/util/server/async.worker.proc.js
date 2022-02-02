@@ -1,4 +1,19 @@
 "use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -47,7 +62,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AsyncWorkerExecutor = exports.AsyncWorkerClient = void 0;
+exports.startWorker = exports.AsyncWorkerExecutor = exports.AsyncWorkerClient = void 0;
 /*
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
@@ -56,29 +71,32 @@ var type_tools_1 = require("@jovian/type-tools");
 var uuid_1 = require("uuid");
 var os = require("os");
 var logger_1 = require("../shared/logger");
-var AsyncWorkerClient = /** @class */ (function () {
+var AsyncWorkerClient = /** @class */ (function (_super) {
+    __extends(AsyncWorkerClient, _super);
     function AsyncWorkerClient(workerData, workerFile) {
-        var _this = this;
-        this.responseFor = '';
-        this.invokeMap = {};
-        this.initPromise = null;
-        this.terminating = false;
-        this.terminated = false;
-        this.duration = null;
-        this.startTime = Date.now();
-        this.endTime = null;
-        this.onterminate = [];
+        var _this = _super.call(this, 'async-worker-client') || this;
+        _this.responseFor = '';
+        _this.handlerMap = {};
+        _this.invokeMap = {};
+        _this.initPromise = null;
+        _this.terminating = false;
+        _this.terminated = false;
+        _this.duration = null;
+        _this.startTime = Date.now();
+        _this.endTime = null;
+        _this.onterminate = [];
         if (!workerData) {
             workerData = {};
         }
-        this.initPromise = new Promise(function (resolve) { _this.initResolver = resolve; });
+        _this.initPromise = new Promise(function (resolve) { _this.initResolver = resolve; });
         workerData.workerFile = workerFile;
-        this.workerData = workerData;
-        this.proc = (0, child_process_1.spawn)('node', ['--max-old-space-size=262144', workerFile], {
+        _this.workerData = workerData;
+        _this.proc = (0, child_process_1.spawn)('node', ['--max-old-space-size=262144', workerFile], {
             stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
             env: __assign(__assign({}, process.env), { WORKER_DATA_BASE64: Buffer.from(JSON.stringify(workerData), 'utf8').toString('base64') })
         });
-        this.proc.on('message', function (messageSerial) {
+        _this.addDefaultHandlers();
+        _this.proc.on('message', function (messageSerial) {
             var message = messageSerial;
             if (_this.responseFor) {
                 _this.handleResponse(_this.responseFor, message);
@@ -87,6 +105,7 @@ var AsyncWorkerClient = /** @class */ (function () {
                 _this.responseFor = message;
             }
         });
+        return _this;
     }
     AsyncWorkerClient.nullAction = function () { };
     AsyncWorkerClient.prototype.call = function (action, payload, parser) {
@@ -136,38 +155,27 @@ var AsyncWorkerClient = /** @class */ (function () {
         }); });
     };
     AsyncWorkerClient.prototype.import = function (scriptFile) {
-        return this.call("$import", scriptFile, function (r) { return r ? true : false; });
+        return this.call("$__import", scriptFile, function (r) { return r ? true : false; });
     };
     AsyncWorkerClient.prototype.terminate = function (exitCode) {
         if (exitCode === void 0) { exitCode = 0; }
-        return this.call('$terminate', exitCode + '');
+        return this.call('$__terminate', exitCode + '');
+    };
+    AsyncWorkerClient.prototype.setHandler = function (name, handler) {
+        if (!name.startsWith('$')) {
+            throw new Error("handler name must start with $");
+        }
+        this.handlerMap[name] = handler;
     };
     AsyncWorkerClient.prototype.handleResponse = function (callId, message) {
         this.responseFor = '';
         if (callId.startsWith('$')) {
-            switch (callId) {
-                case '$init':
-                    if (this.initResolver) {
-                        this.initResolver();
-                    }
-                    this.initResolver = this.initPromise = null;
-                    return;
-                case '$termination_set':
-                    this.terminating = true;
-                    for (var _i = 0, _a = this.onterminate; _i < _a.length; _i++) {
-                        var cb2 = _a[_i];
-                        try {
-                            cb2();
-                        }
-                        catch (e) { }
-                    }
-                    return;
-                case '$terminated':
-                    this.terminated = true;
-                    this.endTime = Date.now();
-                    this.duration = this.endTime - this.startTime;
-                    return;
+            var hcb = this.handlerMap[callId];
+            if (hcb) {
+                hcb(message, callId);
+                delete this.invokeMap[callId];
             }
+            return;
         }
         var cb = this.invokeMap[callId];
         if (cb) {
@@ -175,23 +183,48 @@ var AsyncWorkerClient = /** @class */ (function () {
             delete this.invokeMap[callId];
         }
     };
+    AsyncWorkerClient.prototype.addDefaultHandlers = function () {
+        var _this = this;
+        this.setHandler('$__init', function (message, name) {
+            if (_this.initResolver) {
+                _this.initResolver();
+            }
+            _this.initResolver = _this.initPromise = null;
+        });
+        this.setHandler('$__termination_set', function (message, name) {
+            _this.terminating = true;
+            for (var _i = 0, _a = _this.onterminate; _i < _a.length; _i++) {
+                var cb2 = _a[_i];
+                try {
+                    cb2();
+                }
+                catch (e) { }
+            }
+        });
+        this.setHandler('$__terminated', function (message, name) {
+            _this.terminated = true;
+            _this.endTime = Date.now();
+            _this.duration = _this.endTime - _this.startTime;
+        });
+    };
     AsyncWorkerClient.logger = logger_1.log;
     return AsyncWorkerClient;
-}());
+}(type_tools_1.ix.Entity));
 exports.AsyncWorkerClient = AsyncWorkerClient;
-var AsyncWorkerExecutor = /** @class */ (function () {
+var AsyncWorkerExecutor = /** @class */ (function (_super) {
+    __extends(AsyncWorkerExecutor, _super);
     function AsyncWorkerExecutor(workerData) {
-        var _this = this;
-        this.terminating = false;
-        this.data = {};
-        this.requestFor = '';
-        this.invokeMap = {};
-        this.customAction = {};
+        var _this = _super.call(this, 'async-worker-logic') || this;
+        _this.terminating = false;
+        _this.data = {};
+        _this.requestFor = '';
+        _this.invokeMap = {};
+        _this.customAction = {};
         process.on('unhandledRejection', function (e) {
             // tslint:disable-next-line: no-console
             console.warn('[WARNING] UnhandledRejection:', e);
         });
-        this.workerData = workerData;
+        _this.workerData = workerData;
         process.on('message', function (messageSerial) { return __awaiter(_this, void 0, void 0, function () {
             var message;
             return __generator(this, function (_a) {
@@ -206,7 +239,7 @@ var AsyncWorkerExecutor = /** @class */ (function () {
             });
         }); });
         var scope = workerData.scopeName ? workerData.scopeName : 'unnamed_scope';
-        this.mainScope = new type_tools_1.ix.MajorScope(scope + ("(" + process.pid + ")"));
+        _this.mainScope = new type_tools_1.ix.MajorScope(scope + ("(" + process.pid + ")"));
         if (workerData.coreAffinity !== null && workerData.coreAffinity !== undefined) {
             var core = workerData.coreAffinity;
             if (core === 'auto' && workerData.workerId !== null && workerData.workerId !== undefined) {
@@ -216,9 +249,10 @@ var AsyncWorkerExecutor = /** @class */ (function () {
                 (0, child_process_1.execSync)("taskset -cp " + core + " " + process.pid, { stdio: 'inherit' });
             }
         }
+        return _this;
     }
     AsyncWorkerExecutor.prototype.getSelf = function () { return this; };
-    AsyncWorkerExecutor.prototype.setAsReady = function () { this.returnCall('$init'); };
+    AsyncWorkerExecutor.prototype.setAsReady = function () { this.returnCall('$__init'); };
     AsyncWorkerExecutor.prototype.returnCall = function (callId, response) {
         if (!response) {
             response = '';
@@ -239,19 +273,19 @@ var AsyncWorkerExecutor = /** @class */ (function () {
                         this.requestFor = '';
                         action = callId.split('::')[0];
                         switch (action) {
-                            case '$terminate': {
+                            case '$__terminate': {
                                 if (this.terminating) {
                                     break;
                                 }
                                 this.terminating = true;
                                 exitCode_1 = payload ? parseInt(payload, 10) : 0;
                                 this.ontermination().finally(function () {
-                                    _this.returnCall('$terminated');
+                                    _this.returnCall('$__terminated');
                                     setTimeout(function () { return process.exit(exitCode_1); }, 1000);
                                 });
-                                return [2 /*return*/, this.returnCall('$termination_set')];
+                                return [2 /*return*/, this.returnCall('$__termination_set')];
                             }
-                            case '$import': {
+                            case '$__import': {
                                 try {
                                     module_1 = require(payload);
                                     if (module_1.workerExtension) {
@@ -288,5 +322,15 @@ var AsyncWorkerExecutor = /** @class */ (function () {
     };
     AsyncWorkerExecutor.logger = logger_1.log;
     return AsyncWorkerExecutor;
-}());
+}(type_tools_1.ix.Entity));
 exports.AsyncWorkerExecutor = AsyncWorkerExecutor;
+function startWorker(workerFile, logic) {
+    if (process.env.WORKER_DATA_BASE64) {
+        var workerData = JSON.parse(Buffer.from(process.env.WORKER_DATA_BASE64, 'base64').toString('utf8'));
+        if (workerData.workerFile === workerFile) {
+            return new logic(workerData).getSelf();
+        }
+    }
+    return false;
+}
+exports.startWorker = startWorker;

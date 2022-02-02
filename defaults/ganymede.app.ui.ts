@@ -37,6 +37,10 @@ export const otherProviders = [
 
 ];
 
+export const otherClarityIcons = [
+
+];
+
 HttpWrap.loadInitialIntercepts(http => {
 
 });

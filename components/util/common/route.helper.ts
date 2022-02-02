@@ -93,10 +93,10 @@ export function consumeSubDir(path: string, routeData?: RouteData, exceptions?: 
   return matcher;
 }
 
-export function asRouteBasic(subdir: string, routeData: RouteData, otherParams?: any) {
+export function asRouteBasic<T = any>(subdir: string, routeData: RouteData<T>) {
   const exceptions: {[path: string]: any} = {};
   const otherRouteDivisions: RouteMatchableDefinition[] = [];
-  const routeDef: RouteMatchableDefinition =  {
+  const routeDef: RouteMatchableDefinition = {
     matcher: consumeSubDir(subdir, routeData, exceptions),
     exceptions,
     component: null,
@@ -104,7 +104,6 @@ export function asRouteBasic(subdir: string, routeData: RouteData, otherParams?:
     data: routeData,
     basePath: subdir,
   };
-  if (otherParams) { Object.assign(routeDef, otherParams); }
   if (routeData.pageData) {
     routeData.pageData.path = subdir;
   }

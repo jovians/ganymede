@@ -1,0 +1,12 @@
+{
+  "namespace": "@jovian/ganymede-clr",
+  "mounted": "ganymede",
+  "group": "extensions/native/security/coverity/ui",
+
+  "name": "CovReportPreviewPageComponent",
+  "folder": "pages/cov-report-preview-page",
+  "file": "cov-report-preview-page.component",
+  "selector": "gany-ext-native-sec-cov-report-preview-page",
+
+  "attributes": ["ui", "angular", "clarity"]
+}

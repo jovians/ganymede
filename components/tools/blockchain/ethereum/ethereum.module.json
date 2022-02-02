@@ -1,0 +1,25 @@
+{
+  "namespace": "@jovian/ganymede-clr",
+  "mounted": "ganymede",
+  "group": "components/tools/blockchain/ethereum",
+
+  "name": "GanymedeEthereumModule",
+  "folder": "",
+  "file": "ethereum.module",
+
+  "attributes": ["ui", "angular", "clarity"],
+
+  "reqs": {
+    "npm": {
+      "web3": "^1.6.0"
+    },
+    "angular": {
+      "styles": [
+        
+      ],
+      "scripts": [
+        
+      ]
+    }
+  }
+}

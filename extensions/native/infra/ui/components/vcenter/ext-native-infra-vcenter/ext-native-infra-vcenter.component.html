@@ -10,6 +10,10 @@
       </button>
       <clr-tab-content *clrIfActive="currentTab === 'summary'">
         Dashboard content
+        <!-- <gany-xterm
+          [sessionId]="'IqncLEavW4Qg8RM3ycDvUHGump'"
+          [targetUrl]="'ws://localhost:7002/wss'">
+        </gany-xterm> -->
       </clr-tab-content>
     </clr-tab>
     <clr-tab>
@@ -55,6 +59,26 @@
                 [timeEnd]="timeEnd"
                 [dataFetcher]="dataFetcherDisk"
                 [graphConfig]="graphConfigs.disk"
+                [timeSpansEnabled]="false">
+                </swimlane-timeseries-graph-content>
+            </div>
+            <div class="card" style="min-width: 30%; height: 10rem;">
+              <swimlane-timeseries-graph-content
+                *ngIf="quickStatsGraphData"
+                [timeStart]="timeStart"
+                [timeEnd]="timeEnd"
+                [dataFetcher]="dataFetcherHostCount"
+                [graphConfig]="graphConfigs.hostCount"
+                [timeSpansEnabled]="false">
+                </swimlane-timeseries-graph-content>
+            </div>
+            <div class="card" style="min-width: 30%; height: 10rem;">
+              <swimlane-timeseries-graph-content
+                *ngIf="quickStatsGraphData"
+                [timeStart]="timeStart"
+                [timeEnd]="timeEnd"
+                [dataFetcher]="dataFetcherVmCount"
+                [graphConfig]="graphConfigs.vmCount"
                 [timeSpansEnabled]="false">
                 </swimlane-timeseries-graph-content>
             </div>

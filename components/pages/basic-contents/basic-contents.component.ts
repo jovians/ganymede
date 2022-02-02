@@ -34,8 +34,8 @@ export interface BasicContentMetadata {
 export class BasicContentsComponent implements OnInit, OnDestroy {
   static registration = Components.register(BasicContentsComponent, () => require('./basic-contents.component.json'));
 
-  public static asRoute(subdir: string, routeData: RouteData, otherParams?: any) {
-    const routeDef = asRouteBasic(subdir, routeData, otherParams);
+  public static asRoute<T = any>(subdir: string, routeData: RouteData<T>) {
+    const routeDef = asRouteBasic(subdir, routeData);
     routeDef.main.component = BasicContentsComponent;
     return [routeDef.main, ...routeDef.others];
   }

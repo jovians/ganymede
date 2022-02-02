@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "@jovian/fourq": "^1.0.14",
-    "@jovian/type-tools": "^6.0.43",
+    "@jovian/fourq": "^1.0.16",
+    "@jovian/type-tools": "^6.0.45",
     "express": "^4.17.1",
     "tslib": "^2.3.1"
   },

@@ -18,12 +18,21 @@ export interface HttpWrapperData<T> {
   timeout?: number;
 }
 
+interface HttpRequestPlus<T> extends HttpRequest<T> {
+  directResponse?: HttpResponse<T>;
+}
+
 export class HttpWrap {
   static initialOverrideLoaded = false;
   static currentIntercepts: { [id: string]: HttpWrapperData<any> } = {};
   static overrideByExactMatch: { [path: string]: HttpWrapperData<any> } = {};
   static overrideList: HttpWrapperData<any>[] = [];
   static overrideCount = 0;
+  static verbose = 0;
+
+  static setVerbose(value: number = 1) {
+    HttpWrap.verbose = value;
+  }
 
   static add<T = any>(
     condition: string | RegExp | ((path: string) => boolean),
@@ -33,6 +42,21 @@ export class HttpWrap {
       => (Promise<HttpResponse<T> | void> | void),
   ) {
     const reg = { condition, requestIntercept, responseIntercept };
+    if (typeof condition === 'string') {
+      HttpWrap.overrideByExactMatch[condition] = reg;
+      ++HttpWrap.overrideCount;
+    } else {
+      HttpWrap.overrideList.push(reg);
+      ++HttpWrap.overrideCount;
+    }
+  }
+
+  static addMock<T = any>(
+    condition: string | RegExp | ((path: string) => boolean),
+    requestIntoDirectResult?: (req: HttpRequestPlus<T>, util?: typeof HttpWrap)
+      => Promise<HttpRequest<T>>,
+  ) {
+    const reg = { condition, requestIntercept: requestIntoDirectResult, responseIntercept: null };
     if (typeof condition === 'string') {
       HttpWrap.overrideByExactMatch[condition] = reg;
       ++HttpWrap.overrideCount;
@@ -102,7 +126,8 @@ export class HttpWrap {
     return new HttpHeaders(headersData);
   }
 
-  static jsonContent(res: HttpResponse<any>, statusCode: number, content: any) {
+  static jsonContent(res: HttpResponse<any> | HttpRequest<any>, statusCode: number, content: any) {
+    if (res instanceof HttpRequest) { res = new HttpResponse<any>({ url: res.url }); }
     const contentJson = JSON.stringify(content);
     return new HttpResponse<any>({
       url: res.url,
@@ -114,7 +139,8 @@ export class HttpWrap {
       body: content,
     });
   }
-  static textContent(res: HttpResponse<any>, statusCode: number, text: string) {
+  static textContent(res: HttpResponse<any> | HttpRequest<any>, statusCode: number, text: string) {
+    if (res instanceof HttpRequest) { res = new HttpResponse<any>({ url: res.url }); }
     return new HttpResponse<any>({
       url: res.url,
       headers: HttpWrap.headersOverride(res.headers, {
@@ -125,7 +151,8 @@ export class HttpWrap {
       body: text,
     });
   }
-  static htmlContent(res: HttpResponse<any>, statusCode: number, html: string) {
+  static htmlContent(res: HttpResponse<any> | HttpRequest<any>, statusCode: number, html: string) {
+    if (res instanceof HttpRequest) { res = new HttpResponse<any>({ url: res.url }); }
     return new HttpResponse<any>({
       url: res.url,
       headers: HttpWrap.headersOverride(res.headers, {

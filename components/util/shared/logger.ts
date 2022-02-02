@@ -2,13 +2,10 @@
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 
-import { GanymedeLoggerSettings } from '../../ganymede.app.interface';
-import { ganymedeAppData } from '../../../../../../ganymede.app';
+import { GanymedeLoggerSettings } from '../../../defaults/ganymede.app.interface';
+// import { ganymedeAppData } from '../../../defaults/ganymede.app.interface';
 
 export class GanymedeLogger {
-  constructor(settings: GanymedeLoggerSettings) {
-
-  }
   info(...args) {
     // tslint:disable-next-line: no-console
     console.log(...args);
@@ -21,8 +18,11 @@ export class GanymedeLogger {
     // tslint:disable-next-line: no-console
     console.error(...args);
   }
+  loadSettings(settings: GanymedeLoggerSettings) {
+
+  }
 }
 
-export const log = new GanymedeLogger(ganymedeAppData.loggerSettings);
-ganymedeAppData.logger = log;
+export const log = new GanymedeLogger();
+// ganymedeAppData.logger = log;
 

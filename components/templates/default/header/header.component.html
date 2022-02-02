@@ -1,20 +1,19 @@
-<div class="alert alert-app-level">
-</div>
+<!-- <div class="alert alert-app-level"></div> -->
 <clr-header>
   <div class="branding branding-margins">
     <a [routerLink]="[app.landingPath]" class="nav-link">
       <div *ngIf="!app.subtitle && !app.toptitle">
-        <img [src]="app.icon" class="clr-icon branding-icon app-logo header-app-logo"/>
+        <img [src]="app.src(app.icon)" class="clr-icon branding-icon app-logo header-app-logo"/>
         <div class="title normal-title">{{ app.name }}</div>
       </div>
       <div *ngIf="app.toptitle && !app.subtitle">
         <div class="title top-title"><b>{{ app.toptitle }}</b></div>
-        <img [src]="app.icon" class="clr-icon branding-icon app-logo header-app-logo header-app-logo-toptitle"/>
+        <img [src]="app.src(app.icon)" class="clr-icon branding-icon app-logo header-app-logo header-app-logo-toptitle"/>
         <div class="title normal-title title-on-bottom">{{ app.name }}</div>
       </div>
       <div *ngIf="app.subtitle && !app.toptitle">
         <div class="title sub-title"><b>{{ app.subtitle }}</b></div>
-        <img [src]="app.icon" class="clr-icon branding-icon app-logo header-app-logo header-app-logo-subtitle"/>
+        <img [src]="app.src(app.icon)" class="clr-icon branding-icon app-logo header-app-logo header-app-logo-subtitle"/>
         <div class="title normal-title title-on-top">{{ app.name }}</div>
       </div>
     </a>
@@ -32,8 +31,8 @@
     </div>
     <clr-dropdown *ngFor="let headerAction of app.headerActions" class="header-action-item">
         <button class="nav-icon" clrDropdownTrigger aria-label="toggle settings menu">
-            <clr-icon [attr.shape]="headerAction.icon.value"></clr-icon>
-            <clr-icon shape="caret down"></clr-icon>
+            <cds-icon [attr.shape]="headerAction.icon.value"></cds-icon>
+            <cds-icon shape="caret down"></cds-icon>
         </button>
         <clr-dropdown-menu *clrIfOpen clrPosition="bottom-right">
             <a *ngFor="let headerActionItem of headerAction.list"
@@ -46,5 +45,6 @@
         </clr-dropdown-menu>
     </clr-dropdown>
     <div class="header-action-item" style="height:1px; width:12px; pointer-events: none;"></div>
+    <ng-content #headerOtherContent></ng-content>
   </div>
 </clr-header>

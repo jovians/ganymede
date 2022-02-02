@@ -5,7 +5,7 @@
 
   "name": "GanymedeConfiguratorModule",
   "folder": "",
-  "file": "configurator.module",
+  "file": "configurator.module.aux",
 
   "attributes": ["ui", "angular", "clarity"]
 }

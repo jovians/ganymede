@@ -6,13 +6,23 @@ import { autoUnsub, ix } from '@jovian/type-tools';
 import { ExtNativeInfraService } from '../../shared/ext-native-infra.service';
 import { AppService, rx } from '../../../../../../../components/services/app.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { RouteObservingService } from 'src/app/ganymede/components/services/route-observing.service';
+import { RouteObservingService } from '../../../../../../../components/services/route-observing.service';
 import { bindSub, completeConfig } from '../../../../../../../components/util/shared/common';
-import { SwimlaneTimeseriesGraphConfig } from 'src/app/ganymede/components/metrics/swimlane/swimlane-timeseries-graph-content/swimlane-timeseries-graph-content';
+import { SwimlaneTimeseriesGraphConfig } from '../../../../../../../components/metrics/swimlane/swimlane-timeseries-graph-content/swimlane-timeseries-graph-content';
+import { Terminal } from 'xterm';
+import { FitAddon } from 'xterm-addon-fit';
+import { v4 as uuidv4} from 'uuid';
+import { SizeUtil } from '../../../../../../../components/util/common/size.util';
+
+// declare var Terminal: any;
 
 const baseGraphConfig = {
   yScaleMin: 0,
   yScaleMax: 100,
+};
+
+const countsGraphConfig = {
+  yScaleMin: 0,
 };
 
 @Component({
@@ -36,10 +46,13 @@ export class ExtNativeInfraVcenterComponent extends ix.Entity implements OnInit,
   currentKey = null;
   currentTab = this.getCurrentTabName();
   graphConfigs = {
-    cpu: new SwimlaneTimeseriesGraphConfig(completeConfig(baseGraphConfig, { title: 'CPU'})),
-    mem: new SwimlaneTimeseriesGraphConfig(completeConfig(baseGraphConfig, { title: 'MEM'})),
-    disk: new SwimlaneTimeseriesGraphConfig(completeConfig(baseGraphConfig, { title: 'DISK'})),
+    cpu: new SwimlaneTimeseriesGraphConfig(completeConfig<SwimlaneTimeseriesGraphConfig>(baseGraphConfig, { title: 'CPU' })),
+    mem: new SwimlaneTimeseriesGraphConfig(completeConfig<SwimlaneTimeseriesGraphConfig>(baseGraphConfig, { title: 'MEM' })),
+    disk: new SwimlaneTimeseriesGraphConfig(completeConfig<SwimlaneTimeseriesGraphConfig>(baseGraphConfig, { title: 'DISK' })),
+    hostCount: new SwimlaneTimeseriesGraphConfig(completeConfig<SwimlaneTimeseriesGraphConfig>(countsGraphConfig, { title: 'HOST COUNT' })),
+    vmCount: new SwimlaneTimeseriesGraphConfig(completeConfig<SwimlaneTimeseriesGraphConfig>(countsGraphConfig, { title: 'VM COUNT' })),
   };
+  wsClient;
 
   constructor(
     public app: AppService,
@@ -71,7 +84,10 @@ export class ExtNativeInfraVcenterComponent extends ix.Entity implements OnInit,
       }
     });
   }
-  ngOnDestroy() { autoUnsub(this); this.destroy(); }
+  ngOnDestroy() {
+    autoUnsub(this);
+    this.destroy();
+  }
 
   ngOnChanges(changes: SimpleChanges) {
     for (const propName of Object.keys(changes)) {
@@ -118,6 +134,8 @@ export class ExtNativeInfraVcenterComponent extends ix.Entity implements OnInit,
   dataFetcherCpu = (params) => new Promise<any>(resolve => { resolve(this.quickStatsGraphData.cpu); });
   dataFetcherMem = (params) => new Promise<any>(resolve => { resolve(this.quickStatsGraphData.mem); });
   dataFetcherDisk = (params) => new Promise<any>(resolve => { resolve(this.quickStatsGraphData.disk); });
+  dataFetcherHostCount = (params) => new Promise<any>(resolve => { resolve(this.quickStatsGraphData.hostCount); });
+  dataFetcherVmCount = (params) => new Promise<any>(resolve => { resolve(this.quickStatsGraphData.vmCount); });
 
   extractGraphData(qsData) {
     const shownTags = ['metric'];
@@ -134,11 +152,13 @@ export class ExtNativeInfraVcenterComponent extends ix.Entity implements OnInit,
       return seriesData;
     };
     const data = {
+      hostCount: { shownTags, timeseries: [ newSeries('host-count', 1) ] },
+      vmCount: { shownTags, timeseries: [ newSeries('vm-count', 2) ] },
       cpu: { shownTags, timeseries: [ newSeries('cpu', 3) ] },
       mem: { shownTags, timeseries: [ newSeries('mem', 4) ] },
       disk: { shownTags, timeseries: [ newSeries('disk', 5) ] },
     };
-    let baseTime = Math.floor(Date.now() / 1000) - (Math.floor(Date.now() / 1000) % 86400);
+    let baseTime = Math.floor(Date.now() / 1000) - (Math.floor(Date.now() / 1000) % 2592000);
     let hasLooped = false;
     let prevTime = -1;
     let i = 0;
@@ -146,13 +166,13 @@ export class ExtNativeInfraVcenterComponent extends ix.Entity implements OnInit,
     for (const datapoint of qsData.history) {
       const t = datapoint[0];
       if (prevTime === -1) { prevTime = t; ++i; continue; }
-      if (t < prevTime) { loopIndex = i; hasLooped = true; baseTime -= 86400; break; }
+      if (t < prevTime) { loopIndex = i; hasLooped = true; baseTime -= 2592000; break; }
       prevTime = t;
       ++i;
     }
     i = 0;
     for (const datapoint of qsData.history) {
-      if (i === loopIndex) { baseTime += 86400; }
+      if (i === loopIndex) { baseTime += 2592000; }
       const ts = (baseTime + datapoint[0]) * 1000;
       for (const seriesData of serieses) {
         if (datapoint[seriesData.index] === null) { continue; }

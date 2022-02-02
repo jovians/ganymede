@@ -40,7 +40,7 @@ cp "package-lock.json" "profiles/$PRODUCT_NAME/package-lock.json"
 cp "src/index.html" "profiles/$PRODUCT_NAME/src/index.html"
 cp "src/global.scss" "profiles/$PRODUCT_NAME/src/global.scss"
 cp "src/variables.scss" "profiles/$PRODUCT_NAME/src/variables.scss"
-cp "src/app/app.module.ts" "profiles/$PRODUCT_NAME/src/app/app.module.ts"
+# cp "src/app/app.module.ts" "profiles/$PRODUCT_NAME/src/app/app.module.ts"
 
 cp -R electron/* "profiles/$PRODUCT_NAME/electron"
 
@@ -54,5 +54,6 @@ cp -R src/assets/other/* "profiles/$PRODUCT_NAME/src/assets/other"
 
 cp -R src/app/routes/* "profiles/$PRODUCT_NAME/src/app/routes"
 cp -R src/app/main/* "profiles/$PRODUCT_NAME/src/app/main"
+cp -R src/app/main/* "profiles/$PRODUCT_NAME/src/app/template"
 
 echo "Saved to '$PRODUCT_NAME'"

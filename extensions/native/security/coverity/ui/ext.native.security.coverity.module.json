@@ -1,0 +1,11 @@
+{
+  "namespace": "@jovian/ganymede-clr",
+  "mounted": "ganymede",
+  "group": "extensions/native/security/coverity/ui",
+
+  "name": "GanymedeExtNativeSecurityCoverityModule",
+  "folder": "",
+  "file": "ext.native.security.coverity",
+
+  "attributes": ["ui", "angular", "clarity"]
+}

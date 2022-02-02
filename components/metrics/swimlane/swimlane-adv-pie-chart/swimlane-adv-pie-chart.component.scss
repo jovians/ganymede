@@ -1,0 +1,48 @@
+:host {
+  .chart-container {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .loading-overlay {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    text-align: center;
+    background-color:rgba(140, 140, 140, 0.2);
+    .spinner-spacer {
+      width: 100%;
+      height: 35%;
+    }
+  }
+  
+  .nodata-overlay {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    text-align: center;
+    .nodata-spacer {
+      height: 45%;
+    }
+    .nodata-text {
+      width: 100%;
+      text-align: center;
+      font-size: 2rem;
+      color: rgba(140, 140, 140, 0.35);
+    }
+  }
+
+  ::ng-deep {
+    div.legend-items {
+      overflow: visible !important;
+    }
+  }
+}

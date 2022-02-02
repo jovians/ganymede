@@ -17,6 +17,8 @@
   ],
   "exclude": [
     "**/*.spec.ts",
+    "**/*.aux.ts",
+    "**/aux/**/*",
     "**/dist/**/*",
     "**/dist-server/**/*",
     "**/dist-server-deps/**/*",
@@ -29,6 +31,8 @@
     "src/assets/i18n/**/*",
     "src/assets-root/**/*",
     "src/app/ganymede/*.ts",
+    "src/app/ganymede/src/**/*",
+    "src/app/ganymede/npm-deps/**/*",
     "src/app/ganymede/defaults/**/*",
     "src/app/ganymede/template/**/*",
     "src/app/ganymede/electron/**/*",

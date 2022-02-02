@@ -51,4 +51,5 @@ Thumbs.db
 
 # ignore ganymede real sources
 .ganysource
+.extension.build.uuid
 jovian-ganymede-clr-*

@@ -207,9 +207,9 @@ var GanymedeHttpServer = /** @class */ (function () {
         if (!config.scopeName) {
             config.scopeName = "httpshim;pid=" + process.pid;
         }
-        config = (0, common_1.completeConfig)(config, defaultConfig);
-        config.debug.showErrorStack = true;
-        return config;
+        var newConfig = (0, common_1.completeConfig)(config, defaultConfig);
+        newConfig.debug.showErrorStack = true;
+        return newConfig;
     };
     GanymedeHttpServer.prototype.addDefaultProcessor = function () {
         var processors = [];
@@ -238,6 +238,9 @@ var GanymedeHttpServer = /** @class */ (function () {
         return def;
     };
     GanymedeHttpServer.prototype.addWorker = function (workerClass, workerData) {
+        if (!workerData) {
+            workerData = {};
+        }
         if (!this.workerFleet[workerClass.name]) {
             this.workerFleet[workerClass.name] = { workers: [] };
         }

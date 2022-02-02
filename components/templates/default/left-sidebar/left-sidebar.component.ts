@@ -21,6 +21,7 @@ export class LeftSidebarComponent implements OnInit, AfterViewInit, OnDestroy {
   idemGuard = Date.now();
   private routeSubscription: Subscription;
   private selectedRef = null;
+  private activeTarget;
 
   constructor(
     public app: AppService,
@@ -46,7 +47,7 @@ export class LeftSidebarComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.selectedRef) {
       const el = document.getElementById('main-menu-item-' + this.selectedRef.path);
       if (!el) {
-        el.classList.remove('active');
+        if (this.activeTarget) { this.activeTarget.classList.remove('active'); }
         this.selectedRef.active = false;
       }
     }
@@ -54,6 +55,7 @@ export class LeftSidebarComponent implements OnInit, AfterViewInit, OnDestroy {
     const target = document.getElementById('main-menu-item-' + detected.path);
     if (target) {
       target.classList.add('active');
+      this.activeTarget = target;
       this.selectedRef = detected;
       this.selectedRef.active = true;
     }

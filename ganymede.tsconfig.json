@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "target": "es2015",
+    "module": "commonjs",
+    "strict": false,
+    "types": ["node"],
+    "moduleResolution": "Node",
+    "forceConsistentCasingInFileNames": true,
+    "removeComments": true,
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false
+  },
+  "files": [
+    "ganymede.ts",
+    "ganymede.license.ts"
+  ],
+  "include": [
+    "src/**/*.ts"
+  ]
+}

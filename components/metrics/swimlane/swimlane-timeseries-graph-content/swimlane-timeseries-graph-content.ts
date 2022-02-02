@@ -4,11 +4,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Component, Input, OnInit, OnChanges, SimpleChanges, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { getDateString, getDateYearString, getTimeDateString, getTimeString } from '../../../util/shared/time/time.formats';
-import { lifecycleEnd, LifecycleLinkable } from '../../../util/common/lifecycle.linker';
 import { SizeUtil } from '../../../util/common/size.util';
 import { DomTreeUtil } from '../../../util/common/dom.tree.util';
-import { completeConfig, completeConfigDirectly } from '../../../util/shared/common';
+import { completeConfigDirectly } from '../../../util/shared/common';
 import { namedCurves } from '../d3.curves.map';
+import { ix } from '@jovian/type-tools';
 
 export const oneHour = 3600 * 1000;
 export const oneDay = 24 * oneHour;
@@ -82,18 +82,28 @@ export class SwimlaneTimeseriesGraphConfig {
 }
 
 
+interface DataFetchArgs {
+  timeStart: number;
+  timeEnd: number;
+}
+
+interface DataFetchResult {
+  timeseries: any[];
+  shownTags?: any[];
+}
+
 @Component({
   selector: 'swimlane-timeseries-graph-content',
   templateUrl: './swimlane-timeseries-graph-content.html',
   styleUrls: ['./swimlane-timeseries-graph-content.scss']
 })
-export class SwimlaneTimeseriesGraphContent implements OnInit, OnChanges, OnDestroy, LifecycleLinkable {
+export class SwimlaneTimeseriesGraphContent extends ix.Entity implements OnInit, OnChanges, OnDestroy {
 
   @Input() graphConfig = new SwimlaneTimeseriesGraphConfig();
   @Input() timeStart = Date.now() - timeStartDefaultAgo; // UNIX TS, miliseconds
   @Input() timeEnd = Date.now(); // UNIX TS, miliseconds
-  @Input() dataFetcher: (...args: any[]) => Promise<any> = null;
-  @Input() onupdate: (...args: any[]) => any = null;
+  @Input() dataFetcher: (arg: DataFetchArgs) => Promise<DataFetchResult> = null;
+  @Input() onupdate: (graphData: any) => void = null;
   @Input() updateTrigger = 0;
   @Input() hidden = false;
   @Input() timeSpans = ['5m', '30m', '2h', '1d', '8d'];
@@ -114,7 +124,9 @@ export class SwimlaneTimeseriesGraphContent implements OnInit, OnChanges, OnDest
   noData: boolean = false;
   curves = namedCurves;
 
-  constructor(private host: ElementRef) {}
+  constructor(private host: ElementRef) {
+    super('swimlane-timeseries-graph-content');
+  }
 
   ngOnInit() {
     const cont = this.chartContainer.nativeElement;
@@ -140,7 +152,7 @@ export class SwimlaneTimeseriesGraphContent implements OnInit, OnChanges, OnDest
   }
 
   ngOnDestroy() {
-    lifecycleEnd(this);
+    this.destroy();
   }
 
   getTooltipContainer() {

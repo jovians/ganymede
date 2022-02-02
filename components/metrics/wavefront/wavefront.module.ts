@@ -1,15 +1,14 @@
 /*
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
-import { Modules } from '../../../../ui.modules';
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Modules, ganyBaseModulesImport } from '../../../../ui.modules';
 import { GanymedeSwimlaneModule } from '../swimlane/swimlane.module';
 import { WavefrontEmbeddedChartComponent } from './wavefront-embedded-chart/wavefront-embedded-chart.component';
 
 @NgModule({
   imports: [
-    CommonModule,
+    ...ganyBaseModulesImport,
     GanymedeSwimlaneModule,
   ],
   declarations: [

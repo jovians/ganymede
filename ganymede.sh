@@ -69,11 +69,7 @@ elif [[ $ACTION_NAME == "pwd" ]]; then
   pwd
 
 elif [[ $ACTION_NAME == "cli" ]]; then
-  if [ ! -f ganymede.conf.json ]; then
-      echo "ERROR: Cannot execute scripts on working directory that doesn't have ganymede.conf.json file."
-      exit 1
-  fi
-  node "$GANY_CLI_DIR/ganymede.js" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9"
+  node "$GANY_CLI_DIR/ganymede.js" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10}" "${11}" "${12}" "${13}" "${14}" "${15}" "${16}" "${17}" "${18}" "${19}" "${20}"
 
 elif [[ $ACTION_NAME == "cli-update" ]]; then
   echo "Updating ganymede cli package..."

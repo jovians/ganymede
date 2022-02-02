@@ -1,0 +1,44 @@
+<clr-stack-view *ngIf="summary && issuesCount() > 0" style="margin-left: 1rem; margin-right: 1rem;">
+  <clr-stack-header>
+    {{ title }} ({{ issuesCount() }} Issues in {{filesCount()}} Files{{caveatDescription}})
+    <button class="btn btn-link" (click)="toggleCollapseAll()">{{ collapseAll ? 'Expand All' : 'Collapse All' }}</button>
+  </clr-stack-header>
+  <clr-stack-block *ngFor="let issueInFile of issueMap | keyvalue"
+    [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="2" [clrSbExpanded]="!collapseAll"
+  >
+    <clr-stack-label></clr-stack-label>
+    <clr-stack-content>
+      <b>{{ issueInFile.value.length }}</b> Issues in <b>{{ getFileNameOnly(issueInFile.value[0]) }}</b> ({{ issueInFile.value[0].relPath }})
+    </clr-stack-content>
+    <clr-stack-block gany-clr-stack-block-content-style="full-content"
+      [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1"
+    >
+      <div class="issues-container">
+        <div *ngFor="let issue of issueInFile.value" class="card issue-card">
+          {{ fetchIssueFile(issue) }}
+          <div class="card-header">
+            <span *ngIf="severityIs(issue, 'high')" class="label label-error issue-label">HIGH</span>
+            <span *ngIf="severityIs(issue, 'medium')" class="label label-warning issue-label">MEDIUM</span>
+            <span *ngIf="severityIs(issue, 'low')" class="label label-success issue-label">LOW</span>
+            <span *ngIf="severityIs(issue, 'unknown')"class="label label-info issue-label">UNKNOWN</span>
+            {{ issue.kind.name.en }}
+            <br>
+            <span style="font-size: 80%; font-family: 'Courier New', Courier, monospace;">
+              @line <span style="font-weight: bold;">{{ issue.mainEventLineNumber }}</span>
+            </span>
+            <span style="font-size: 80%; margin-left: 0.3rem;">in <span style="font-weight: bold;">{{ getFileNameOnly(issue) }}</span></span>
+          </div>
+          <div class="card-block" style="margin-bottom: 0; padding-bottom: 0.25rem;">
+            <div class="issue-desc">{{ issue.mainEventDescription }}</div>
+            <span [innerHtml]="issue.kind.description.en"></span>
+            <div *ngIf="issue.fileRef?.slice" [attr.id]="'cov-issue-' + issue.localIndex">
+              <pre class="code-no-margin line-numbers" [attr.data-start]="lineStart(issue)" [attr.data-line]="issue.mainEventLineNumber"><code [attr.class]="langClass(issue)">{{ issue.fileRef?.slice }}</code></pre>
+            </div>
+            <div *ngIf="!issue.fileRef?.slice"></div>
+            <span style="font-size: 75%; opacity: 0.6; margin-left: 0.2rem; line-height: 1;">Checked by: {{ issue.kind.cim_checker_properties.category }} (KEY={{ issue.kind.type }})</span>
+          </div>
+        </div>
+      </div>
+    </clr-stack-block>
+  </clr-stack-block>
+</clr-stack-view>

@@ -1,0 +1,26 @@
+{
+  "namespace": "@jovian/ganymede-clr",
+  "mounted": "ganymede",
+  "group": "components/tools/xterm",
+
+  "name": "GanymedeXtermModule",
+  "folder": "",
+  "file": "xterm.module",
+
+  "attributes": ["ui", "angular", "clarity"],
+
+  "reqs": {
+    "npm": {
+      "xterm": "^4.14.1",
+      "xterm-addon-fit": "^0.5.0"
+    },
+    "angular": {
+      "styles": [
+        "node_modules/xterm/css/xterm.css"
+      ],
+      "scripts": [
+        "node_modules/xterm/lib/xterm.js"
+      ]
+    }
+  }
+}

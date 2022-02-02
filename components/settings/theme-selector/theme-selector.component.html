@@ -1,0 +1,9 @@
+<div>
+  <h3 *ngIf="headerVisible">{{ headerText }}</h3>
+  <form clrForm>
+    <clr-radio-wrapper *ngFor="let theme of themeChoices | keyvalue : kvOrder.original">
+      <input type="radio" clrRadio [value]="theme.key" name="theme" [(ngModel)]="selectedTheme" (click)="themeChange()"/>
+      <label>{{ theme.value }}</label>
+    </clr-radio-wrapper>
+  </form>
+</div>

@@ -7,6 +7,8 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Components } from '../../../../ui.components';
 
+const mdImageRegExp = /!\[(?<alttext>.*?)\]\((?<filename>.*?)(?=\"|\))(?<optionalpart>\".*\")?\)/g;
+
 @Component({
     selector: 'markdown-frame',
     templateUrl: './markdown-frame.component.html',
@@ -42,6 +44,34 @@ export class MarkdownFrameComponent implements AfterViewInit, OnDestroy {
       this.src = src;
       if (this.src) {
         this.http.get(this.src, {responseType: 'text'}).subscribe(data => {
+            if (src.startsWith('/')) {
+              const srcPath = src.split('/').slice(0, -1).join('/');
+              const lines = data.split('\n');
+              const newContent = [];
+              for (let line of lines) {
+                line = line.replace('<THIS_CONTENT_PATH>', srcPath);
+                let transformedLine = line;
+                const matches = line.matchAll(mdImageRegExp);
+                for (const match of matches) {
+                  if (match.groups?.filename &&
+                      !match.groups.filename.startsWith('http://') &&
+                      !match.groups.filename.startsWith('https://') &&
+                      !match.groups.filename.startsWith('/assets/')) {
+                      const lookFor = match[0];
+                      const replaced = lookFor.replace(
+                                            match.groups.filename,
+                                            `${srcPath}/${match.groups.filename}`);
+                      const replacedLine = line.replace(lookFor, replaced);
+                      transformedLine = replacedLine;
+                  }
+                }
+                newContent.push(transformedLine);
+              }
+              data = newContent.join('\n');
+            }
+            // for (const groupKey of Object.keys(groups)) {
+            //   console.log(groupKey, groups[groupKey]);
+            // }
             try {
                 this.markdownViewer.render(data, true);
                 resolve(true);

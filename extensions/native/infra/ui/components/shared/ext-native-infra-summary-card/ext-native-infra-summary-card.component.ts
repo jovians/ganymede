@@ -3,6 +3,7 @@
  */
 import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { autoUnsub, ix } from '@jovian/type-tools';
+import { Subscription } from 'rxjs';
 import { AppService, rx } from '../../../../../../../components/services/app.service';
 import { ExtNativeInfraService } from '../ext-native-infra.service';
 
@@ -22,9 +23,11 @@ export class ExtNativeInfraSummaryCardComponent extends ix.Entity implements OnI
   vcenter = ExtNativeInfraService.skel?.ds?.vcenter;
   key: string = '';
   statsTimer;
+  dataSub: Subscription
   dataLoaded = false;
   dataLoadingShow = false;
   dataLoadFailed = false;
+  currentStats;
 
   numFormat: (n: number, unit?: string) => string;
 
@@ -38,13 +41,13 @@ export class ExtNativeInfraSummaryCardComponent extends ix.Entity implements OnI
       rx.invoke(this.app.store.extInfra.vcenter.quickStats.actions.FETCH, { key: this.entryData.key });
     }, 30000);
     // tslint:disable-next-line: deprecation
-    this.app.store.extInfra.vcenter.quickStats.data$.subscribe(vcenters => {
-      if (vcenters[this.key]) { this.dataLoaded = true; }
-      console.log(vcenters[this.key]);
+    this.dataSub = this.app.store.extInfra.vcenter.quickStats.data$.subscribe(vcenters => {
+      if (vcenters[this.key]) { this.dataLoaded = true; this.currentStats = vcenters[this.key]; }
     });
     setTimeout(() => { this.dataLoadingShow = true; }, 1000);
     setTimeout(() => { if (!this.dataLoaded) { this.dataLoadFailed = true; } }, 7000);
     this.addOnDestroy(() => {
+      if (this.dataSub) { this.dataSub.unsubscribe(); }
       if (this.statsTimer) { clearInterval(this.statsTimer); this.statsTimer = null; }
     });
     this.numFormat = (n: number, unit?: string) => {

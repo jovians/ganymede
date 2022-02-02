@@ -39,6 +39,7 @@ class GanymedeAppGenerator {
     const a = prepCommandLineArgs();
     const opname = a[0];
     if (opname === 'appset') {
+      requireGanyConf();
       if (a[1] === 'revert') {
         this.revert();
       } else if (a[1] === 'refresh') {
@@ -49,23 +50,29 @@ class GanymedeAppGenerator {
     } else if (opname === 'packages-update') {
       this.packageJsonImport();
     } else if (opname === 'template-load') {
+      requireGanyConf();
       this.templateLoad();
-
     } else if (opname === 'license-keygen') {
       this.generateLicenseSigningKey();
     } else if (opname === 'license-sign') {
+      requireGanyConf();
       this.signLicense(a[1], a[2], a[3], a[4], a[5], a[6]);
     } else if (opname === 'license-verify') {
+      requireGanyConf();
       this.verifyLicense();
     } else if (opname === 'license-stamp') {
+      requireGanyConf();
       this.stampLicense();
 
     } else if (opname === 'param-file-init') {
+      requireGanyConf();
       this.paramFileInit();
 
     } else if (opname === 'i18n-update') {
+      requireGanyConf();
       this.i18nUpdate();
     } else if (opname === 'i18n-generate') {
+      requireGanyConf();
       this.i18nGenerateFromJson();
 
     } else if (opname === 'encrypt-file') {
@@ -74,6 +81,7 @@ class GanymedeAppGenerator {
       this.decryptFile(a[1], a[2]);
 
     } else if (opname === 'product-name') {
+      requireGanyConf();
       console.log(config.productName);
     } else if (opname === 'stash') {
       // this.encryptFile(a[1], a[2]);
@@ -81,8 +89,9 @@ class GanymedeAppGenerator {
       // this.decryptFile(a[1], a[2]);
 
     } else if (opname === 'product-name-set') {
+      requireGanyConf();
       this.setProductName(a[1]);
-    } else if (opname === 'cli-version') {
+    } else if (opname === 'version') {
       console.log(require('./package.json').version);
     }
   }
@@ -268,7 +277,11 @@ class GanymedeAppGenerator {
 
   loadConfig(configPath: string = defaultConfigPath) {
     if (!config) {
-      config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+      try {
+        config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+      } catch (e) {
+        config = null;
+      }
     }
   }
 
@@ -363,6 +376,13 @@ function prepCommandLineArgs() {
   const args = JSON.parse(JSON.stringify(process.argv));
   args.shift(); args.shift(); // remove cmd and file; `node file.js`
   return args;
+}
+
+function requireGanyConf() {
+  if (!config) {
+    console.log(new Error('This command requires ganymede.conf.json to exist at cwd.'));
+    process.exit(1);
+  }
 }
 
 async function getRequest(host: string, path: string, port: number = 80) {

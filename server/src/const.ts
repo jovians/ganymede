@@ -4,7 +4,7 @@
 import {
   GanymedeAppBase,
   GanymedeAppExtensions,
-} from '../../../../../ganymede.app.interface';
+} from '../../defaults/ganymede.app.interface';
 
 export class ServerConst {
   static initialized = false;

@@ -2,6 +2,7 @@
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 import { ElementRef, OnDestroy } from '@angular/core';
+import { ix } from '@jovian/type-tools';
 import { DomIdUtil } from './dom.id.util';
 
 export enum LifecycleLinkType {
@@ -9,12 +10,8 @@ export enum LifecycleLinkType {
   MUTATION_SUBTREE = 'MUTATION_SUBTREE',
 }
 
-export interface LifecycleLinkable extends OnDestroy {
-  lifecycleCallbacks?: { onDestroy: () => (Promise<void> | void)}[];
-}
-
 export class LifecycleLinker {
-  static link(linkType: string, angularComponent: LifecycleLinkable, target: any): { onDestroy: () => (Promise<void> | void)} {
+  static link(linkType: string, angularComponent: ix.Entity, target: any): { onDestroy: () => (Promise<void> | void)} {
     if (typeof target !== 'object') { throw new Error(`Cannot link lifecycle to non-object target. (target=${target})`); }
     if (!target._gany_lc_links) { Object.defineProperty(target, '_gany_lc_links', { value: {} }); }
     DomIdUtil.readyAngularComponent(angularComponent);
@@ -25,24 +22,13 @@ export class LifecycleLinker {
     const onDestroyObj: { onDestroy: () => (Promise<void> | void)} = {
       onDestroy: () => {}
     };
-    if (!angularComponent.lifecycleCallbacks) { angularComponent.lifecycleCallbacks = []; }
-    angularComponent.lifecycleCallbacks.push(onDestroyObj);
+    angularComponent.addOnDestroy(() => {
+      onDestroyObj.onDestroy();
+    });
     return onDestroyObj;
   }
 
   static containerElementOf(component: ElementRef) {
     return component.nativeElement.parentElement as HTMLElement;
-  }
-}
-
-export function lifecycleEnd(component: LifecycleLinkable) {
-  if (component.lifecycleCallbacks) {
-    for (const onDestroyObj of component.lifecycleCallbacks) {
-      if (onDestroyObj && onDestroyObj.onDestroy) {
-        onDestroyObj.onDestroy();
-      }
-    }
-    component.lifecycleCallbacks.length = 0;
-    delete component.lifecycleCallbacks;
   }
 }

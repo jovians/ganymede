@@ -1,0 +1,73 @@
+:host {
+  .issue-label {
+    vertical-align: middle;
+    line-height: 1;
+    border-radius: 0.25rem;
+  }
+  .issue-desc {
+    border-radius: 0.2rem;
+    border: 1px solid rgba(140, 140, 140, 0.2);
+    padding: min(3%, 0.4rem) min(3%, 1rem);
+    background-color: rgba(120, 120, 120, 0.1);
+    margin-bottom: 0.7rem;
+    font-weight: bold;
+    font-size: 105%;
+  }
+  .issues-container {
+    width: 100%;
+    overflow-x: hidden;
+    .issue-card {
+      width: calc(100% - 2 * max(0.3rem, 1%));
+      margin: max(0.3rem, 1%);
+      margin-top: max(0.5rem, 1%);
+      margin-bottom: 0%;
+    }
+    > :last-child {
+      margin-bottom: max(0.75rem, 1.5%);
+    }
+  }
+  .code-no-margin {
+    margin-top: 0.25rem;
+    margin-bottom: 0rem;
+  }
+  pre:not([tabindex]) {
+    display: none;
+  }
+  pre[tabindex] {
+    display: block;
+  }
+  ::ng-deep {
+    .stack-header {
+      margin-top: 0.5rem;
+      font-size: 1rem;
+    }
+    .stack-view {
+      .stack-block-label {
+        // line-height: 1.5rem;
+        // padding: 0.5rem 0.7rem;
+      }
+      .stack-view-key {
+        // font-size: 125%;
+        flex: 0 0 20% !important;
+        min-width: 0.5rem !important;
+        max-width: 0.5rem !important;
+      }
+      .stack-block-content {
+        // font-size: 125%;
+        word-break: break-word;
+      }
+      clr-stack-block[gany-clr-stack-block-content-style="full-content"] {
+        div.stack-block-label {
+          padding: 0;
+          margin: 0;
+        }
+        .stack-view-key {
+          display: none;
+        }
+        .stack-block-content {
+          padding-left: 0;
+        }
+      }
+    }
+  }
+}

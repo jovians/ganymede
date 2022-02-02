@@ -72,6 +72,8 @@ export class GanymedeAppData {
 
   conf: any; // ganymede.conf.json content
 
+  theme = { base: 'CLARITY', type: 'LIGHT' };
+
   constructor(initializer?: Partial<GanymedeAppData>) {
     if (initializer) {
       const defaultFeatures = this.features;

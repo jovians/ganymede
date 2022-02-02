@@ -2,8 +2,8 @@
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 import * as express from 'express';
-import { ServerConst, ServerConstDataGlobal } from './const';
-import { saltedSha512, SecureChannel, SecureChannelPayload, SecureChannelPeer, SecureChannelTypes } from '../../components/util/shared/crypto/secure.channel';
+import { ServerConstDataGlobal } from './const';
+import { SecureChannel, SecureChannelPayload, SecureChannelPeer, SecureChannelTypes } from '../../components/util/shared/crypto/secure.channel';
 import { Class } from '@jovian/type-tools';
 import { SecureChannelWorkerClient } from './http.shim.worker.security';
 import { AsyncWorkerClient } from '../../components/util/server/async.worker.proc';
@@ -47,7 +47,7 @@ export enum HttpBaseLib {
 }
 
 export interface GanymedeHttpServerConfig {
-  type: HttpBaseLib;
+  type: HttpBaseLib | string;
   scopeName?: string;
   debug?: {
     showErrorStack?: boolean;
@@ -188,9 +188,9 @@ export class GanymedeHttpServer {
 
   normalizeServerConfig(config: GanymedeHttpServerConfig) {
     if (!config.scopeName) { config.scopeName = `httpshim;pid=${process.pid}`; }
-    config = completeConfig(config, defaultConfig);
-    config.debug.showErrorStack = true;
-    return config;
+    const newConfig = completeConfig<GanymedeHttpServerConfig>(config, defaultConfig as any);
+    newConfig.debug.showErrorStack = true;
+    return newConfig;
   }
 
   addDefaultProcessor(...processors: ReqProcessor[]) {
@@ -216,7 +216,8 @@ export class GanymedeHttpServer {
     return def;
   }
 
-  addWorker<T extends AsyncWorkerClient>(workerClass: Class<T>, workerData: {[key: string]: any; }) {
+  addWorker<T extends AsyncWorkerClient>(workerClass: Class<T>, workerData?: {[key: string]: any; }) {
+    if (!workerData) { workerData = {}; }
     if (!this.workerFleet[workerClass.name]) {
       this.workerFleet[workerClass.name] = { workers: [] };
     }

@@ -3,7 +3,8 @@
  */
 import { ganylog } from './console.util';
 import { v4 as uuidv4 } from 'uuid';
-import { LifecycleLinkable, LifecycleLinker, LifecycleLinkType } from './lifecycle.linker';
+import { LifecycleLinker, LifecycleLinkType } from './lifecycle.linker';
+import { ix } from '@jovian/type-tools';
 
 declare var window: any;
 
@@ -54,7 +55,7 @@ export class SizeUtil {
       computedHeight: parseFloat(cs.height),
     };
   }
-  static linkDimension(component: LifecycleLinkable, target: HTMLElement, onResize: (dim: SizeUtilFullInfo) => void) {
+  static linkDimension(component: ix.Entity, target: HTMLElement, onResize: (dim: SizeUtilFullInfo) => void) {
     const id = uuidv4();
     const link = LifecycleLinker.link(LifecycleLinkType.RESIZE_DETECT, component, target);
     if (link) {

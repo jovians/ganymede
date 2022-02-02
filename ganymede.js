@@ -1,9 +1,23 @@
 "use strict";
-/*
- * Copyright 2014-2021 Jovian, all rights reserved.
- *
- * Jovian Ganymede App Generator (Angular using Clarity, and server components)
- */
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -13,60 +27,32 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-exports.__esModule = true;
-// tslint:disable: no-console
-var fs = require("fs");
-var crypto = require("crypto");
-var fourq_1 = require("@jovian/fourq");
-var langster_1 = require("@jovian/langster");
-var http = require('http');
-var allReplaces = [];
-var config = null;
-var defaultConfigPath = 'ganymede.conf.json';
-var configReplacerTargets = [
+Object.defineProperty(exports, "__esModule", { value: true });
+const fs = __importStar(require("fs"));
+const crypto = __importStar(require("crypto"));
+const fourq_1 = require("@jovian/fourq");
+const langster_1 = require("@jovian/langster");
+const http = require('http');
+const allReplaces = [];
+let config = null;
+const defaultConfigPath = 'ganymede.conf.json';
+const configReplacerTargets = [
     'package.json',
     'angular.json',
     'karma.conf.js',
     'src/index.html',
     'src/assets-root/manifest.json',
 ];
-var styleReplacesTargets = [
+const styleReplacesTargets = [
     'src/variables.scss',
 ];
-var GanymedeAppGenerator = /** @class */ (function () {
-    function GanymedeAppGenerator() {
-    }
-    GanymedeAppGenerator.prototype.executeBasedOnArgs = function () {
-        var a = prepCommandLineArgs();
-        var opname = a[0];
+class GanymedeAppGenerator {
+    constructor() { }
+    executeBasedOnArgs() {
+        const a = prepCommandLineArgs();
+        const opname = a[0];
         if (opname === 'appset') {
+            requireGanyConf();
             if (a[1] === 'revert') {
                 this.revert();
             }
@@ -81,27 +67,34 @@ var GanymedeAppGenerator = /** @class */ (function () {
             this.packageJsonImport();
         }
         else if (opname === 'template-load') {
+            requireGanyConf();
             this.templateLoad();
         }
         else if (opname === 'license-keygen') {
             this.generateLicenseSigningKey();
         }
         else if (opname === 'license-sign') {
+            requireGanyConf();
             this.signLicense(a[1], a[2], a[3], a[4], a[5], a[6]);
         }
         else if (opname === 'license-verify') {
+            requireGanyConf();
             this.verifyLicense();
         }
         else if (opname === 'license-stamp') {
+            requireGanyConf();
             this.stampLicense();
         }
         else if (opname === 'param-file-init') {
+            requireGanyConf();
             this.paramFileInit();
         }
         else if (opname === 'i18n-update') {
+            requireGanyConf();
             this.i18nUpdate();
         }
         else if (opname === 'i18n-generate') {
+            requireGanyConf();
             this.i18nGenerateFromJson();
         }
         else if (opname === 'encrypt-file') {
@@ -111,32 +104,32 @@ var GanymedeAppGenerator = /** @class */ (function () {
             this.decryptFile(a[1], a[2]);
         }
         else if (opname === 'product-name') {
+            requireGanyConf();
             console.log(config.productName);
         }
         else if (opname === 'stash') {
-            // this.encryptFile(a[1], a[2]);
         }
         else if (opname === 'stash-pop') {
-            // this.decryptFile(a[1], a[2]);
         }
         else if (opname === 'product-name-set') {
+            requireGanyConf();
             this.setProductName(a[1]);
         }
-        else if (opname === 'cli-version') {
+        else if (opname === 'version') {
             console.log(require('./package.json').version);
         }
-    };
-    GanymedeAppGenerator.prototype.setProductName = function (productNameSet) {
-        var productName = productNameSet.indexOf(':') >= 0 ? productNameSet.split(':')[0] : productNameSet;
-        var commonName = productNameSet.indexOf(':') >= 0 ? productNameSet.split(':')[1] : productName;
-        var configJson = JSON.parse(fs.readFileSync(defaultConfigPath, 'utf-8'));
+    }
+    setProductName(productNameSet) {
+        const productName = productNameSet.indexOf(':') >= 0 ? productNameSet.split(':')[0] : productNameSet;
+        const commonName = productNameSet.indexOf(':') >= 0 ? productNameSet.split(':')[1] : productName;
+        const configJson = JSON.parse(fs.readFileSync(defaultConfigPath, 'utf-8'));
         configJson.productName = productName;
         configJson.replacer['<gany.APP_TITLE>'] = commonName;
         configJson.replacer['<gany.ANGULAR_APP_NAME>'] = productName;
         configJson.replacer['<gany.APP_PACKAGE_NAME>'] = productName;
         fs.writeFileSync(defaultConfigPath, JSON.stringify(configJson, null, 2), 'utf-8');
-    };
-    GanymedeAppGenerator.prototype.encryptFile = function (filePath, passphrase) {
+    }
+    encryptFile(filePath, passphrase) {
         if (!passphrase) {
             if (fs.existsSync('./.archive.encryption.key')) {
                 passphrase = fs.readFileSync('./.archive.encryption.key', 'utf8');
@@ -145,16 +138,16 @@ var GanymedeAppGenerator = /** @class */ (function () {
                 throw new Error('Passphrase is required for encryption');
             }
         }
-        var fileContent = fs.readFileSync(filePath);
-        var passphraseHash = crypto.createHash('sha256').update('AES_ENCRYPT_SALT::' + passphrase).digest();
-        var iv = crypto.randomBytes(16);
-        var cipher = crypto.createCipheriv('aes-256-cbc', passphraseHash, iv);
-        var encrypted = cipher.update(fileContent);
+        const fileContent = fs.readFileSync(filePath);
+        const passphraseHash = crypto.createHash('sha256').update('AES_ENCRYPT_SALT::' + passphrase).digest();
+        const iv = crypto.randomBytes(16);
+        const cipher = crypto.createCipheriv('aes-256-cbc', passphraseHash, iv);
+        let encrypted = cipher.update(fileContent);
         encrypted = Buffer.concat([encrypted, cipher.final()]);
-        var encryptedFileData = Buffer.concat([Buffer.from('aes-256-cbc:' + iv.toString('hex') + ':', 'ascii'), encrypted]);
+        const encryptedFileData = Buffer.concat([Buffer.from('aes-256-cbc:' + iv.toString('hex') + ':', 'ascii'), encrypted]);
         fs.writeFileSync(filePath + '.enc', encryptedFileData);
-    };
-    GanymedeAppGenerator.prototype.decryptFile = function (filePath, passphrase) {
+    }
+    decryptFile(filePath, passphrase) {
         if (!passphrase) {
             if (fs.existsSync('./.archive.encryption.key')) {
                 passphrase = fs.readFileSync('./.archive.encryption.key', 'utf8');
@@ -163,21 +156,21 @@ var GanymedeAppGenerator = /** @class */ (function () {
                 throw new Error('Passphrase is required for decryption');
             }
         }
-        var fileContents = fs.readFileSync(filePath);
-        var passphraseHash = crypto.createHash('sha256').update('AES_ENCRYPT_SALT::' + passphrase).digest();
-        var encryptionScheme = 'aes-256-cbc';
-        var ivEnd;
-        for (var i = 12; i < fileContents.length; ++i) {
+        const fileContents = fs.readFileSync(filePath);
+        const passphraseHash = crypto.createHash('sha256').update('AES_ENCRYPT_SALT::' + passphrase).digest();
+        const encryptionScheme = 'aes-256-cbc';
+        let ivEnd;
+        for (let i = 12; i < fileContents.length; ++i) {
             if (fileContents[i] === 58) {
                 ivEnd = i;
                 break;
             }
         }
-        var encryptionIV = Buffer.from(fileContents.slice(12, ivEnd).toString('ascii'), 'hex');
-        var encryptedData = fileContents.slice(ivEnd + 1);
-        var decrypted;
+        const encryptionIV = Buffer.from(fileContents.slice(12, ivEnd).toString('ascii'), 'hex');
+        const encryptedData = fileContents.slice(ivEnd + 1);
+        let decrypted;
         try {
-            var decipher = crypto.createDecipheriv(encryptionScheme, passphraseHash, encryptionIV);
+            const decipher = crypto.createDecipheriv(encryptionScheme, passphraseHash, encryptionIV);
             decrypted = decipher.update(encryptedData);
             decrypted = Buffer.concat([decrypted, decipher.final()]);
         }
@@ -185,203 +178,191 @@ var GanymedeAppGenerator = /** @class */ (function () {
             return console.log('Passphrase incorrect.');
         }
         fs.writeFileSync(filePath.slice(0, -4), decrypted);
-    };
-    GanymedeAppGenerator.prototype.generateLicenseSigningKey = function () {
-        var seed = crypto.randomBytes(32);
-        var keypair = fourq_1.FourQ.generateFromSeed(seed);
-        var publicKeyBase64 = keypair.publicKey.toString('base64');
-        var secretKeyBase64 = keypair.secretKey.toString('base64');
+    }
+    generateLicenseSigningKey() {
+        const seed = crypto.randomBytes(32);
+        const keypair = fourq_1.FourQ.generateFromSeed(seed);
+        const publicKeyBase64 = keypair.publicKey.toString('base64');
+        const secretKeyBase64 = keypair.secretKey.toString('base64');
         fs.writeFileSync('license-public-key', 'fourq:' + publicKeyBase64);
-        var prompt = require('prompt');
+        const prompt = require('prompt');
         prompt.start();
-        prompt.get([{ name: 'passphrase', hidden: true }], function (e, result) {
+        prompt.get([{ name: 'passphrase', hidden: true }], (e, result) => {
             if (e) {
                 return console.log('\nCanceled.');
             }
-            var passphrase = result.passphrase;
-            var passphraseHash = crypto.createHash('sha256').update('GANYMEDE_SALT::' + passphrase).digest();
-            var iv = crypto.randomBytes(16);
-            var cipher = crypto.createCipheriv('aes-256-cbc', passphraseHash, iv);
-            var encrypted = cipher.update(Buffer.from(secretKeyBase64, 'base64'));
+            const passphrase = result.passphrase;
+            const passphraseHash = crypto.createHash('sha256').update('GANYMEDE_SALT::' + passphrase).digest();
+            const iv = crypto.randomBytes(16);
+            const cipher = crypto.createCipheriv('aes-256-cbc', passphraseHash, iv);
+            let encrypted = cipher.update(Buffer.from(secretKeyBase64, 'base64'));
             encrypted = Buffer.concat([encrypted, cipher.final()]);
-            var encryptedPrivateKeyData = 'aes-256-cbc:' + iv.toString('hex') + ':' + encrypted.toString('hex');
+            const encryptedPrivateKeyData = 'aes-256-cbc:' + iv.toString('hex') + ':' + encrypted.toString('hex');
             fs.writeFileSync('.license-signing-key', encryptedPrivateKeyData);
             console.log('Public Key: ' + publicKeyBase64);
             console.log('Encrypted Private Key: ' + encryptedPrivateKeyData);
         });
-    };
-    GanymedeAppGenerator.prototype.signLicense = function (org, user, app, domain, scope, etc) {
-        return __awaiter(this, void 0, void 0, function () {
-            var encryptedPrivateKeyInfo, publicKeyBase64, prompt;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, getRequest('127.0.0.1', '/get-encryped-signing-key', 58267)];
-                    case 1:
-                        encryptedPrivateKeyInfo = (_a.sent()).split(':');
-                        publicKeyBase64 = fs.readFileSync('license-public-key', 'utf8').split(':')[1];
-                        prompt = require('prompt');
-                        prompt.start();
-                        prompt.get([{ name: 'passphrase', hidden: true }], function (e, result) {
-                            if (e) {
-                                return console.log('\nCanceled.');
-                            }
-                            var passphrase = result.passphrase;
-                            var passphraseHash = crypto.createHash('sha256').update('GANYMEDE_SALT::' + passphrase).digest();
-                            var encryptionScheme = encryptedPrivateKeyInfo.shift();
-                            var encryptionIV = encryptedPrivateKeyInfo.shift();
-                            var encryptedText = encryptedPrivateKeyInfo.shift();
-                            var encryptedData = Buffer.from(encryptedText, 'hex');
-                            var decrypted;
-                            try {
-                                var decipher = crypto.createDecipheriv(encryptionScheme, passphraseHash, Buffer.from(encryptionIV, 'hex'));
-                                decrypted = decipher.update(encryptedData);
-                                decrypted = Buffer.concat([decrypted, decipher.final()]);
-                            }
-                            catch (e) {
-                                return console.log('Passphrase incorrect.');
-                            }
-                            // console.log(decrypted.toString('base64'));
-                            var secretKey = decrypted;
-                            var licenseMessage = Buffer.from("GANYMEDE_LICENSE___" + org + "___" + user + "___" + app + "___" + domain + "___" + scope + "___" + etc);
-                            console.log("License message: " + licenseMessage);
-                            var sig = fourq_1.FourQ.sign(licenseMessage, secretKey);
-                            var valid = fourq_1.FourQ.verify(sig.data, licenseMessage, Buffer.from(publicKeyBase64, 'base64'));
-                            if (valid) {
-                                console.log('License Key: ' + sig.data.toString('base64'));
-                            }
-                            else {
-                                console.log('Fatal: signed signaure does not verified to be true');
-                            }
-                        });
-                        return [2 /*return*/];
+    }
+    signLicense(org, user, app, domain, scope, etc) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const encryptedPrivateKeyInfo = (yield getRequest('127.0.0.1', '/get-encryped-signing-key', 58267)).split(':');
+            const publicKeyBase64 = fs.readFileSync('license-public-key', 'utf8').split(':')[1];
+            const prompt = require('prompt');
+            prompt.start();
+            prompt.get([{ name: 'passphrase', hidden: true }], (e, result) => {
+                if (e) {
+                    return console.log('\nCanceled.');
+                }
+                const passphrase = result.passphrase;
+                const passphraseHash = crypto.createHash('sha256').update('GANYMEDE_SALT::' + passphrase).digest();
+                const encryptionScheme = encryptedPrivateKeyInfo.shift();
+                const encryptionIV = encryptedPrivateKeyInfo.shift();
+                const encryptedText = encryptedPrivateKeyInfo.shift();
+                const encryptedData = Buffer.from(encryptedText, 'hex');
+                let decrypted;
+                try {
+                    const decipher = crypto.createDecipheriv(encryptionScheme, passphraseHash, Buffer.from(encryptionIV, 'hex'));
+                    decrypted = decipher.update(encryptedData);
+                    decrypted = Buffer.concat([decrypted, decipher.final()]);
+                }
+                catch (e) {
+                    return console.log('Passphrase incorrect.');
+                }
+                const secretKey = decrypted;
+                const licenseMessage = Buffer.from(`GANYMEDE_LICENSE___${org}___${user}___${app}___${domain}___${scope}___${etc}`);
+                console.log(`License message: ${licenseMessage}`);
+                const sig = fourq_1.FourQ.sign(licenseMessage, secretKey);
+                const valid = fourq_1.FourQ.verify(sig.data, licenseMessage, Buffer.from(publicKeyBase64, 'base64'));
+                if (valid) {
+                    console.log('License Key: ' + sig.data.toString('base64'));
+                }
+                else {
+                    console.log('Fatal: signed signaure does not verified to be true');
                 }
             });
         });
-    };
-    GanymedeAppGenerator.prototype.verifyLicense = function () {
-        var pubkeySource = fs.existsSync('license-public-key') ? 'license-public-key' : 'src/app/ganymede/license-public-key';
-        var publicKeyBase64 = fs.readFileSync(pubkeySource, 'utf8').split(':')[1];
-        var org = config.license.org;
-        var user = config.license.user;
-        var app = config.license.app;
-        var domain = config.license.domain;
-        var scope = config.license.scope;
-        var etc = config.license.etc;
-        var licenseMessage = Buffer.from("GANYMEDE_LICENSE___" + org + "___" + user + "___" + app + "___" + domain + "___" + scope + "___" + etc);
-        var sigData = Buffer.from(config.license.key, 'base64');
-        var valid = fourq_1.FourQ.verify(sigData, licenseMessage, Buffer.from(publicKeyBase64, 'base64'));
-        var licenseMessage2 = Buffer.from("GANYMEDE_LICENSE___" + org + "___" + user + "___" + app + "___localhost___" + scope + "___" + etc);
-        var sigData2 = Buffer.from(config.license.keyLocal, 'base64');
-        var valid2 = fourq_1.FourQ.verify(sigData2, licenseMessage2, Buffer.from(publicKeyBase64, 'base64'));
-        console.log("domain=" + (valid ? 'valid' : 'not_valid') + ";localhost=" + (valid2 ? 'valid' : 'not_valid'));
+    }
+    verifyLicense() {
+        const pubkeySource = fs.existsSync('license-public-key') ? 'license-public-key' : 'src/app/ganymede/license-public-key';
+        const publicKeyBase64 = fs.readFileSync(pubkeySource, 'utf8').split(':')[1];
+        const org = config.license.org;
+        const user = config.license.user;
+        const app = config.license.app;
+        const domain = config.license.domain;
+        const scope = config.license.scope;
+        const etc = config.license.etc;
+        const licenseMessage = Buffer.from(`GANYMEDE_LICENSE___${org}___${user}___${app}___${domain}___${scope}___${etc}`);
+        const sigData = Buffer.from(config.license.key, 'base64');
+        const valid = fourq_1.FourQ.verify(sigData, licenseMessage, Buffer.from(publicKeyBase64, 'base64'));
+        const licenseMessage2 = Buffer.from(`GANYMEDE_LICENSE___${org}___${user}___${app}___localhost___${scope}___${etc}`);
+        const sigData2 = Buffer.from(config.license.keyLocal, 'base64');
+        const valid2 = fourq_1.FourQ.verify(sigData2, licenseMessage2, Buffer.from(publicKeyBase64, 'base64'));
+        console.log(`domain=${valid ? 'valid' : 'not_valid'};localhost=${valid2 ? 'valid' : 'not_valid'}`);
         return valid;
-    };
-    GanymedeAppGenerator.prototype.stampLicense = function () {
-        var indexContent = fs.readFileSync('src/index.html', 'utf-8');
+    }
+    stampLicense() {
+        let indexContent = fs.readFileSync('src/index.html', 'utf-8');
         indexContent = indexContent.replace('<gany.LICENSE_ORG>', config.license.org);
         indexContent = indexContent.replace('<gany.LICENSE_USER>', config.license.user);
         indexContent = indexContent.replace('<gany.LICENSE_DOMAIN>', config.license.domain);
         indexContent = indexContent.replace('<gany.LICENSE_SCOPE>', config.license.scope);
         indexContent = indexContent.replace('<gany.LICENSE_KEY>', config.license.key);
         fs.writeFileSync('src/index.html', indexContent);
-    };
-    GanymedeAppGenerator.prototype.paramFileInit = function () {
+    }
+    paramFileInit() {
         if (!fs.existsSync('src/global.scss')) {
             fs.writeFileSync('src/global.scss', '');
         }
-    };
-    GanymedeAppGenerator.prototype.generate = function () {
-        console.log("Setting template variables...");
+    }
+    generate() {
+        console.log(`Setting template variables...`);
         this.configReplacerDo();
-    };
-    GanymedeAppGenerator.prototype.revert = function () {
-        console.log("Reverting template variables...");
+    }
+    revert() {
+        console.log(`Reverting template variables...`);
         this.configReplacerUndo();
-    };
-    GanymedeAppGenerator.prototype.refresh = function () {
-        console.log("Refreshing template variables...");
+    }
+    refresh() {
+        console.log(`Refreshing template variables...`);
         this.configReplacerRefresh();
-    };
-    GanymedeAppGenerator.prototype.packageJsonImport = function () {
+    }
+    packageJsonImport() {
         if (fs.existsSync('package.saved.json')) {
-            var pkgTemplate = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
-            var pkgSaved = JSON.parse(fs.readFileSync('package.saved.json', 'utf-8'));
-            for (var _i = 0, _a = Object.keys(pkgSaved); _i < _a.length; _i++) {
-                var field = _a[_i];
+            const pkgTemplate = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
+            const pkgSaved = JSON.parse(fs.readFileSync('package.saved.json', 'utf-8'));
+            for (const field of Object.keys(pkgSaved)) {
                 if (field === 'name' || field === 'version') {
                     continue;
                 }
-                for (var _b = 0, _c = Object.keys(pkgSaved[field]); _b < _c.length; _b++) {
-                    var field2 = _c[_b];
+                for (const field2 of Object.keys(pkgSaved[field])) {
                     pkgTemplate[field][field2] = pkgSaved[field][field2];
                 }
             }
             fs.writeFileSync('package.json', JSON.stringify(pkgTemplate, null, 2));
         }
-    };
-    GanymedeAppGenerator.prototype.templateLoad = function () {
-        var templateName = config.template.main;
-        var moduleTsContent = fs.readFileSync('src/app/app.module.ts', 'utf-8');
+    }
+    templateLoad() {
+        const templateName = config.template.main;
+        let moduleTsContent = fs.readFileSync('src/app/app.module.ts', 'utf-8');
         moduleTsContent = moduleTsContent.replace('<gany.APP_TEMPLATE_NAME>', templateName);
         moduleTsContent = moduleTsContent.replace('<gany.APP_IMPORTS>', '');
         moduleTsContent = moduleTsContent.replace('<gany.APP_DECLARATIONS>', '');
         fs.writeFileSync('src/app/app.module.ts', moduleTsContent);
-    };
-    GanymedeAppGenerator.prototype.loadConfig = function (configPath) {
-        if (configPath === void 0) { configPath = defaultConfigPath; }
+    }
+    loadConfig(configPath = defaultConfigPath) {
         if (!config) {
-            config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+            try {
+                config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+            }
+            catch (e) {
+                config = null;
+            }
         }
-    };
-    GanymedeAppGenerator.prototype.initializeReplaces = function (configPath) {
-        if (configPath === void 0) { configPath = defaultConfigPath; }
+    }
+    initializeReplaces(configPath = defaultConfigPath) {
         this.loadConfig(configPath);
         allReplaces.length = 0;
-        for (var _i = 0, _a = Object.keys(config.replacer); _i < _a.length; _i++) {
-            var replaceKey = _a[_i];
+        for (const replaceKey of Object.keys(config.replacer)) {
             allReplaces.push({
-                find: new RegExp("" + replaceKey, 'g'),
+                find: new RegExp(`${replaceKey}`, 'g'),
                 value: config.replacer[replaceKey] + ''
             });
         }
-        for (var _b = 0, _c = Object.keys(config.styles.replacer); _b < _c.length; _b++) {
-            var replaceKey = _c[_b];
+        for (const replaceKey of Object.keys(config.styles.replacer)) {
             allReplaces.push({
-                find: new RegExp("\\" + replaceKey + "__", 'g'),
+                find: new RegExp(`\\${replaceKey}__`, 'g'),
                 value: config.styles.replacer[replaceKey] + ''
             });
         }
-    };
-    GanymedeAppGenerator.prototype.i18nGenerateFromJson = function () {
-        var i18nPath = fs.existsSync('src/assets/i18n') ? 'src/assets/i18n' : '../../assets/i18n';
+    }
+    i18nGenerateFromJson() {
+        const i18nPath = fs.existsSync('src/assets/i18n') ? 'src/assets/i18n' : '../../assets/i18n';
         new langster_1.NgxTranslateLangster({
             folderPath: i18nPath,
             langPackExtension: '.lang.js',
             ignorePatternsAdditional: ['**/ganymede/**', '**/ganymede.ts']
         }).generateFromJson();
-    };
-    GanymedeAppGenerator.prototype.i18nUpdate = function () {
-        var i18nPath = fs.existsSync('src/assets/i18n') ? 'src/assets/i18n' : '../../assets/i18n';
+    }
+    i18nUpdate() {
+        const i18nPath = fs.existsSync('src/assets/i18n') ? 'src/assets/i18n' : '../../assets/i18n';
         new langster_1.NgxTranslateLangster({
             folderPath: i18nPath,
             langPackExtension: '.lang.js',
             ignorePatternsAdditional: ['**/ganymede/**', '**/ganymede.ts']
         }).update();
-    };
-    GanymedeAppGenerator.prototype.configReplacerDo = function () {
+    }
+    configReplacerDo() {
         this.initializeReplaces();
-        var allTargets = [].concat(configReplacerTargets, styleReplacesTargets);
-        for (var _i = 0, allTargets_1 = allTargets; _i < allTargets_1.length; _i++) {
-            var filePath = allTargets_1[_i];
+        const allTargets = [].concat(configReplacerTargets, styleReplacesTargets);
+        for (const filePath of allTargets) {
             try {
-                console.log("Setting template variables in '" + filePath + "'");
-                var backUpFilePath = this.getBackUpFilePath(filePath);
+                console.log(`Setting template variables in '${filePath}'`);
+                const backUpFilePath = this.getBackUpFilePath(filePath);
                 if (!fs.existsSync(backUpFilePath)) {
                     fs.copyFileSync(filePath, backUpFilePath);
                 }
-                var fileContent = fs.readFileSync(filePath, 'utf-8');
-                for (var _a = 0, allReplaces_1 = allReplaces; _a < allReplaces_1.length; _a++) {
-                    var replacer = allReplaces_1[_a];
+                let fileContent = fs.readFileSync(filePath, 'utf-8');
+                for (const replacer of allReplaces) {
                     fileContent = fileContent.replace(replacer.find, replacer.value);
                 }
                 fs.writeFileSync(filePath, fileContent);
@@ -390,15 +371,14 @@ var GanymedeAppGenerator = /** @class */ (function () {
                 console.error(e);
             }
         }
-    };
-    GanymedeAppGenerator.prototype.configReplacerUndo = function () {
+    }
+    configReplacerUndo() {
         this.initializeReplaces();
-        var allTargets = [].concat(configReplacerTargets, styleReplacesTargets);
-        for (var _i = 0, allTargets_2 = allTargets; _i < allTargets_2.length; _i++) {
-            var filePath = allTargets_2[_i];
+        const allTargets = [].concat(configReplacerTargets, styleReplacesTargets);
+        for (const filePath of allTargets) {
             try {
-                console.log("Reverting template variables in '" + filePath + "'");
-                var backUpFilePath = this.getBackUpFilePath(filePath);
+                console.log(`Reverting template variables in '${filePath}'`);
+                const backUpFilePath = this.getBackUpFilePath(filePath);
                 if (fs.existsSync(backUpFilePath)) {
                     fs.copyFileSync(backUpFilePath, filePath);
                 }
@@ -407,40 +387,42 @@ var GanymedeAppGenerator = /** @class */ (function () {
                 console.error(e);
             }
         }
-    };
-    GanymedeAppGenerator.prototype.configReplacerRefresh = function () {
+    }
+    configReplacerRefresh() {
         this.configReplacerUndo();
         this.configReplacerDo();
-    };
-    GanymedeAppGenerator.prototype.getBackUpFilePath = function (filePath) {
-        var dotSplit = filePath.split('.');
-        var extension = dotSplit.pop();
+    }
+    getBackUpFilePath(filePath) {
+        const dotSplit = filePath.split('.');
+        const extension = dotSplit.pop();
         dotSplit.push('TEMPLATE');
         dotSplit.push(extension);
         return dotSplit.join('.');
-    };
-    return GanymedeAppGenerator;
-}());
-var appGen = new GanymedeAppGenerator();
+    }
+}
+const appGen = new GanymedeAppGenerator();
 appGen.loadConfig();
 appGen.executeBasedOnArgs();
 function prepCommandLineArgs() {
-    var args = JSON.parse(JSON.stringify(process.argv));
+    const args = JSON.parse(JSON.stringify(process.argv));
     args.shift();
-    args.shift(); // remove cmd and file; `node file.js`
+    args.shift();
     return args;
 }
-function getRequest(host, path, port) {
-    if (port === void 0) { port = 80; }
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            return [2 /*return*/, new Promise(function (resolve) {
-                    http.request({ host: host, path: path, port: port }, function (res) {
-                        var chunks = [];
-                        res.on('data', function (chunk) { chunks.push(chunk); });
-                        res.on('end', function () { resolve(chunks.join('')); });
-                    }).end();
-                })];
+function requireGanyConf() {
+    if (!config) {
+        console.log(new Error('This command requires ganymede.conf.json to exist at cwd.'));
+        process.exit(1);
+    }
+}
+function getRequest(host, path, port = 80) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise(resolve => {
+            http.request({ host, path, port }, (res) => {
+                const chunks = [];
+                res.on('data', chunk => { chunks.push(chunk); });
+                res.on('end', () => { resolve(chunks.join('')); });
+            }).end();
         });
     });
 }

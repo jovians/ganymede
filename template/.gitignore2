@@ -2,6 +2,7 @@
 
 # compiled output
 /dist
+/dist-modules
 /dist-server
 /dist-server-deps
 /dist-electron

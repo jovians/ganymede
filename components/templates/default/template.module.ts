@@ -2,28 +2,20 @@
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 import { NgModule } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { CommonModule } from '@angular/common';
-
+import { Modules, ganyBaseModulesImport } from '../../../../ui.modules';
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './header/header.component';
 import { FooterComponent } from './footer/footer.component';
 import { LeftSidebarComponent } from './left-sidebar/left-sidebar.component';
 import { RightSidebarComponent } from './right-sidebar/right-sidebar.component';
+import { HeaderOtherContentComponent } from '../../../../template/header/header-other-content/header-other-content.component';
 
-import { ClarityModule } from '@clr/angular';
-import { TranslateModule } from '@ngx-translate/core';
-
-import { Modules } from '../../../../ui.modules';
 // import { MarkdownFrameComponent } from '../../markdown/markdown-frame/markdown-frame.component';
 // import { MarkdownContentComponent } from '../../markdown/markdown-content/markdown-content.component';
 
 @NgModule({
   imports: [
-    CommonModule,
-    RouterModule,
-    ClarityModule,
-    TranslateModule.forChild(),
+    ...ganyBaseModulesImport,
   ],
   declarations: [
     AppComponent,
@@ -32,6 +24,8 @@ import { Modules } from '../../../../ui.modules';
     FooterComponent,
     LeftSidebarComponent,
     RightSidebarComponent,
+
+    HeaderOtherContentComponent,
   ],
   exports: [
     AppComponent,

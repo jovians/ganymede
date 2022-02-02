@@ -3,18 +3,18 @@
  */
 import { Components } from '../../../../../ui.components';
 import { Component, Input, OnInit, OnChanges, SimpleChanges, ElementRef, OnDestroy } from '@angular/core';
-import { LifecycleLinkable, lifecycleEnd } from '../../../util/common/lifecycle.linker';
 import { DomTreeUtil } from '../../../util/common/dom.tree.util';
 import { SizeUtil } from '../../../util/common/size.util';
 import { MutationUtil } from '../../../util/common/mutation.observer';
 import { topMomentOut } from '../../../util/shared/common';
+import { ix } from '@jovian/type-tools';
 
 @Component({
   selector: 'app-wavefront-embedded-chart',
   templateUrl: './wavefront-embedded-chart.component.html',
   styleUrls: ['./wavefront-embedded-chart.component.scss']
 })
-export class WavefrontEmbeddedChartComponent implements OnInit, OnChanges, OnDestroy, LifecycleLinkable {
+export class WavefrontEmbeddedChartComponent extends ix.Entity implements OnInit, OnChanges, OnDestroy {
   static registration = Components.register(WavefrontEmbeddedChartComponent, () => require('./wavefront-embedded-chart.component.json'));
 
   @Input() protocol = 'https';
@@ -24,7 +24,9 @@ export class WavefrontEmbeddedChartComponent implements OnInit, OnChanges, OnDes
   @Input() width: number | string = 300;
   @Input() height: number | string = null;
 
-  constructor(private host: ElementRef) {}
+  constructor(private host: ElementRef) {
+    super('wavefront-embedded-chart');
+  }
 
   ngOnInit(): void {
   }
@@ -81,7 +83,7 @@ export class WavefrontEmbeddedChartComponent implements OnInit, OnChanges, OnDes
   }
 
   ngOnDestroy() {
-    lifecycleEnd(this);
+    this.destroy();
   }
 
 }

@@ -2,7 +2,9 @@
   <div #containerComponent class="main-container fade-in">
     <div class="alert alert-app-level">
     </div>
-    <app-header *ngIf="headerVisible" #headerComponent></app-header>
+    <app-header *ngIf="headerVisible" #headerComponent>
+      <gany-header-other-content></gany-header-other-content>
+    </app-header>
     <div class="content-container">
         <main #mainContentArea class="content-area" style="margin:0; padding:0; order:0;">
           <router-outlet></router-outlet>

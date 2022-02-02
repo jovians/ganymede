@@ -2,6 +2,21 @@
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 import { Class } from '@jovian/type-tools';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { CdsModule } from '@cds/angular';
+import { ClarityModule } from '@clr/angular';
+import { TranslateModule } from '@ngx-translate/core';
+
+export const ganyBaseModulesImport: any[] = [
+  CommonModule,
+  FormsModule,
+  RouterModule,
+  CdsModule,
+  ClarityModule,
+  TranslateModule.forChild(),
+];
 
 export interface ModulesRegistrationData {
   name: string;

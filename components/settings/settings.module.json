@@ -1,0 +1,11 @@
+{
+  "namespace": "@jovian/ganymede-clr",
+  "mounted": "ganymede",
+  "group": "components/settings",
+
+  "name": "GanymedePagesModule",
+  "folder": "",
+  "file": "settings.module",
+
+  "attributes": ["ui", "angular", "clarity"]
+}

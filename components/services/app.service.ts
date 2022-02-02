@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Store } from '@ngrx/store';
 import { Actions } from '@ngrx/effects';
+import { Observable } from 'rxjs';
 
 import { EnvService } from '../services/env.service';
 import { rx } from '../util/common/ngrx.stores';
@@ -19,7 +20,11 @@ import { CommandsRegistrar } from '../util/common/commands.registrar';
 import { RouteObservingService } from './route-observing.service';
 import { ServiceWorkerUtil } from '../util/common/service.worker.utils';
 import { DisplayMode } from '../util/common/size.util';
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
+import { InputEventService } from './input-event.service';
+import { CryptoService } from './crypto.service';
+
+export { autoUnsub, ix } from '@jovian/type-tools';
 
 declare var window: any;
 
@@ -39,12 +44,24 @@ export class AppService extends GanymedeAppData {
 
   debug = debugController;
 
+  service: {
+    env?: EnvService;
+    http?: HttpClient;
+    inputEvent?: InputEventService;
+    crypto?: CryptoService;
+    translator?: TranslateService;
+    router?: Router;
+    routeObserver?: RouteObservingService;
+  } = {};
+
   private mainContentArea: ElementRef = null;
 
   constructor(
     public env: EnvService,
     public http: HttpClient,
+    public inputEvent: InputEventService,
     public storeBase: Store<rx.AnyStore>,
+    private crypto: CryptoService,
     private translateService: TranslateService,
     private router: Router,
     private routeObserver: RouteObservingService,
@@ -53,6 +70,14 @@ export class AppService extends GanymedeAppData {
     super();
     this.config = window.ganymedeAppData;
     Object.assign(this, window.ganymedeAppData);
+    
+    this.service.env = this.env;
+    this.service.http = this.http;
+    this.service.inputEvent = this.inputEvent;
+    this.service.crypto = this.crypto;
+    this.service.translator = this.translateService;
+    this.service.router = this.router;
+    this.service.routeObserver = this.routeObserver;
 
     // tslint:disable-next-line: no-string-literal
     window['ngxTranslateService'] = this.translateService;
@@ -107,6 +132,10 @@ export class AppService extends GanymedeAppData {
     }
   }
 
+  src(url: string): string {
+    return window.srcResolver ? window.srcResolver(url) : url;
+  }
+
 }
 
 export function extRegisterRx(extKey: string) {
@@ -118,3 +147,9 @@ export function extGetData(extKey: string) {
 }
 
 export { rx };
+
+export function autoSub(component: any, sub: Subscription) {
+  if (component && component.__rx_subs) {
+    component.__rx_subs.push(sub);
+  }
+}
