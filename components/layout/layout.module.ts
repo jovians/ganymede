@@ -4,16 +4,19 @@
 import { NgModule } from '@angular/core';
 import { Modules, ganyBaseModulesImport } from '../../../ui.modules';
 import { FilledSpaceComponent } from './filled-space/filled-space.component';
+import { GanyGridComponent } from './gany-grid/gany-grid.component';
 
 @NgModule({
   imports: [
     ...ganyBaseModulesImport,
   ],
   declarations: [
-    FilledSpaceComponent
+    FilledSpaceComponent,
+    GanyGridComponent
   ],
   exports: [
-    FilledSpaceComponent
+    FilledSpaceComponent,
+    GanyGridComponent,
   ],
 })
 export class GanymedeLayoutModule {

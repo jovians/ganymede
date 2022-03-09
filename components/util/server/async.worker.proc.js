@@ -111,7 +111,7 @@ var AsyncWorkerClient = /** @class */ (function (_super) {
     AsyncWorkerClient.prototype.call = function (action, payload, parser) {
         var _this = this;
         if (payload === void 0) { payload = ''; }
-        var callId = action + "::" + (0, uuid_1.v4)();
+        var callId = "".concat(action, "::").concat((0, uuid_1.v4)());
         return new Promise(function (resolve) { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -239,14 +239,14 @@ var AsyncWorkerExecutor = /** @class */ (function (_super) {
             });
         }); });
         var scope = workerData.scopeName ? workerData.scopeName : 'unnamed_scope';
-        _this.mainScope = new type_tools_1.ix.MajorScope(scope + ("(" + process.pid + ")"));
+        _this.mainScope = new type_tools_1.ix.MajorScope(scope + "(".concat(process.pid, ")"));
         if (workerData.coreAffinity !== null && workerData.coreAffinity !== undefined) {
             var core = workerData.coreAffinity;
             if (core === 'auto' && workerData.workerId !== null && workerData.workerId !== undefined) {
                 core = (workerData.workerId % os.cpus().length) + '';
             }
             if (process.platform === 'linux') {
-                (0, child_process_1.execSync)("taskset -cp " + core + " " + process.pid, { stdio: 'inherit' });
+                (0, child_process_1.execSync)("taskset -cp ".concat(core, " ").concat(process.pid), { stdio: 'inherit' });
             }
         }
         return _this;
@@ -299,22 +299,28 @@ var AsyncWorkerExecutor = /** @class */ (function (_super) {
                                 return [2 /*return*/, this.returnCall(callId, '')];
                             }
                         }
-                        res = this.handleAction(callId, action, payload);
-                        if (!(!res && this.customAction[action])) return [3 /*break*/, 2];
-                        return [4 /*yield*/, Promise.resolve(this.customAction[action](payload, this, callId, action))];
+                        return [4 /*yield*/, this.handleAction(callId, action, payload)];
                     case 1:
+                        res = _b.sent();
+                        if (!(!res && this.customAction[action])) return [3 /*break*/, 3];
+                        return [4 /*yield*/, Promise.resolve(this.customAction[action](payload, this, callId, action))];
+                    case 2:
                         resStr = _b.sent();
                         if (!resStr) {
                             resStr = '';
                         }
                         this.returnCall(callId, resStr);
-                        _b.label = 2;
-                    case 2: return [2 /*return*/];
+                        _b.label = 3;
+                    case 3: return [2 /*return*/];
                 }
             });
         });
     };
-    AsyncWorkerExecutor.prototype.handleAction = function (callId, action, payload) { };
+    AsyncWorkerExecutor.prototype.handleAction = function (callId, action, payload) {
+        return __awaiter(this, void 0, void 0, function () { return __generator(this, function (_a) {
+            return [2 /*return*/];
+        }); });
+    };
     AsyncWorkerExecutor.prototype.ontermination = function () {
         return __awaiter(this, void 0, void 0, function () { return __generator(this, function (_a) {
             return [2 /*return*/];

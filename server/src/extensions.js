@@ -68,18 +68,18 @@ var GanymedeServerExtensions = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         ganyBasePath = __dirname.split('/').slice(0, -2).join('/');
-                        extPath = ganyBasePath + "/extensions/" + key.split('.').join('/');
-                        fs.writeFileSync(extPath + "/server/.extension.build.uuid", process.env.BUILD_UUID, 'utf8');
-                        if (!fs.existsSync("" + extPath)) {
-                            return [2 /*return*/, console.log("ganymede server extension '" + key + "' not found.")];
+                        extPath = "".concat(ganyBasePath, "/extensions/").concat(key.split('.').join('/'));
+                        fs.writeFileSync("".concat(extPath, "/server/.extension.build.uuid"), process.env.BUILD_UUID, 'utf8');
+                        if (!fs.existsSync("".concat(extPath))) {
+                            return [2 /*return*/, console.log("ganymede server extension '".concat(key, "' not found."))];
                         }
                         alwaysCompile = true;
-                        if (!(alwaysCompile || compileOnly || !fs.existsSync(extPath + "/server/src/main.js"))) return [3 /*break*/, 5];
+                        if (!(alwaysCompile || compileOnly || !fs.existsSync("".concat(extPath, "/server/src/main.js")))) return [3 /*break*/, 5];
                         compiled = void 0;
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, execAsync("tsc --target es5 --experimentalDecorators --resolveJsonModule " + extPath + "/server/src/main.ts")];
+                        return [4 /*yield*/, execAsync("tsc --target es5 --experimentalDecorators --resolveJsonModule ".concat(extPath, "/server/src/main.ts"))];
                     case 2:
                         _a.sent();
                         compiled = true;
@@ -90,19 +90,19 @@ var GanymedeServerExtensions = /** @class */ (function () {
                         return [3 /*break*/, 4];
                     case 4:
                         if (!compiled) {
-                            return [2 /*return*/, console.log("ganymede server extension '" + key + "' failed to compile.")];
+                            return [2 /*return*/, console.log("ganymede server extension '".concat(key, "' failed to compile."))];
                         }
                         _a.label = 5;
                     case 5:
                         if (compileOnly) {
-                            console.log("ganymede server extension '" + key + "' has been compiled.");
+                            console.log("ganymede server extension '".concat(key, "' has been compiled."));
                             process.exit(0);
                         }
                         extData = process.env.EXT_DATA_BASE64 ?
                             JSON.parse(Buffer.from(process.env.EXT_DATA_BASE64, 'base64').toString('utf8')) : {};
-                        profilingLogFile = extData.v8Profiling ? "--logfile=prof.ext." + key + ".log" : '';
-                        console.log("Ganymede server extension '" + key + "' running (pid=" + process.pid + ")");
-                        procArgs = ['--max-old-space-size=262144', extPath + "/server/src/main.js"];
+                        profilingLogFile = extData.v8Profiling ? "--logfile=prof.ext.".concat(key, ".log") : '';
+                        console.log("Ganymede server extension '".concat(key, "' running (pid=").concat(process.pid, ")"));
+                        procArgs = ['--max-old-space-size=262144', "".concat(extPath, "/server/src/main.js")];
                         if (profilingLogFile) {
                             procArgs.unshift('--prof');
                             procArgs.unshift(profilingLogFile);
@@ -124,7 +124,7 @@ var GanymedeServerExtensions = /** @class */ (function () {
                                 a[_i] = arguments[_i];
                             }
                             console.log(a);
-                            console.log("ganymede server extension '" + key + "' exited.");
+                            console.log("ganymede server extension '".concat(key, "' exited."));
                         });
                         return [2 /*return*/];
                 }
@@ -149,7 +149,7 @@ function execAsync(cmd) {
             return [2 /*return*/, new Promise(function (resolve) {
                     (0, child_process_1.exec)(cmd, function (e, stdout) {
                         if (e) {
-                            console.log("ERROR: " + stdout);
+                            console.log("ERROR: ".concat(stdout));
                             return resolve(false);
                         }
                         resolve(true);

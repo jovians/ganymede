@@ -109,7 +109,7 @@ function methodsRegister(methods, path, apiOptions) {
                     case 0:
                         api = methodMap[op.method];
                         if (!api) {
-                            return [2 /*return*/, op.endWithError(http_models_1.HttpCode.NOT_FOUND, "METHOD_NOT_FOUND", "Method " + op.method + " not found for '" + api.fullpath + "'")];
+                            return [2 /*return*/, op.endWithError(http_models_1.HttpCode.NOT_FOUND, "METHOD_NOT_FOUND", "Method ".concat(op.method, " not found for '").concat(api.fullpath, "'"))];
                         }
                         return [4 /*yield*/, Promise.resolve(logic.apply(api.server, [op]))];
                     case 1:
@@ -193,7 +193,7 @@ var GanymedeHttpServer = /** @class */ (function () {
     }
     GanymedeHttpServer.prototype.registerApis = function () {
         if (this.state.apiRegistered) {
-            throw new Error("Cannot register apis twice; already registered from " + this.state.apiRegisterStack);
+            throw new Error("Cannot register apis twice; already registered from ".concat(this.state.apiRegisterStack));
         }
         this.state.apiRegistered = true;
         this.state.apiRegisterStack = new Error().stack;
@@ -205,7 +205,7 @@ var GanymedeHttpServer = /** @class */ (function () {
     };
     GanymedeHttpServer.prototype.normalizeServerConfig = function (config) {
         if (!config.scopeName) {
-            config.scopeName = "httpshim;pid=" + process.pid;
+            config.scopeName = "httpshim;pid=".concat(process.pid);
         }
         var newConfig = (0, common_1.completeConfig)(config, defaultConfig);
         newConfig.debug.showErrorStack = true;
@@ -226,7 +226,7 @@ var GanymedeHttpServer = /** @class */ (function () {
     };
     GanymedeHttpServer.prototype.cacheDefine = function (init) {
         if (this.cacheData[init.path]) {
-            throw new Error("Cache path '" + init.path + "' is already defined.");
+            throw new Error("Cache path '".concat(init.path, "' is already defined."));
         }
         var def = new CacheDef(init);
         this.cacheData[def.path] = new CacheEntry({
@@ -349,11 +349,11 @@ var GanymedeHttpServer = /** @class */ (function () {
                         args = op.req.decryptedPayloadObject;
                         resolved = this.pathResolve(args.path);
                         if (!resolved) {
-                            return [2 /*return*/, op.endWithError(http_models_1.HttpCode.NOT_FOUND, "PATH_NOT_FOUND", "Encrypted access to unknown path: '" + args.path + "'")];
+                            return [2 /*return*/, op.endWithError(http_models_1.HttpCode.NOT_FOUND, "PATH_NOT_FOUND", "Encrypted access to unknown path: '".concat(args.path, "'"))];
                         }
                         api = resolved.methods[op.method];
                         if (!api) {
-                            return [2 /*return*/, op.endWithError(http_models_1.HttpCode.NOT_FOUND, "METHOD_NOT_FOUND", "Method " + op.method + " not found for '" + api.fullpath + "'")];
+                            return [2 /*return*/, op.endWithError(http_models_1.HttpCode.NOT_FOUND, "METHOD_NOT_FOUND", "Method ".concat(op.method, " not found for '").concat(api.fullpath, "'"))];
                         }
                         Object.assign(op.req.params, resolved.params);
                         Object.assign(op.req.params, args.data);
@@ -379,11 +379,11 @@ var GanymedeHttpServer = /** @class */ (function () {
     GanymedeHttpServer.prototype.register = function (api) {
         var apiVersion = api.apiVersion ? api.apiVersion : this.apiVersion;
         var apiPath = api.apiPath ? api.apiPath : this.apiPath;
-        var finalMountPath = api.rootMount ? '' : "/" + apiPath + "/" + apiVersion;
-        var fullpath = (finalMountPath + "/" + api.path).replace(/\/\//g, '/');
+        var finalMountPath = api.rootMount ? '' : "/".concat(apiPath, "/").concat(apiVersion);
+        var fullpath = "".concat(finalMountPath, "/").concat(api.path).replace(/\/\//g, '/');
         api.fullpath = fullpath;
         this.pathResolve(fullpath, api);
-        var apiKey = api.method + " " + api.fullpath;
+        var apiKey = "".concat(api.method, " ").concat(api.fullpath);
         this.apiPathList.push(apiKey);
         this.apiMap[apiKey] = api;
         if (!api.pre) {
@@ -593,8 +593,8 @@ var GanymedeHttpServer = /** @class */ (function () {
             var paramDef = node['?param-name?'];
             if (paramDef) {
                 if (newApi && isParam && paramDef.slot !== slot) {
-                    throw new Error("Cannot register a parameter slot " + slot + ", " +
-                        ("parameter " + paramDef.slot + " has been registered by " + paramDef.registeredPath));
+                    throw new Error("Cannot register a parameter slot ".concat(slot, ", ") +
+                        "parameter ".concat(paramDef.slot, " has been registered by ").concat(paramDef.registeredPath));
                 }
                 paramCollector[paramDef.name] = slot;
                 node = paramDef.nextNode;
@@ -617,7 +617,7 @@ var GanymedeHttpServer = /** @class */ (function () {
         }
         if (newApi) {
             if (node.__apidef__ && node.__apidef__.methods[newApi.method]) {
-                throw new Error("Cannot register api at " + newApi.method + " " + path + ", another api is already registered");
+                throw new Error("Cannot register api at ".concat(newApi.method, " ").concat(path, ", another api is already registered"));
             }
             if (!node.__apidef__) {
                 node.__apidef__ = {
@@ -756,9 +756,9 @@ var GanymedeHttpResponse = /** @class */ (function () {
         this.statusCode = code;
         return this.end(JSON.stringify(resObj));
     };
-    GanymedeHttpResponse.prototype.okJsonPreserialized = function (serial) { return "{\"status\":\"ok\",\"result\":" + serial + "}"; };
+    GanymedeHttpResponse.prototype.okJsonPreserialized = function (serial) { return "{\"status\":\"ok\",\"result\":".concat(serial, "}"); };
     GanymedeHttpResponse.prototype.okJsonString = function (obj) { return JSON.stringify({ status: 'ok', result: obj }); };
-    GanymedeHttpResponse.prototype.returnJsonPreserialized = function (serial) { return this.end("{\"status\":\"ok\",\"result\":" + serial + "}"); };
+    GanymedeHttpResponse.prototype.returnJsonPreserialized = function (serial) { return this.end("{\"status\":\"ok\",\"result\":".concat(serial, "}")); };
     GanymedeHttpResponse.prototype.returnJson = function (obj) { return this.end(JSON.stringify({ status: 'ok', result: obj })); };
     return GanymedeHttpResponse;
 }());
@@ -791,7 +791,7 @@ var HttpOp = /** @class */ (function () {
         if (!errorMessage) {
             errorMessage = appErrorCode + '';
         }
-        var joinedMessage = "HTTP-" + httpStatusCode + " :: " + appErrorCode + " :: " + errorMessage;
+        var joinedMessage = "HTTP-".concat(httpStatusCode, " :: ").concat(appErrorCode, " :: ").concat(errorMessage);
         this.error = {
             op: this,
             t: Date.now(),
@@ -871,7 +871,7 @@ var HttpOp = /** @class */ (function () {
                 this.oriRes.status(this.res.statusCode).end(this.res.endingPayload);
                 return null;
             default:
-                throw new Error("Unknown base http library type: " + this.server.config.type);
+                throw new Error("Unknown base http library type: ".concat(this.server.config.type));
         }
     };
     return HttpOp;
@@ -1092,16 +1092,16 @@ var CacheEntry = /** @class */ (function () {
         }
         else {
             if (!(opt === null || opt === void 0 ? void 0 : opt.pathParams)) {
-                throw new Error("Cannot naviagate cache path '" + this.def.path + "'. param not given");
+                throw new Error("Cannot naviagate cache path '".concat(this.def.path, "'. param not given"));
             }
             var paramValue = (_a = opt === null || opt === void 0 ? void 0 : opt.pathParams) === null || _a === void 0 ? void 0 : _a[keyInfo.name];
             if (!paramValue) {
-                throw new Error("Cannot naviagate cache path '" + this.def.path + "'. param '" + keyInfo.name + "' not found");
+                throw new Error("Cannot naviagate cache path '".concat(this.def.path, "'. param '").concat(keyInfo.name, "' not found"));
             }
             key = paramValue;
         }
         if (!key) {
-            throw new Error("Cannot naviagate cache path '" + this.def.path + "; Params = " + opt.pathParams);
+            throw new Error("Cannot naviagate cache path '".concat(this.def.path, "; Params = ").concat(opt.pathParams));
         }
         return key;
     };
@@ -1178,7 +1178,7 @@ var HttpCacheOp = /** @class */ (function () {
     };
     HttpCacheOp.prototype.cacheSet = function (cacheDef, value, option) {
         if (!this.op.server.cacheData[cacheDef.path]) {
-            throw new Error("Cache key '" + cacheDef.path + "' is not defined ahead-of-time for this server.");
+            throw new Error("Cache key '".concat(cacheDef.path, "' is not defined ahead-of-time for this server."));
         }
         var cacheData = this.op.server.cacheData[cacheDef.path];
         var setter = cacheData.keyNavigate(option);

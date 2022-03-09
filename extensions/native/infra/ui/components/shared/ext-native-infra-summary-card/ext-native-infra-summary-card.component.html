@@ -1,5 +1,5 @@
-<div class="card" style="margin: 0;">
-  <div class="card-header">
+<div [ngClass]="{'card': true, 'no-card': noCard }" style="margin: 0;">
+  <div class="card-header" *ngIf="!noHeader">
     <button *ngIf="!entryData?.defunct" class="btn btn-sm btn-link nav-button" [routerLink]="['/' + entryData?.link]">View</button>
     <div style="width: calc(100% - 2rem);">{{ entryData?.name }}</div>
   </div>
@@ -14,35 +14,47 @@
             <!-- utilization bars -->
             <div class="clr-col">
               <div class="prog-label">CPU
-                <span style="font-size: 70%; opacity: 0.8;">@</span>
-                <span style="font-size: 75%; opacity: 0.9;">&nbsp;{{ numFormat(stats.overview.consumedCpu, 'G') }}
-                <span style="font-size: 80%; opacity: 0.8; display: inline;">GHz</span></span>
+                <span *ngVar="Unit.adjust(stats.overview.consumedCpu, 'G') as cpuNow">
+                  <span style="font-size: 70%; opacity: 0.8;">@</span>
+                  <span style="font-size: 75%; opacity: 0.9;">
+                    {{ cpuNow.value }}
+                    <span style="font-size: 80%; opacity: 0.8; display: inline;"> {{ cpuNow.prefix }}Hz</span>
+                  </span>
+                </span>
               </div>
               <clr-progress-bar class="prog-gauge"
                 [id]="'infra-summary-card-for-' + key + '-cpu-bar'"
                 [clrLabeled]="true" [clrValue]="stats?.percent?.cpu?.toFixed(0)"
-                [ngClass]="{'util-orange': stats?.percent?.cpu >= 60, 'util-red': stats?.percent?.cpu > 85, 'util-black': stats?.percent?.cpu >= 98 }">
+                [ngClass]="{'util-orange': stats?.percent?.cpu >= 55, 'util-red': stats?.percent?.cpu > 84, 'util-black': stats?.percent?.cpu >= 94 }">
               </clr-progress-bar>
               <div class="prog-margin"></div>
               <div class="prog-label">Mem
-                <span style="font-size: 70%; opacity: 0.8;">@</span>
-                <span style="font-size: 75%; opacity: 0.9;">&nbsp;{{ numFormat(stats.overview.consumedMem / 1024) }}
-                <span style="font-size: 80%; opacity: 0.8; display: inline;">TiB</span></span>
+                <span *ngVar="Unit.adjust(stats.overview.consumedMem / 1024, 'Ti') as memNow">
+                  <span style="font-size: 70%; opacity: 0.8;">@</span>
+                  <span style="font-size: 75%; opacity: 0.9;">
+                    {{ memNow.value }}
+                    <span style="font-size: 80%; opacity: 0.8; display: inline;"> {{ memNow.prefix }}B</span>
+                  </span>
+                </span>
               </div>
               <clr-progress-bar class="prog-gauge"
                 [id]="'infra-summary-card-for-' + key + '-mem-bar'"
                 [clrLabeled]="true" [clrValue]="stats?.percent?.mem?.toFixed(0)"
-                [ngClass]="{'util-orange': stats?.percent?.mem >= 60, 'util-red': stats?.percent?.mem > 85, 'util-black': stats?.percent?.mem >= 98 }"></clr-progress-bar>
+                [ngClass]="{'util-orange': stats?.percent?.mem >= 55, 'util-red': stats?.percent?.mem > 84, 'util-black': stats?.percent?.mem >= 94 }"></clr-progress-bar>
               <div class="prog-margin"></div>
               <div class="prog-label">Disk
-                <span style="font-size: 70%; opacity: 0.8;">@</span>
-                <span style="font-size: 75%; opacity: 0.9;">&nbsp;{{ numFormat(stats.overview.consumedStorage / 1024) }}
-                <span style="font-size: 80%; opacity: 0.8; display: inline;">TiB</span></span>
+                <span *ngVar="Unit.adjust(stats.overview.consumedStorage / 1024, 'Ti') as diskNow">
+                  <span style="font-size: 70%; opacity: 0.8;">@</span>
+                  <span style="font-size: 75%; opacity: 0.9;">
+                    {{ diskNow.value }}
+                    <span style="font-size: 80%; opacity: 0.8; display: inline;"> {{ diskNow.prefix }}B</span>
+                  </span>
+                </span>
               </div>
               <clr-progress-bar class="prog-gauge"
                 [id]="'infra-summary-card-for-' + key + '-disk-bar'"
                 [clrLabeled]="true" [clrValue]="stats?.percent?.disk?.toFixed(0)"
-                [ngClass]="{'util-orange': stats?.percent?.disk >= 60, 'util-red': stats?.percent?.disk > 85, 'util-black': stats?.percent?.disk >= 98 }"></clr-progress-bar>
+                [ngClass]="{'util-orange': stats?.percent?.disk >= 55, 'util-red': stats?.percent?.disk > 84, 'util-black': stats?.percent?.disk >= 94 }"></clr-progress-bar>
               <div class="prog-margin"></div>
               <div class="prog-margin"></div>
             </div>
@@ -50,42 +62,51 @@
             <div class="clr-col">
               <div class="other-details" style="margin-top: 0.4rem;">
                 <div class="aligned-right">
-                  <cds-icon shape="vm" size="16" style="margin-right: 0.3rem; transform: translate(0, -0.03rem);"></cds-icon>
-                  <b>{{ stats.vmCount }}</b>
+                  <cds-icon *ngIf="!vmHostsInText" shape="vm" size="16" style="margin-right: 0.3rem; transform: translate(0, -0.03rem);"></cds-icon>
+                  <b>{{ stats.vmCount }} </b><span *ngIf="vmHostsInText" style="font-size: 80%;">VMs</span>
                   <!-- &nbsp;<span style="font-size: 90%;">{{ stats.vmCount > 1 ? 'VMs' : 'VM' }}</span> -->
                   <span class="num-div">&nbsp; | &nbsp;</span>
                   <span style="width: 0.3rem;">&nbsp;</span>
-                  <cds-icon shape="host-group" size="16" style="margin-right: 0.3rem; transform: translate(0, -0.03rem);"></cds-icon>
-                  <b>{{ stats.hostCount }}</b>
+                  <cds-icon *ngIf="!vmHostsInText" shape="host-group" size="16" style="margin-right: 0.3rem; transform: translate(0, -0.03rem);" [badge]="hostHasIssues(stats)"></cds-icon>
+                  <b>{{ stats.hostCount }} </b><span *ngIf="vmHostsInText" style="font-size: 80%;">Hosts</span>
                   <!-- &nbsp;<span style="font-size: 90%;">{{ stats.hostCount > 1 ? 'Hosts' : 'Host' }}</span> -->
                 </div>
                 <br>
                 <div style="height: 0.5rem;"></div>
                 <div class="aligned-right small-stats">
                   <!-- <span style="font-size: 80%">CPU: </span> -->
-                  <b>{{ numFormat(stats.overview.totalCpu - stats.overview.consumedCpu, 'G') }}</b><span style="font-size: 80%"> GHz free</span>
+                  <span *ngVar="Unit.adjust(stats.overview.totalCpu - stats.overview.consumedCpu, 'G') as cpuNow">
+                    <b>{{ cpuNow.value }}</b><span style="font-size: 80%"> {{ cpuNow.prefix }}Hz free</span>
+                  </span>
                   <span class="num-div"> / </span>
-                  {{ numFormat(stats.overview.totalCpu, 'G') }}
-                  <span style="font-size: 80%">GHz</span>
+                  <span *ngVar="Unit.adjust(stats.overview.totalCpu, 'G') as cpuTotal">
+                    {{ cpuTotal.value }}<span style="font-size: 80%"> {{ cpuTotal.prefix }}Hz</span>  
+                  </span>
                   <!-- <cds-icon shape="cpu" size="16" style="margin-left: 0.2rem;"></cds-icon> -->
                 </div>
                 <br>
                 <div class="aligned-right small-stats">
                   <!-- <span style="font-size: 80%">Mem: </span> -->
                   <!-- <cds-icon shape="memory" size="15" style="margin-right: 0.2rem;"></cds-icon> -->
-                  <b>{{ numFormat((stats.overview.totalMem - stats.overview.consumedMem) / 1024, 'Ti') }}</b><span style="font-size: 80%"> TiB free</span>
+                  <span *ngVar="Unit.adjust((stats.overview.totalMem - stats.overview.consumedMem) / 1024, 'Ti') as memNow">
+                    <b>{{ memNow.value }}</b><span style="font-size: 80%"> {{ memNow.prefix }}B free</span>
+                  </span>
                   <span class="num-div"> / </span>
-                  {{ numFormat(stats.overview.totalMem / 1024) }}
-                  <span style="font-size: 80%">TiB</span>
+                  <span *ngVar="Unit.adjust(stats.overview.totalMem / 1024, 'Ti') as memTotal">
+                    {{ memTotal.value }}<span style="font-size: 80%"> {{ memTotal.prefix }}B</span>
+                  </span>
                 </div>
                 <br>
                 <div class="aligned-right small-stats">
                   <!-- <span style="font-size: 80%">Disk: </span> -->
                   <cds-icon shape="storage" size="13" style="margin-right: 0.3rem; transform: translate(0, -0.03rem);"></cds-icon>
-                  <b>{{ numFormat((stats.overview.totalStorage - stats.overview.consumedStorage) / 1024, 'Ti') }}</b><span style="font-size: 80%"> TiB free</span>
+                  <span *ngVar="Unit.adjust((stats.overview.totalStorage - stats.overview.consumedStorage) / 1024, 'Ti') as diskNow">
+                    <b>{{ diskNow.value }}</b><span style="font-size: 80%"> {{ diskNow.prefix }}B free</span>
+                  </span>
                   <span class="num-div"> / </span>
-                  {{ numFormat(stats.overview.totalStorage / 1024) }}
-                  <span style="font-size: 80%">TiB</span>
+                  <span *ngVar="Unit.adjust(stats.overview.totalStorage / 1024, 'Ti') as diskTotal">
+                    {{ diskTotal.value }}<span style="font-size: 80%"> {{ diskTotal.prefix }}B</span>
+                  </span>
                 </div>
                 <br>
                 <div style="height: 0.3rem;"></div>

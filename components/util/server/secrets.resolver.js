@@ -52,7 +52,7 @@ var SecretsResolver = /** @class */ (function () {
                 this.allData = JSON.parse(fs.readFileSync(config.jsonFile, 'utf8'));
             }
             else {
-                throw new Error("Cannot find secrets datastore file: '" + config.jsonFile + "'");
+                throw new Error("Cannot find secrets datastore file: '".concat(config.jsonFile, "'"));
             }
         }
         else if (config.type === 'source-from-destor') {
@@ -72,7 +72,7 @@ var SecretsResolver = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, destor_1.Destor.get({
-                            path: "/api-destor/v1/secret-resolve/" + common_1.currentEnv, data: { path: secretPath }
+                            path: "/api-destor/v1/secret-resolve/".concat(common_1.currentEnv), data: { path: secretPath }
                         })];
                     case 1:
                         result = _a.sent();

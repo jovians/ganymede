@@ -41,6 +41,7 @@ export class AppService extends GanymedeAppData {
   config: GanymedeAppData;
 
   routeData = new Subject<any>();
+  preserveQueryParams: boolean = false;
 
   debug = debugController;
 

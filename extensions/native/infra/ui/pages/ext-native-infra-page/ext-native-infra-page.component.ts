@@ -4,6 +4,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { autoUnsub, ix } from '@jovian/type-tools';
 import { RouteObservingService } from 'src/app/ganymede/components/services/route-observing.service';
+import { kvOrder, KVComparator } from 'src/app/ganymede/components/util/directive/filter/keyvalue.order';
 import { Components } from '../../../../../../../ui.components';
 import { AppService, rx } from '../../../../../../components/services/app.service';
 import { asRouteBasic, RouteData } from '../../../../../../components/util/common/route.helper';
@@ -31,9 +32,12 @@ export class ExtNativeInfraPageComponent extends ix.Entity implements OnInit, On
   overviewOrder = ['aws', 'gcp', 'azure', 'vcenter'];
   isDefunct = false;
 
+  kvOrder = kvOrder;
+
   constructor(
     public app: AppService,
     private routeObserver: RouteObservingService,
+    private infraService: ExtNativeInfraService,
   ) {
     super('ext-native-infra-page');
     this.inventory = this.app.store.extInfra.inventory;
@@ -48,6 +52,9 @@ export class ExtNativeInfraPageComponent extends ix.Entity implements OnInit, On
         this.isDefunct = false;
         this.key = data.key;
       }
+    });
+    this.infraService.ds.vcenter.quickStats.data$.subscribe(a => {
+      // this.orderer = this.getOrderer();
     });
   }
 
@@ -71,5 +78,17 @@ export class ExtNativeInfraPageComponent extends ix.Entity implements OnInit, On
 
   ngOnInit() { this.hydrate(); }
   ngOnDestroy() { autoUnsub(this); this.destroy(); }
+
+  getOrderer(type: string = 'original'): KVComparator<any> {
+    switch(type) {
+      case 'original': return (a, b) => {
+        const cv = this.infraService.ds.vcenter.quickStats.currentValue;
+        if (cv) {
+          return cv[b.value.key]?.vmCount - cv[a.value.key]?.vmCount;
+        }
+        return 0;
+      };
+    }
+  }
 
 }

@@ -89,7 +89,7 @@ var ServerEntryPoint = /** @class */ (function () {
                     case 2:
                         ip = _j.sent();
                         if (!ip) {
-                            console.log("[Destor resolve #" + (tryCount - 1) + "] unable to resolve " + hostname + ", trying next...");
+                            console.log("[Destor resolve #".concat(tryCount - 1, "] unable to resolve ").concat(hostname, ", trying next..."));
                             return [3 /*break*/, 4];
                         }
                         return [4 /*yield*/, destorGet(target)];
@@ -144,14 +144,14 @@ var ServerEntryPoint = /** @class */ (function () {
                             console.log("No destor profiles are available, exiting. 2");
                             process.exit(0);
                         }
-                        console.log("[Destor resolved] discovered " + destorInfo.list.length + " active destor endpoints.");
+                        console.log("[Destor resolved] discovered ".concat(destorInfo.list.length, " active destor endpoints."));
                         _j.label = 12;
                     case 12:
                         // Default modules
                         if (const_1.ServerConst.data.base.modules && !compileOnly) {
                             for (_e = 0, _f = Object.keys(const_1.ServerConst.data.base.modules); _e < _f.length; _e++) {
                                 baseModuleName = _f[_e];
-                                console.log("Ganymede server module '" + baseModuleName + "' entrypoint (pid=" + process.pid + ")");
+                                console.log("Ganymede server module '".concat(baseModuleName, "' entrypoint (pid=").concat(process.pid, ")"));
                                 switch (baseModuleName) {
                                     case 'auth':
                                         authServer = new auth_server_1.AuthServer();
@@ -170,7 +170,7 @@ var ServerEntryPoint = /** @class */ (function () {
                                     nativeExt = _h[_g];
                                     extData = const_1.ServerConst.data.extensions.native[nativeExt];
                                     globalConfData = const_1.ServerConst.data.global ? const_1.ServerConst.data.global : {};
-                                    extData._extension_key = "native." + nativeExt;
+                                    extData._extension_key = "native.".concat(nativeExt);
                                     cluster.fork({
                                         BUILD_UUID: ServerEntryPoint.buildUuid,
                                         EXT_KEY: extData._extension_key,
@@ -224,11 +224,11 @@ function destorGet(target) {
             }
         }).catch(function (e) {
             if (e.response) {
-                console.log("[Destor resolution error] destor handshake failed for " + target.endpoint + ", returned with " +
-                    (e.response.status + ": " + e.response.data.status));
+                console.log("[Destor resolution error] destor handshake failed for ".concat(target.endpoint, ", returned with ") +
+                    "".concat(e.response.status, ": ").concat(e.response.data.status));
             }
             else {
-                console.log("[Destor resolution error] destor handshake failed for " + target.endpoint + ", returned with " + e.message);
+                console.log("[Destor resolution error] destor handshake failed for ".concat(target.endpoint, ", returned with ").concat(e.message));
             }
             resolve(null);
         });

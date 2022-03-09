@@ -1,2 +1,9 @@
-
 @import './default/clarity-themes.scss';
+
+body[theme-family="dark"] {
+  svg {
+    text {
+      fill: rgba(255, 255, 255, 0.66);
+    }
+  }
+}

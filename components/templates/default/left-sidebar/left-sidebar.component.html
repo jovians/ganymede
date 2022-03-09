@@ -23,8 +23,11 @@
       <ul class="nav-list">
         <ng-template ngFor let-item [ngForOf]="itemData.children" let-i="itemIndex">
           <li [ngClass]="{'hollow-disabled': item.defunct}">
-            <a class="nav-link" [ngClass]="{'active': navActiveStatus(item)}"
-                [routerLink]="[item.link]" (click)="endHere($event)">{{ item.name | translate }}</a>
+            <a class="nav-link"
+                [ngClass]="{'active': navActiveStatus(item)}"
+                [routerLink]="getRouterLink(item)"
+                [queryParamsHandling]="getQueryParamsHandling(item)"
+                (click)="endHere($event)">{{ item.name | translate }}</a>
           </li>
         </ng-template>
       </ul>
@@ -37,8 +40,11 @@
       <ul class="nav-list">
         <ng-template ngFor let-item [ngForOf]="itemData.children" let-i="itemIndex">
           <li [ngClass]="{'hollow-disabled': item.defunct}">
-            <a class="nav-link" [ngClass]="{'active': navActiveStatus(item)}"
-              [routerLink]="[item.link]" (click)="endHere($event)">{{ item.name | translate }}</a>
+            <a class="nav-link"
+              [ngClass]="{'active': navActiveStatus(item)}"
+              [routerLink]="getRouterLink(item)"
+              [queryParamsHandling]="getQueryParamsHandling(item)"
+              (click)="endHere($event)">{{ item.name | translate }}</a>
           </li>
         </ng-template>
       </ul>

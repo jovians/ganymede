@@ -1,0 +1,47 @@
+<as-split direction="horizontal" gutterSize="8" (dragEnd)="onDragEnd($event)">
+  <as-split-area [(size)]="leftSize" [minSize]="20" style="overflow: scroll;">
+    <div style="width: 100%; min-width: 640px;">
+      <clr-tree>
+        <clr-tree-node *clrRecursiveFor="let stub of stubs; getChildren: getChildren"
+          [(clrExpanded)]="uiStateTracker.expanded[stub.iid].value"
+          (click)="selectEntity(stub)"
+          style="max-width: 200px; white-space: nowrap;"
+          >
+          <cds-icon [attr.shape]="stub.icon"></cds-icon>
+          <a [routerLink]="[]" [queryParams]="getQueryParams(stub)" class="clr-treenode-link" routerLinkActive="active" queryParamsHandling="merge">
+            <span style="padding-right: 0.25rem;">
+              {{ stub.name }}
+            </span>
+          </a>
+        </clr-tree-node>
+      </clr-tree>
+      <div class="mbot5"></div>
+      <div class="mbot5"></div>
+    </div>
+  </as-split-area>
+  <as-split-area [(size)]="rightSize" [minSize]="20" style="overflow: scroll;">
+    <div *ngIf="dataLoadingForWhile" class="loading-area">
+      <div class="spinner-spacer"></div>
+      <clr-spinner class="spinner"></clr-spinner>
+    </div>
+    <div *ngIf="!dataLoadingForWhile && entityNotFound" class="entity-not-found-area">
+      <div class="entity-not-found-spacer"></div>
+      <div class="card entity-not-found-card">
+        <div class="card-header">
+          <cds-icon shape="warning-standard" size="md" style="margin-right: 0.2rem;"></cds-icon>
+          Object Not Found
+        </div>
+        <div class="card-block card-block-content">
+          <div class="card-text card-content">
+            Entity '{{ selectedEntityKey }}' does not exist on the this vCenter
+          </div>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="!dataLoadingForWhile && !entityNotFound">
+      <gany-ext-native-infra-vcenter-host-details *ngIf="moType === 'HostSystem'" [moData]="moData" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-host-details>
+      <gany-ext-native-infra-vcenter-vm-details *ngIf="moType === 'VirtualMachine'" [moData]="moData" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-vm-details>
+      <gany-ext-native-infra-vcenter-datastore-details *ngIf="moType === 'Datastore'" [moData]="moData" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-datastore-details>
+    </div>
+  </as-split-area>
+</as-split>

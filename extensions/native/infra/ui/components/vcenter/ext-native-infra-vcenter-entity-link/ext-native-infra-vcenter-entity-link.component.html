@@ -1,0 +1,8 @@
+<span *ngIf="!showCustomLink" style="white-space: nowrap;">
+  <cds-icon *ngIf="showIcon" [shape]="iconShape" [ngStyle]="iconStyle" [badge]="iconBadge" [status]="iconStatus"></cds-icon>
+  <a [routerLink]="routerLink" [queryParams]="queryParams" queryParamsHandling="merge">{{ entityName }}</a>
+  <ng-content></ng-content>
+</span>
+<span *ngIf="showCustomLink">
+  <ng-content></ng-content>
+</span>

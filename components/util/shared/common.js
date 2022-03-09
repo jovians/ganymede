@@ -3,7 +3,8 @@
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.bindSub = exports.topMomentOut = exports.completeConfig = exports.completeConfigDirectly = exports.keyNav = exports.currentEnv = exports.EnvContext = exports.isNodeJs = void 0;
+exports.moduleTypeMap = exports.bindSub = exports.topMomentOut = exports.completeConfig = exports.completeConfigDirectly = exports.keyNav = exports.currentEnv = exports.EnvContext = exports.isNodeJs = void 0;
+var type_tools_1 = require("@jovian/type-tools");
 exports.isNodeJs = (typeof process !== 'undefined') && (process.release.name === 'node');
 var EnvContext;
 (function (EnvContext) {
@@ -87,3 +88,42 @@ function bindSub(component, subj, getter) {
     component.__rx_subs.push(subs);
 }
 exports.bindSub = bindSub;
+function moduleTypeMap(module, typeHintProperty) {
+    var classByName = {};
+    var classLineageByName = {};
+    var classLineageStringByName = {};
+    for (var _i = 0, _a = Object.keys(module); _i < _a.length; _i++) {
+        var propName = _a[_i];
+        var member = module[propName];
+        if (!member) {
+            continue;
+        }
+        var targetIsClass = member && !!member.prototype && !!member.constructor.name;
+        if (targetIsClass) {
+            classByName[propName] = member;
+            classLineageByName[propName] = type_tools_1.ClassLineage.of(member);
+            classLineageStringByName[propName] = classLineageByName[propName].map(function (cls) {
+                classByName[cls.name] = cls;
+                return cls.name;
+            });
+        }
+    }
+    return {
+        classByName: classByName,
+        classLineageByName: classLineageByName,
+        classLineageStringByName: classLineageStringByName,
+        checkInstanceOf: function (target, ancestor) {
+            if (!target || !ancestor || !target[typeHintProperty]) {
+                return false;
+            }
+            var typeName = target[typeHintProperty];
+            var targetClass = classByName[target[typeHintProperty]];
+            if (!targetClass) {
+                return false;
+            }
+            var lca = type_tools_1.ClassLineage.lastCommonAncestor(targetClass, ancestor);
+            return lca === ancestor;
+        },
+    };
+}
+exports.moduleTypeMap = moduleTypeMap;

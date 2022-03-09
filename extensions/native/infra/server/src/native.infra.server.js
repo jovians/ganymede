@@ -69,14 +69,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NativeInfraExtensionServer = void 0;
-/*
- * Copyright 2014-2021 Jovian, all rights reserved.
- */
 var http_shim_1 = require("../../../../../server/src/http.shim");
 var secrets_resolver_1 = require("../../../../../components/util/server/secrets.resolver");
 var logger_1 = require("../../../../../components/util/shared/logger");
 var native_infra_server_worker_1 = require("./native.infra.server.worker");
-var scopeName = "ext-infra;pid=" + process.pid;
+var scopeName = "ext-infra;pid=".concat(process.pid);
 var NativeInfraExtensionServer = /** @class */ (function (_super) {
     __extends(NativeInfraExtensionServer, _super);
     function NativeInfraExtensionServer(extData, globalConfData) {
@@ -90,7 +87,7 @@ var NativeInfraExtensionServer = /** @class */ (function (_super) {
         };
         _this.extData = extData;
         _this.apiVersion = 'v1';
-        _this.apiPath = _this.configGlobal.ext.basePath + "/native/infra";
+        _this.apiPath = "".concat(_this.configGlobal.ext.basePath, "/native/infra");
         _this.addDefaultProcessor(http_shim_1.ReqProcessor.BASIC);
         _this.enumerateVCenters();
         return _this;
@@ -132,7 +129,7 @@ var NativeInfraExtensionServer = /** @class */ (function (_super) {
                     case 6:
                         _c.password = _d.sent();
                         if (!inv.username || !inv.password) {
-                            console.log("Failed to resolve credentials for '" + inv.key + "'");
+                            console.log("Failed to resolve credentials for '".concat(inv.key, "'"));
                             return [3 /*break*/, 7];
                         }
                         inv.watch = true;
@@ -204,7 +201,7 @@ var NativeInfraExtensionServer = /** @class */ (function (_super) {
                                     case 1:
                                         inventorySerialized = _a.sent();
                                         if (!inventorySerialized) {
-                                            return [2 /*return*/, op.endWithError(500, "NOT_READY_INV", "[" + op.req.params.key + "] utilization summary not ready yet")];
+                                            return [2 /*return*/, op.endWithError(500, "NOT_READY_INV", "[".concat(op.req.params.key, "] utilization summary not ready yet"))];
                                         }
                                         resolve(JSON.parse(inventorySerialized));
                                         return [2 /*return*/];
@@ -234,7 +231,7 @@ var NativeInfraExtensionServer = /** @class */ (function (_super) {
                     case 2:
                         cacheAccess = (_a.version = _b.sent(), _a.matchExactly = true, _a);
                         if (cacheAccess.version < 0) {
-                            return [2 /*return*/, op.endWithError(500, "NOT_READY_UTIL_SUMMARY", "[" + op.req.params.key + "] utilization summary not ready yet")];
+                            return [2 /*return*/, op.endWithError(500, "NOT_READY_UTIL_SUMMARY", "[".concat(op.req.params.key, "] utilization summary not ready yet"))];
                         }
                         op.cache.handler(this.cache.quickStats, cacheAccess, function (resolve) { return __awaiter(_this, void 0, void 0, function () {
                             var _a, _b, _c;
@@ -293,19 +290,44 @@ var NativeInfraExtensionServer = /** @class */ (function (_super) {
             });
         });
     };
-    NativeInfraExtensionServer.prototype.getVCenterByKey = function (op) {
+    NativeInfraExtensionServer.prototype.getEntities = function (op) {
+        return __awaiter(this, void 0, void 0, function () {
+            var guid, entityKey, vcKey, vc, entitiesSerialized;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        guid = op.req.params.key;
+                        entityKey = guid.split(':').pop();
+                        vcKey = guid.split(':')[1];
+                        return [4 /*yield*/, this.getVCenterByKey(op, vcKey)];
+                    case 1:
+                        vc = _a.sent();
+                        if (op.error) {
+                            return [2 /*return*/, op.endWithError()];
+                        }
+                        return [4 /*yield*/, vc.getEntities([entityKey])];
+                    case 2:
+                        entitiesSerialized = _a.sent();
+                        return [2 /*return*/, op.res.returnJson(JSON.parse(entitiesSerialized)[0])];
+                }
+            });
+        });
+    };
+    NativeInfraExtensionServer.prototype.getVCenterByKey = function (op, key) {
         var _a;
         return __awaiter(this, void 0, void 0, function () {
-            var key, vc;
+            var vc;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        key = (_a = op.req.params) === null || _a === void 0 ? void 0 : _a.key;
                         if (!key) {
-                            return [2 /*return*/, op.raise(http_shim_1.HttpCode.BAD_REQUEST, "PATH_PARAM_NOT_FOUND", "'" + key + "' path parameter not defined.")];
+                            key = (_a = op.req.params) === null || _a === void 0 ? void 0 : _a.key;
+                        }
+                        if (!key) {
+                            return [2 /*return*/, op.raise(http_shim_1.HttpCode.BAD_REQUEST, "PATH_PARAM_NOT_FOUND", "'".concat(key, "' path parameter not defined."))];
                         }
                         if (this.vcentersDefunct[key]) {
-                            return [2 /*return*/, op.raise(http_shim_1.HttpCode.BAD_REQUEST, "VCENTER_DEFUNCT", "[" + key + "] vCenter is defunct")];
+                            return [2 /*return*/, op.raise(http_shim_1.HttpCode.BAD_REQUEST, "VCENTER_DEFUNCT", "[".concat(key, "] vCenter is defunct"))];
                         }
                         vc = this.vcenters[key];
                         if (!(vc && vc.then)) return [3 /*break*/, 2];
@@ -315,7 +337,7 @@ var NativeInfraExtensionServer = /** @class */ (function (_super) {
                         _b.label = 2;
                     case 2:
                         if (!vc) {
-                            return [2 /*return*/, op.raise(http_shim_1.HttpCode.BAD_REQUEST, "NO_VCENTER_KEY", "[" + key + "] cannot find vCenter by key " + key)];
+                            return [2 /*return*/, op.raise(http_shim_1.HttpCode.BAD_REQUEST, "NO_VCENTER_KEY", "[".concat(key, "] cannot find vCenter by key ").concat(key))];
                         }
                         return [2 /*return*/, vc];
                 }
@@ -337,6 +359,9 @@ var NativeInfraExtensionServer = /** @class */ (function (_super) {
     __decorate([
         http_shim_1.HTTP.GET("/vcenter/:key/watcher-failure-heat")
     ], NativeInfraExtensionServer.prototype, "getWatcherFailureHeat", null);
+    __decorate([
+        http_shim_1.HTTP.GET("/vcenter/:key/managed-object")
+    ], NativeInfraExtensionServer.prototype, "getEntities", null);
     return NativeInfraExtensionServer;
 }(http_shim_1.GanymedeHttpServer));
 exports.NativeInfraExtensionServer = NativeInfraExtensionServer;

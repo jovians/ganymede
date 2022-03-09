@@ -1,9 +1,8 @@
 /*
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
-import '@cds/core/icon/register.js';
-import { ClarityIcons } from '@clr/core/icon';
 import {
+  ClarityIcons,
   userIcon,
   homeIcon,
   downloadIcon,
@@ -12,8 +11,9 @@ import {
   storageIcon,
   ellipsisVerticalIcon,
   barsIcon,
-} from '@clr/core/icon';
+} from '@cds/core/icon';
 import { otherClarityIcons } from '../../../../ganymede.app.ui';
+import '@cds/core/icon/register.js';
 
 ClarityIcons.addIcons(
   ...[
@@ -29,6 +29,8 @@ ClarityIcons.addIcons(
   ].filter((value, index, self) => self.indexOf(value) === index)
 );
 
+ClarityIcons.addIcons(vmIcon);
+
 export const cdsIconImportInfo = {
-  added: true
+  added: false
 };

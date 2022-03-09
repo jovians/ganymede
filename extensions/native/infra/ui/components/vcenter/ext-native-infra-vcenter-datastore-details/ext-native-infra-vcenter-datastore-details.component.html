@@ -1,0 +1,265 @@
+<ng-container *ngIf="moData && data">
+  <h3 class="vcenter-title" style="margin-top: 0.65rem; margin-left: 0.9rem; margin-bottom: 0.1rem;">
+    <cds-icon shape="storage" size="md"></cds-icon>
+    {{ data.name }}
+  </h3>
+  <gany-grid [minWidth]="'540px'" class="mtop" style="width: calc(100% - 1rem); padding-left: 1rem;">
+    <!-- Summary Section -->
+    <div class="card grid-card">
+      <div class="card-header">Summary</div>
+      <div class="card-block card-block-content">
+        <div class="card-text card-content">
+          <div style="margin-top: -12px;">
+            <swimlane-adv-util-gauge
+              [title]="'DISK'" style="display: block; margin: 0 auto;"
+              [value]="data.status.space.usedRaw" [valuePrefix]="'0i'"
+              [maxValue]="data.status.space.capacityRaw" [maxValuePrefix]="'0i'"
+              [thresholdPercent]="70" [unit]="'B'" [size]="'md'"></swimlane-adv-util-gauge>
+          </div>
+          <clr-stack-view style="margin-top: 1rem;">
+            <!-- Name -->
+            <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Name</clr-stack-label>
+              <clr-stack-content>{{ data.name }}</clr-stack-content>
+            </clr-stack-block>
+            <!-- Type -->
+            <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Type</clr-stack-label>
+              <clr-stack-content>{{ data.type }}</clr-stack-content>
+            </clr-stack-block>
+            <!-- Alias if any -->
+            <clr-stack-block *ngIf="moData.aliasOf" [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Alias Of</clr-stack-label>
+              <clr-stack-content>
+                <gany-ext-native-infra-vcenter-entity-link [entityId]="moData.aliasOf" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-entity-link>
+              </clr-stack-content>
+            </clr-stack-block>
+            <!-- Disk Space Status -->
+            <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Utilization</clr-stack-label>
+              <clr-stack-content>{{ data.status.space.used }} / {{ data.status.space.capacity }} ({{ data.status.space.usePercentStr }}%)</clr-stack-content>
+            </clr-stack-block>
+            <!-- Hosts & VMs -->
+            <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Hosts & VMs</clr-stack-label>
+              <clr-stack-content>{{ data.hostsAndVms }}</clr-stack-content>
+            </clr-stack-block>
+            <!-- Location -->
+            <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Location</clr-stack-label>
+              <clr-stack-content><span style="word-break: break-all;">{{ data.location }}</span></clr-stack-content>
+            </clr-stack-block>
+          </clr-stack-view>
+        </div>
+      </div>
+    </div>
+    <!-- Metadata Section -->
+    <div class="card grid-card">
+      <div class="card-header">Details & Configs</div>
+      <div class="card-block card-block-content">
+        <div class="card-text card-content">
+          <clr-stack-view>
+            <!-- Capabilities -->
+            <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Capabilities</clr-stack-label>
+              <clr-stack-content>{{ data.meta.capabilityListLength }} Config Flag(s)</clr-stack-content>
+              <clr-stack-block *ngIf="data.meta.clusteredVmdkSupported !== null"[clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Clustered VMDK</clr-stack-label>
+                <clr-stack-content>{{ data.meta.capability.clusteredVmdkSupported ? 'Supported' : 'Unsupported' }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Directory Hierarchy</clr-stack-label>
+                <clr-stack-content>{{ data.meta.capability.directoryHierarchySupported ? 'Supported' : 'Unsupported' }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Raw Disk Mapping</clr-stack-label>
+                <clr-stack-content>{{ data.meta.capability.rawDiskMappingsSupported ? 'Supported' : 'Unsupported' }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Per-File Thin Provision</clr-stack-label>
+                <clr-stack-content>{{ data.meta.capability.perFileThinProvisioningSupported ? 'Supported' : 'Unsupported' }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Storage IORM</clr-stack-label>
+                <clr-stack-content>{{ data.meta.capability.storageIORMSupported ? 'Enabled' : 'Disabled' }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Native Snapshots</clr-stack-label>
+                <clr-stack-content>{{ data.meta.capability.nativeSnapshotSupported ? 'Supported' : 'Unsupported' }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Top-level Directory</clr-stack-label>
+                <clr-stack-content>{{ data.meta.capability.topLevelDirectoryCreateSupported ? 'Can Create' : 'Cannot Create' }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>SE Sparse</clr-stack-label>
+                <clr-stack-content>{{ data.meta.capability.seSparseSupported ? 'Supported' : 'Unsupported' }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>VMFS Sparse</clr-stack-label>
+                <clr-stack-content>{{ data.meta.capability.vmfsSparseSupported ? 'Supported' : 'Unsupported' }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>vSAN Sparse</clr-stack-label>
+                <clr-stack-content>{{ data.meta.capability.vsanSparseSupported ? 'Supported' : 'Unsupported' }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>VMDK Expandable</clr-stack-label>
+                <clr-stack-content>{{ data.meta.capability.vmdkExpandSupported ? 'Supported' : 'Unsupported' }}</clr-stack-content>
+              </clr-stack-block>
+            </clr-stack-block>
+            <!-- IORM Info -->
+            <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Storage IORM</clr-stack-label>
+              <clr-stack-content>{{ data.meta.iorm.enabled ? 'Enabled' : 'Disabled' }}</clr-stack-content>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Congestion Threshold Mode</clr-stack-label>
+                <clr-stack-content>{{ data.meta.iorm.congestionThresholdMode }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Congestion Threshold</clr-stack-label>
+                <clr-stack-content>{{ data.meta.iorm.congestionThreshold }}%</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Peak Thruoughput Percent</clr-stack-label>
+                <clr-stack-content>{{ data.meta.iorm.percentOfPeakThroughput }}%</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Stats Collection</clr-stack-label>
+                <clr-stack-content>{{ data.meta.iorm.statsCollectionEnabled ? 'Enabled' : 'Disabled' }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Reservations</clr-stack-label>
+                <clr-stack-content>{{ data.meta.iorm.reservationEnabled ? 'Enabled' : 'Disabled' }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Stats Aggregation</clr-stack-label>
+                <clr-stack-content>{{ data.meta.iorm.statsAggregationDisabled ? 'Disabled' : 'Enabled' }}</clr-stack-content>
+              </clr-stack-block>
+            </clr-stack-block>
+            <!-- VMFS Info -->
+            <clr-stack-block *ngIf="data.meta.vmfs" [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>VMFS Info</clr-stack-label>
+              <clr-stack-content>{{ data.meta.vmfs.name }}</clr-stack-content>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>UUID</clr-stack-label>
+                <clr-stack-content>{{ data.meta.vmfs.uuid }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Version</clr-stack-label>
+                <clr-stack-content>{{ data.meta.vmfs.version }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Capacity</clr-stack-label>
+                <clr-stack-content>{{ data.meta.vmfsCapacity }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Block Size</clr-stack-label>
+                <clr-stack-content>{{ data.meta.vmfs.blockSize }} KiB</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Max Blocks</clr-stack-label>
+                <clr-stack-content>{{ data.meta.vmfs.maxBlocks }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Backed by SSD</clr-stack-label>
+                <clr-stack-content>{{ data.meta.vmfs.ssd ? 'Yes' : 'No' }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Locally Backed</clr-stack-label>
+                <clr-stack-content>{{ data.meta.vmfs.local ? 'Yes' : 'No' }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>VMFS Upgrdable</clr-stack-label>
+                <clr-stack-content>{{ data.meta.vmfs.vmfsUpgradable ? 'True' : 'False' }}</clr-stack-content>
+              </clr-stack-block>
+            </clr-stack-block>
+            <!-- Container ID -->
+            <clr-stack-block *ngIf="data.meta.containerId" [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Container ID</clr-stack-label>
+              <clr-stack-content>{{ data.meta.containerId }}</clr-stack-content>
+            </clr-stack-block>
+            <!-- Membership ID -->
+            <clr-stack-block *ngIf="data.meta.membershipUuid" [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Membership ID</clr-stack-label>
+              <clr-stack-content>{{ data.meta.membershipUuid }}</clr-stack-content>
+            </clr-stack-block>
+            <!-- Access Gen No. -->
+            <clr-stack-block *ngIf="data.meta.accessGenNo" [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Access Gen No.</clr-stack-label>
+              <clr-stack-content>{{ data.meta.accessGenNo }}</clr-stack-content>
+            </clr-stack-block>
+            <!-- Maintenance Mode -->
+            <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Maintenance Mode</clr-stack-label>
+              <clr-stack-content>{{ data.meta.maintenanceMode }}</clr-stack-content>
+            </clr-stack-block>
+            <!-- Multiple Host Access -->
+            <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Multiple Host Access</clr-stack-label>
+              <clr-stack-content>{{ data.meta.multipleHostAccess ? 'True' : 'False' }}</clr-stack-content>
+            </clr-stack-block>
+            <!-- Max vDisk Capacity -->
+            <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Max vDisk Capacity</clr-stack-label>
+              <clr-stack-content>{{ data.meta.maxVirtualDiskCapacity }}</clr-stack-content>
+            </clr-stack-block>
+            <!-- Max File Size -->
+            <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Max File Size</clr-stack-label>
+              <clr-stack-content>{{ data.meta.maxFileSize }}</clr-stack-content>
+            </clr-stack-block>
+            <!-- Max Memory File Size -->
+            <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Max Memory File Size</clr-stack-label>
+              <clr-stack-content>{{ data.meta.maxMemoryFileSize }}</clr-stack-content>
+            </clr-stack-block>
+            <!-- Max Physical RDM File Size -->
+            <clr-stack-block *ngIf="data.meta.maxPhysicalRDMFileSize" [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Max Physical RDM File Size</clr-stack-label>
+              <clr-stack-content>{{ data.meta.maxPhysicalRDMFileSize }}</clr-stack-content>
+            </clr-stack-block>
+            <!-- Max Virtual RDM File Size -->
+            <clr-stack-block *ngIf="data.meta.maxVirtualRDMFileSize" [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Max Virtual RDM File Size</clr-stack-label>
+              <clr-stack-content>{{ data.meta.maxVirtualRDMFileSize }}</clr-stack-content>
+            </clr-stack-block>
+          </clr-stack-view>
+        </div>
+      </div>
+    </div>
+    <!-- Hosts Section -->
+    <div class="card grid-card" *ngIf="moData.host && moData.host.length > 0">
+      <clr-datagrid>
+        <clr-dg-column>Hosts</clr-dg-column>
+        <clr-dg-row *clrDgItems="let host of moData.host">
+          <clr-dg-cell>
+            <gany-ext-native-infra-vcenter-entity-link [entityId]="host.key" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-entity-link>
+          </clr-dg-cell>
+        </clr-dg-row>
+        <clr-dg-footer>
+          <clr-dg-pagination #pagination [clrDgPageSize]="10">
+            {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of {{ pagination.totalItems }} Host(s)
+          </clr-dg-pagination>
+        </clr-dg-footer>
+      </clr-datagrid>
+    </div>
+    <!-- VM Section -->
+    <div class="card grid-card" *ngIf="moData.vm && moData.vm.length > 0">
+      <clr-datagrid>
+        <clr-dg-column>Virtual Machines</clr-dg-column>
+        <clr-dg-row *clrDgItems="let vmId of moData.vm">
+          <clr-dg-cell>
+            <gany-ext-native-infra-vcenter-entity-link [entityId]="vmId" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-entity-link>
+          </clr-dg-cell>
+        </clr-dg-row>
+        <clr-dg-footer>
+          <clr-dg-pagination #pagination [clrDgPageSize]="10">
+            {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of {{ pagination.totalItems }} VM(s)
+          </clr-dg-pagination>
+        </clr-dg-footer>
+      </clr-datagrid>
+    </div>
+  </gany-grid>
+  <div class="mbot5"></div>
+</ng-container>

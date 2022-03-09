@@ -8,6 +8,8 @@ import { FormsModule } from '@angular/forms';
 import { CdsModule } from '@cds/angular';
 import { ClarityModule } from '@clr/angular';
 import { TranslateModule } from '@ngx-translate/core';
+import { AngularSplitModule } from 'angular-split';
+import { GanymedeDefaultDirectivesModule } from './ganymede/components/directives/default.directives.module';
 
 export const ganyBaseModulesImport: any[] = [
   CommonModule,
@@ -15,7 +17,9 @@ export const ganyBaseModulesImport: any[] = [
   RouterModule,
   CdsModule,
   ClarityModule,
+  AngularSplitModule,
   TranslateModule.forChild(),
+  GanymedeDefaultDirectivesModule,
 ];
 
 export interface ModulesRegistrationData {

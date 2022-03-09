@@ -1,9 +1,46 @@
 
-body[theme="CLARITY-BLACK"] {
+body[theme-family="dark"] {
   nav.clr-nav-level-2 {
     border-left: 1px solid rgba(140, 140, 140, 0.25) !important;
   }
   div.alert-app-level {
     border: none;
+  }
+
+  .sidenav .nav-group .nav-list .nav-link.active {
+    color: rgba(255,255,255,0.877) !important;
+  }
+
+  .sidenav .sidenav-content>.nav-link.active {
+    color:rgba(255,255,255,0.877) !important;
+  }
+
+  div.as-split-gutter {
+    background-color:rgba(140, 140, 140, 0.25) !important;
+  }
+
+  swimlane-adv-util-gauge {
+    .adv-guage-cont {
+      .text-info .percent-value {
+        color: #49AFD9 !important;
+      }
+      svg.ngx-charts g[ngx-charts-pie-arc]:not(.background-arc) > g.arc-group > path.arc {
+        fill: #49AFD9 !important;
+      }
+      svg.ngx-charts g[ngx-charts-pie-arc].background-arc > g.arc-group > path.arc {
+        fill: rgba(140, 140, 140, 0.1);
+      }
+    }
+    .adv-guage-cont.red-lining {
+      .text-info .percent-value {
+        color: rgb(194, 84, 0) !important;
+      }
+      svg.ngx-charts g[ngx-charts-pie-arc]:not(.background-arc) > g.arc-group > path.arc {
+        fill: rgb(194, 84, 0) !important;
+      }
+      svg.ngx-charts g[ngx-charts-pie-arc].background-arc > g.arc-group > path.arc {
+        fill: rgba(140, 140, 140, 0.1);
+      }
+    }
   }
 }

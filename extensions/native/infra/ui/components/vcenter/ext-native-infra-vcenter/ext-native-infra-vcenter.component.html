@@ -3,94 +3,152 @@
     {{ vCenter.name }}
     <span class="vcenter-url">{{ vCenter.url }} (key={{ key }})</span>
   </h3>
-  <clr-tabs>
-    <clr-tab>
+  <clr-tabs class="tabs-panel" *ngIf="!dataLoading">
+    <clr-tab class="tab-panel">
       <button clrTabLink style="margin-left: 1.25rem;" (click)="tabSelect('summary')">
         Summary
       </button>
-      <clr-tab-content *clrIfActive="currentTab === 'summary'">
-        Dashboard content
-        <!-- <gany-xterm
-          [sessionId]="'IqncLEavW4Qg8RM3ycDvUHGump'"
-          [targetUrl]="'ws://localhost:7002/wss'">
-        </gany-xterm> -->
-      </clr-tab-content>
+      <ng-template [(clrIfActive)]="tabActiveState.summary">
+        <clr-tab-content>
+          <div class="summary-page">
+            <gany-ext-native-infra-summary-card
+              style="width: min(500px, 100%);"
+              [listData]="vCenterList"
+              [entryData]="vCenter"
+              [noHeader]="true"
+              [noCard]="true"
+              [vmHostsInText]="true">
+            </gany-ext-native-infra-summary-card>
+            <h3 style="margin-bottom: 0.5rem;">Key Metrics (24h)</h3>
+            <div class="gany-grid" style="width: calc(98%);">
+              <div class="card metric-card">
+                <swimlane-timeseries-graph-content
+                  *ngIf="quickStatsGraphData"
+                  [timeStart]="timeStart"
+                  [timeEnd]="timeEnd"
+                  [dataFetcher]="dataFetcherCpu"
+                  [graphConfig]="graphConfigs.cpu"
+                  [timeSpansEnabled]="false"
+                  [showLoading]="quickStatsShowLoading">
+                  </swimlane-timeseries-graph-content>
+              </div>
+              <div class="card metric-card">
+                <swimlane-timeseries-graph-content
+                  *ngIf="quickStatsGraphData"
+                  [timeStart]="timeStart"
+                  [timeEnd]="timeEnd"
+                  [dataFetcher]="dataFetcherMem"
+                  [graphConfig]="graphConfigs.mem"
+                  [timeSpansEnabled]="false"
+                  [showLoading]="quickStatsShowLoading">
+                  </swimlane-timeseries-graph-content>
+              </div>
+              <div class="card metric-card">
+                <swimlane-timeseries-graph-content
+                  *ngIf="quickStatsGraphData"
+                  [timeStart]="timeStart"
+                  [timeEnd]="timeEnd"
+                  [dataFetcher]="dataFetcherDisk"
+                  [graphConfig]="graphConfigs.disk"
+                  [timeSpansEnabled]="false"
+                  [showLoading]="quickStatsShowLoading">
+                  </swimlane-timeseries-graph-content>
+              </div>
+              <div class="card metric-card">
+                <swimlane-timeseries-graph-content
+                  *ngIf="quickStatsGraphData"
+                  [timeStart]="timeStart"
+                  [timeEnd]="timeEnd"
+                  [dataFetcher]="dataFetcherHostCount"
+                  [graphConfig]="graphConfigs.hostCount"
+                  [timeSpansEnabled]="false"
+                  [showLoading]="quickStatsShowLoading">
+                  </swimlane-timeseries-graph-content>
+              </div>
+              <div class="card metric-card">
+                <swimlane-timeseries-graph-content
+                  *ngIf="quickStatsGraphData"
+                  [timeStart]="timeStart"
+                  [timeEnd]="timeEnd"
+                  [dataFetcher]="dataFetcherVmCount"
+                  [graphConfig]="graphConfigs.vmCount"
+                  [timeSpansEnabled]="false"
+                  [showLoading]="quickStatsShowLoading">
+                  </swimlane-timeseries-graph-content>
+              </div>
+            </div>
+            <div class="mbot5"></div>
+          </div>
+        </clr-tab-content>
+      </ng-template>
     </clr-tab>
     <clr-tab>
       <button clrTabLink (click)="tabSelect('hosts')">
-        Hosts
+        Hosts {{ getEntityCount(inventoryStubs.hosts) }}
       </button>
-      <clr-tab-content *clrIfActive="currentTab === 'hosts'">
-        Dashboard content 2
-      </clr-tab-content>
-    </clr-tab>
-    <clr-tab>
-      <button clrTabLink (click)="tabSelect('metrics')">
-        Metrics
-      </button>
-      <clr-tab-content *clrIfActive="currentTab === 'metrics'">
-        <div class="tab-inner">
-          <!-- <div>Watcher Metrics</div> -->
-          <div class="gany-grid" style="width: 98%;">
-            <div class="card" style="min-width: 30%; height: 10rem;">
-              <swimlane-timeseries-graph-content
-                *ngIf="quickStatsGraphData"
-                [timeStart]="timeStart"
-                [timeEnd]="timeEnd"
-                [dataFetcher]="dataFetcherCpu"
-                [graphConfig]="graphConfigs.cpu"
-                [timeSpansEnabled]="false">
-                </swimlane-timeseries-graph-content>
-            </div>
-            <div class="card" style="min-width: 30%; height: 10rem;">
-              <swimlane-timeseries-graph-content
-                *ngIf="quickStatsGraphData"
-                [timeStart]="timeStart"
-                [timeEnd]="timeEnd"
-                [dataFetcher]="dataFetcherMem"
-                [graphConfig]="graphConfigs.mem"
-                [timeSpansEnabled]="false">
-                </swimlane-timeseries-graph-content>
-            </div>
-            <div class="card" style="min-width: 30%; height: 10rem;">
-              <swimlane-timeseries-graph-content
-                *ngIf="quickStatsGraphData"
-                [timeStart]="timeStart"
-                [timeEnd]="timeEnd"
-                [dataFetcher]="dataFetcherDisk"
-                [graphConfig]="graphConfigs.disk"
-                [timeSpansEnabled]="false">
-                </swimlane-timeseries-graph-content>
-            </div>
-            <div class="card" style="min-width: 30%; height: 10rem;">
-              <swimlane-timeseries-graph-content
-                *ngIf="quickStatsGraphData"
-                [timeStart]="timeStart"
-                [timeEnd]="timeEnd"
-                [dataFetcher]="dataFetcherHostCount"
-                [graphConfig]="graphConfigs.hostCount"
-                [timeSpansEnabled]="false">
-                </swimlane-timeseries-graph-content>
-            </div>
-            <div class="card" style="min-width: 30%; height: 10rem;">
-              <swimlane-timeseries-graph-content
-                *ngIf="quickStatsGraphData"
-                [timeStart]="timeStart"
-                [timeEnd]="timeEnd"
-                [dataFetcher]="dataFetcherVmCount"
-                [graphConfig]="graphConfigs.vmCount"
-                [timeSpansEnabled]="false">
-                </swimlane-timeseries-graph-content>
-            </div>
+      <ng-template [(clrIfActive)]="tabActiveState.hosts">
+        <clr-tab-content>
+          <div class="entity-tree-area">
+            <gany-ext-native-infra-vcenter-inventory-view
+              *ngIf="inventoryStubs.datacenters.length > 0"
+              [stubs]="inventoryStubs.mainDatacenter.hostFolder.children"
+              [inventoryStubs]="inventoryStubs"
+              [uiStateTracker]="uiStateTracker"
+            ></gany-ext-native-infra-vcenter-inventory-view>
           </div>
-        </div>
-      </clr-tab-content>
+        </clr-tab-content>
+      </ng-template>
     </clr-tab>
     <clr-tab>
-      <button clrTabLink>Events</button>
-      <clr-tab-content>
-        Cloud content
-      </clr-tab-content>
+      <button clrTabLink (click)="tabSelect('vms')">
+        VMs {{ getEntityCount(inventoryStubs.vms) }}
+      </button>
+      <ng-template [(clrIfActive)]="tabActiveState.vms">
+        <clr-tab-content>
+          <div class="entity-tree-area">
+            <gany-ext-native-infra-vcenter-inventory-view
+              *ngIf="inventoryStubs.datacenters.length > 0"
+              [stubs]="inventoryStubs.mainDatacenter.vmFolder.children"
+              [inventoryStubs]="inventoryStubs"
+              [uiStateTracker]="uiStateTracker"
+            ></gany-ext-native-infra-vcenter-inventory-view>
+          </div>
+        </clr-tab-content>
+      </ng-template>
+    </clr-tab>
+    <clr-tab>
+      <button clrTabLink (click)="tabSelect('datastores')">
+        Datastores {{ getEntityCount(inventoryStubs.datastores) }}
+      </button>
+      <ng-template [(clrIfActive)]="tabActiveState.datastores">
+        <clr-tab-content *clrIfActive="currentTab === 'datastores'">
+          <div class="entity-tree-area">
+            <gany-ext-native-infra-vcenter-inventory-view
+              *ngIf="inventoryStubs.datacenters.length > 0"
+              [stubs]="inventoryStubs.mainDatacenter.datastoreFolder.children"
+              [inventoryStubs]="inventoryStubs"
+              [uiStateTracker]="uiStateTracker"
+            ></gany-ext-native-infra-vcenter-inventory-view>        
+          </div>
+        </clr-tab-content>
+      </ng-template>
+    </clr-tab>
+    <clr-tab>
+      <button clrTabLink (click)="tabSelect('networks')">
+        Networks {{ getEntityCount(inventoryStubs.networks) }}
+      </button>
+      <ng-template [(clrIfActive)]="tabActiveState.networks">
+        <clr-tab-content *clrIfActive="currentTab === 'networks'">
+          <div class="entity-tree-area">
+            <gany-ext-native-infra-vcenter-inventory-view
+              *ngIf="inventoryStubs.datacenters.length > 0"
+              [stubs]="inventoryStubs.mainDatacenter.networkFolder.children"
+              [inventoryStubs]="inventoryStubs"
+              [uiStateTracker]="uiStateTracker"
+            ></gany-ext-native-infra-vcenter-inventory-view>        
+          </div>
+        </clr-tab-content>
+      </ng-template>
     </clr-tab>
   </clr-tabs>
 </ng-container>

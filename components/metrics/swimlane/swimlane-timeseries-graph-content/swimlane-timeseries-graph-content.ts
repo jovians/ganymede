@@ -104,10 +104,11 @@ export class SwimlaneTimeseriesGraphContent extends ix.Entity implements OnInit,
   @Input() timeEnd = Date.now(); // UNIX TS, miliseconds
   @Input() dataFetcher: (arg: DataFetchArgs) => Promise<DataFetchResult> = null;
   @Input() onupdate: (graphData: any) => void = null;
-  @Input() updateTrigger = 0;
+  @Input() updateTrigger = -1;
   @Input() hidden = false;
   @Input() timeSpans = ['5m', '30m', '2h', '1d', '8d'];
   @Input() timeSpansEnabled = true;
+  @Input() showLoading = false;
 
   @ViewChild('chartContainer', { static: true }) chartContainer: ElementRef;
   @ViewChild('timeSpanPick', { static: true }) timeSpanPick: ElementRef;
@@ -370,8 +371,10 @@ export class SwimlaneTimeseriesGraphContent extends ix.Entity implements OnInit,
     this.noData = false;
     this.graphData = data.timeseries;
     if (this.onupdate) { this.onupdate(this.graphData); }
-    setTimeout(() => {
+    const checker = setInterval(() => {
+      if (this.showLoading) { return; }
       this.seriesStyling();
+      clearInterval(checker);
     }, 100);
   }
 

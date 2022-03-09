@@ -1,0 +1,22 @@
+:host {
+  display: inline;
+  select {
+    margin: 0;
+    padding: 0;
+    color: var(--clr-link-color, #5bc4f1);
+    display: inline;
+    border-bottom: none;
+    background: transparent !important;
+    border-radius: 1rem;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    width: auto;
+  }
+  select:focus {
+    width: auto;
+  }
+}

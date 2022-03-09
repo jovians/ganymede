@@ -5,6 +5,12 @@
   max-width: 35rem;
   display: inline-block;
 
+  .no-card {
+    border: none !important;
+    background: none !important;
+    box-shadow: none !important;
+  }
+
   .card-block-content {
     min-height: 7rem;
   }

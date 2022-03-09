@@ -1,0 +1,216 @@
+<ng-container *ngIf="moData && data">
+  <h3 class="vcenter-title" style="margin-top: 0.65rem; margin-left: 0.9rem; margin-bottom: 0.1rem;">
+    <cds-icon shape="vm" size="md"></cds-icon>
+    {{ data.name }}
+  </h3>
+  <gany-grid [minWidth]="'540px'" class="mtop" style="width: calc(100% - 1rem); padding-left: 1rem;">
+    <!-- Status Section -->
+    <div class="card grid-card">
+      <div class="card-header">Status</div>
+      <div class="card-block card-block-content">
+        <div class="card-text card-content">
+          <div style="display: block; margin: 0 auto; width: 490px; transform: translate(0, -12px);">
+            <swimlane-adv-util-gauge
+              [title]="data.status.cpu.cpuTitle" style="display: inline-block;"
+              [value]="data.status.cpu.usage" [valuePrefix]="'M'"
+              [maxValue]="data.status.cpu.capacity" [maxValuePrefix]="'M'"
+              [thresholdPercent]="70" [unit]="'Hz'" [size]="'sm'"></swimlane-adv-util-gauge>
+            <swimlane-adv-util-gauge
+              [title]="'MEM'" style="display: inline-block;"
+              [value]="data.status.mem.usage" [valuePrefix]="'Mi'"
+              [maxValue]="data.status.mem.capacity" [maxValuePrefix]="'Mi'"
+              [thresholdPercent]="80" [unit]="'B'" [size]="'sm'"></swimlane-adv-util-gauge>
+            <!-- <swimlane-adv-util-gauge
+              [title]="'DISK'" style="display: inline-block;"
+              [value]="data.status.disk.usage" [valuePrefix]="'Gi'"
+              [maxValue]="data.status.disk.capacity" [maxValuePrefix]="'Gi'"
+              [thresholdPercent]="80" [unit]="'B'" [size]="'sm'"></swimlane-adv-util-gauge> -->
+          </div>
+          <clr-stack-view>
+            <!-- Guest OS -->
+            <!-- <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Guest OS</clr-stack-label>
+              <clr-stack-content>{{ moData.summary.guest.guestFullName ? moData.summary.guest.guestFullName : '(Not Running)' }}</clr-stack-content>
+            </clr-stack-block> -->
+            <!-- Top IPv4 Address if any -->
+            <!-- <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>IP Address</clr-stack-label>
+              <clr-stack-content>{{ moData.summary.guest.ipAddress ? moData.summary.guest.ipAddress : '(Unassigned)' }}</clr-stack-content>
+            </clr-stack-block> -->
+            <!-- Network -->
+            <!-- <clr-stack-block *ngIf="data.status.network" [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Network</clr-stack-label>
+              <clr-stack-content>
+                <gany-ext-native-infra-vcenter-entity-link [entityId]="data.status.network.iid" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-entity-link>
+              </clr-stack-content>
+            </clr-stack-block> -->
+            <!-- Datastore -->
+            <!-- <clr-stack-block *ngIf="data.status.datastore" [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Datastore</clr-stack-label>
+              <clr-stack-content>
+                <gany-ext-native-infra-vcenter-entity-link [entityId]="data.status.datastore.iid" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-entity-link>
+              </clr-stack-content>
+            </clr-stack-block> -->
+            <!-- Host & Cluster -->
+            <clr-stack-block *ngIf="data.status.cluster" [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Cluster</clr-stack-label>
+              <clr-stack-content>
+                <gany-ext-native-infra-vcenter-entity-link [entityId]="data.status.cluster.iid" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-entity-link>
+              </clr-stack-content>
+            </clr-stack-block>
+            <!-- Resource Pool -->
+            
+            <!-- Update Time -->
+            <clr-stack-block *ngIf="data.meta.upSince" [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Up Since</clr-stack-label>
+              <gany-time-view [time]="data.meta.upSince" [showDelta]="true"></gany-time-view>
+            </clr-stack-block>
+          </clr-stack-view>
+        </div>
+      </div>
+    </div>
+    <!-- Hardware Section -->
+    <div class="card grid-card" *ngIf="false">
+      <div class="card-header">VM Hardware</div>
+      <div class="card-block card-block-content">
+        <div class="card-text card-content">
+          <clr-stack-view>
+            <!-- CPU -->
+            <clr-stack-block *ngVar="data.status.cpu as cpuInfo" [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>CPU</clr-stack-label>
+              <clr-stack-content>{{ cpuInfo.summary }}</clr-stack-content>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Shares</clr-stack-label><clr-stack-content>{{ cpuInfo.shares }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="2">
+                <clr-stack-label>Reservation</clr-stack-label><clr-stack-content>{{ cpuInfo.reservation }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="3">
+                <clr-stack-label>Limit</clr-stack-label><clr-stack-content>{{ cpuInfo.limit }}</clr-stack-content>
+              </clr-stack-block>
+            </clr-stack-block>
+            <!-- Mem -->
+            <clr-stack-block *ngVar="data.status.mem as memInfo" [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Memory</clr-stack-label>
+              <clr-stack-content>{{ memInfo.summary }}</clr-stack-content>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Shares</clr-stack-label><clr-stack-content>{{ memInfo.shares }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="2">
+                <clr-stack-label>Reservation</clr-stack-label><clr-stack-content>{{ memInfo.reservation }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="3">
+                <clr-stack-label>Limit</clr-stack-label><clr-stack-content>{{ memInfo.limit }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="3">
+                <clr-stack-label>Overhead</clr-stack-label><clr-stack-content>{{ memInfo.consumedOverhead }}</clr-stack-content>
+              </clr-stack-block>
+            </clr-stack-block>
+            <!-- GPUs -->
+            <clr-stack-block *ngFor="let gpu of data.hw.gpus" [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>{{ gpu.name }}</clr-stack-label>
+              <clr-stack-content>
+                <span>{{ gpu.displays }} Display(s), {{ gpu.videoRam }} Video RAM</span>
+              </clr-stack-content>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Graphics RAM</clr-stack-label><clr-stack-content>{{ gpu.graphicsRam }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>3D Support</clr-stack-label><clr-stack-content>{{ gpu.enable3DSupport ? 'Enabled' : 'Disabled' }}</clr-stack-content>
+              </clr-stack-block>
+            </clr-stack-block>
+            <!-- Disks -->
+            <clr-stack-block *ngFor="let diskInfo of data.hw.disks" [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>{{ diskInfo.name }}</clr-stack-label>
+              <clr-stack-content>{{ diskInfo.size }}</clr-stack-content>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Type</clr-stack-label><clr-stack-content>{{ diskInfo.type }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="2">
+                <clr-stack-label>Backing</clr-stack-label>
+                <clr-stack-content>
+                  <gany-ext-native-infra-vcenter-entity-link [entityId]="diskInfo.backingId" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-entity-link>
+                </clr-stack-content>
+              </clr-stack-block>
+            </clr-stack-block>
+            <!-- Networks -->
+            <clr-stack-block *ngFor="let netInfo of data.hw.networks" [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>{{ netInfo.name }}</clr-stack-label>
+              <clr-stack-content>
+                <gany-ext-native-infra-vcenter-entity-link [entityId]="netInfo.backingId" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-entity-link>
+                &nbsp;<span>({{ netInfo.connected ? 'connected' : 'disconnected'}})</span>
+              </clr-stack-content>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Type</clr-stack-label><clr-stack-content>{{ netInfo.type }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Mac Address</clr-stack-label><clr-stack-content>{{ netInfo.macAddress }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Backed by</clr-stack-label>
+                <clr-stack-content>
+                  <gany-ext-native-infra-vcenter-entity-link [entityId]="netInfo.backingId" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-entity-link>
+                  &nbsp;<span>({{ netInfo.backedBy }})</span>
+                </clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Wake on LAN</clr-stack-label><clr-stack-content>{{ netInfo.wakeOnLan ? 'Enabled' : 'Disabled' }}</clr-stack-content>
+              </clr-stack-block>
+            </clr-stack-block>
+            <!-- CD/DVD -->
+            <clr-stack-block *ngFor="let cdDrive of data.hw.cdDrives" [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>{{ cdDrive.name }}</clr-stack-label>
+              <clr-stack-content>
+                <span>{{ cdDrive.connected ? 'Connected' : 'Disconnected'}}</span>
+              </clr-stack-content>
+              <clr-stack-block *ngIf="cdDrive.connected" [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>File</clr-stack-label><clr-stack-content>{{ cdDrive.file }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block *ngIf="cdDrive.connected" [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Location</clr-stack-label>
+                <clr-stack-content>
+                  <gany-ext-native-infra-vcenter-entity-link [entityId]="cdDrive.backingId" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-entity-link>
+                </clr-stack-content>
+              </clr-stack-block>
+            </clr-stack-block>
+            <!-- Other Hardware -->
+            <clr-stack-block *ngVar="data.hw.other as otherInfo" [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Other</clr-stack-label>
+              <clr-stack-content>
+                <span>
+                  {{ otherInfo.controllers.length + otherInfo.scsiControllers.length + otherInfo.usbControllers.length}} Controller(s),
+                  {{ otherInfo.inputDevices.length }} Input Device(s)
+                </span>
+              </clr-stack-content>
+              <clr-stack-block *ngIf="otherInfo.controllers.length" [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Controllers</clr-stack-label>
+                <clr-stack-content>
+                  <div *ngFor="let controllerName of otherInfo.controllers">{{ controllerName }}</div>
+                </clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block *ngIf="otherInfo.scsiControllers.length" [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>SCSI Adapters</clr-stack-label>
+                <clr-stack-content>
+                  <div *ngFor="let scsiControllerName of otherInfo.scsiControllers">{{ scsiControllerName }}</div>
+                </clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block *ngIf="otherInfo.usbControllers.length" [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>USB Controllers</clr-stack-label>
+                <clr-stack-content>
+                  <div *ngFor="let usbControllerName of otherInfo.usbControllers">{{ usbControllerName }}</div>
+                </clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block *ngIf="otherInfo.inputDevices.length" [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Input Devices</clr-stack-label>
+                <clr-stack-content>
+                  <div *ngFor="let inputDeviceName of otherInfo.inputDevices">{{ inputDeviceName }}</div>
+                </clr-stack-content>
+              </clr-stack-block>
+            </clr-stack-block>
+          </clr-stack-view>
+        </div>
+      </div>
+    </div>
+  </gany-grid>
+  <div class="mbot5"></div>
+</ng-container>

@@ -70,4 +70,15 @@ export class LeftSidebarComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy() {
     if (this.routeSubscription) { this.routeSubscription.unsubscribe(); }
   }
+
+  getRouterLink(item) {
+    return [item.link];
+  }
+
+  getQueryParamsHandling(item) {
+    if (item.preserveQueryParams) {
+      return 'preserve';
+    }
+    return '';
+  }
 }

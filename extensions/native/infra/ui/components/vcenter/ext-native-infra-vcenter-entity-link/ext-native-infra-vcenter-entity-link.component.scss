@@ -1,0 +1,8 @@
+:host {
+  display: inline;
+
+  a:visited, a:hover, a:active {
+    color: var(--clr-link-color, #5bc4f1);
+  }
+
+}

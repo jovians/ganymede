@@ -4,6 +4,7 @@
 import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { autoUnsub, ix } from '@jovian/type-tools';
 import { Subscription } from 'rxjs';
+import { Unit } from 'src/app/ganymede/components/util/shared/unit.utils';
 import { AppService, rx } from '../../../../../../../components/services/app.service';
 import { ExtNativeInfraService } from '../ext-native-infra.service';
 
@@ -18,6 +19,9 @@ export class ExtNativeInfraSummaryCardComponent extends ix.Entity implements OnI
 
   @Input() listData;
   @Input() entryData;
+  @Input() noHeader: boolean = false;
+  @Input() noCard: boolean = false;
+  @Input() vmHostsInText: boolean = false;
 
   isDefunct = false;
   vcenter = ExtNativeInfraService.skel?.ds?.vcenter;
@@ -29,7 +33,7 @@ export class ExtNativeInfraSummaryCardComponent extends ix.Entity implements OnI
   dataLoadFailed = false;
   currentStats;
 
-  numFormat: (n: number, unit?: string) => string;
+  Unit = Unit;
 
   constructor(
     public app: AppService
@@ -50,18 +54,6 @@ export class ExtNativeInfraSummaryCardComponent extends ix.Entity implements OnI
       if (this.dataSub) { this.dataSub.unsubscribe(); }
       if (this.statsTimer) { clearInterval(this.statsTimer); this.statsTimer = null; }
     });
-    this.numFormat = (n: number, unit?: string) => {
-      if (n < 0.01 && n >= 0) { return '0'; }
-      if (n < 1) {
-        const v = n.toFixed(2);
-        if (v.endsWith('0')) { return v.substr(0, v.length - 1); }
-        return v;
-      } else if (n < 10) {
-        return n.toFixed(1);
-      } else {
-        return n.toFixed(0);
-      }
-    };
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -91,5 +83,12 @@ export class ExtNativeInfraSummaryCardComponent extends ix.Entity implements OnI
 
   ngOnInit() { this.hydrate(); }
   ngOnDestroy() { autoUnsub(this); this.destroy(); }
+
+  hostHasIssues(stats) {
+    if (stats.hostStats.filter(a => !a.stats).length > 0) { // has a bad host
+      return 'warning-triangle'
+    }
+    return '';
+  }
 
 }

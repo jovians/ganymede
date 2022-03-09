@@ -5,10 +5,8 @@ import { AsyncWorkerClient, AsyncWorkerExecutor } from '../../components/util/se
 import { SecureChannel, SecureChannelPeer } from '../../components/util/shared/crypto/secure.channel';
 import { FourQ } from '@jovian/fourq';
 
-const thisWorkerFile = `${__dirname}/http.shim.worker.security.js`;
-
 export class SecureChannelWorkerClient extends AsyncWorkerClient {
-  static workerFile = thisWorkerFile;
+  static workerFile = __filename;
   constructor(workerData: any) { super(workerData, SecureChannelWorkerClient.workerFile); }
   signMessage(msgBase64: string) { return this.call<string>(`signMessage`, msgBase64, r => r); }
   newChannel(peerInfo: SecureChannelPeer) {
@@ -20,6 +18,7 @@ export class SecureChannelWorkerClient extends AsyncWorkerClient {
     return this.call<SecureChannel>(`newChannel`, peerInfoEncoded, r => SecureChannel.fromJSON(r));
   }
 }
+const thisWorkerClass = SecureChannelWorkerClient;
 
 export class SecureChannelWorkerLogic extends AsyncWorkerExecutor {
   signingKey: Buffer;
@@ -28,7 +27,7 @@ export class SecureChannelWorkerLogic extends AsyncWorkerExecutor {
     this.signingKey = Buffer.from(workerData.signingKey, 'base64');
     this.setAsReady();
   }
-  handleAction(callId: string, action: string, payload?: string) {
+  async handleAction(callId: string, action: string, payload?: string) {
     switch (action) {
       case 'signMessage':
         const sig = FourQ.sign(Buffer.from(payload, 'base64'), this.signingKey);
@@ -44,5 +43,5 @@ export class SecureChannelWorkerLogic extends AsyncWorkerExecutor {
 
 if (process.env.WORKER_DATA_BASE64) {
   const workerData = JSON.parse(Buffer.from(process.env.WORKER_DATA_BASE64, 'base64').toString('utf8'));
-  if (workerData.workerFile === thisWorkerFile) { new SecureChannelWorkerLogic(workerData).getSelf(); }
+  if (workerData.workerFile === thisWorkerClass.workerFile) { new SecureChannelWorkerLogic(workerData).getSelf(); }
 }

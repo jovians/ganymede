@@ -35,7 +35,7 @@
 
   .gany-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    grid-template-columns: repeat(auto-fit, max(16rem, 1fr));
     grid-gap: 0.75rem 0.5rem;
   }
 

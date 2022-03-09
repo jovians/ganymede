@@ -117,6 +117,21 @@ export namespace rx {
     lastUpdated?: number;
   }
 
+  export interface MapOf<T> {
+    [key: string]: T;
+  };
+
+  export function defaultMap<T>(defaultValue: T): MapOf<T> {
+    return new Proxy({}, {
+      get: (target, p, receiver) => {
+        if(!target[p]) { target[p] = JSON.parse(JSON.stringify(defaultValue)); }
+        return target[p];
+      }
+    }) as MapOf<T>;
+  }
+
+  export type GetterOf<T> = () => (Promise<T> | T)
+
   export class Data<T> {
     firstValue: T = null;
     currentValue: T = null;
@@ -128,8 +143,8 @@ export namespace rx {
     fetchLast?: number = 0;
     fetchLasts?: {[key: string]: number} = {};
     lock?: Promise<void> = null;
-    locks?: {[key: string]: Promise<void>} = {};
-    meta?: {[key: string]: DataMetaInfo} = {};
+    locks?: MapOf<Promise<void>> = {};
+    meta?: MapOf<DataMetaInfo> = {};
     info?: any;
     options?: DataOptions<T>;
     instance?: RxDefMember<T>;
@@ -157,12 +172,23 @@ export namespace rx {
     get data$() { return this.instance.data$; }
     setValue(v: T) { this.currentValue = v; }
     getLink() { return this.instance.data$; }
-    sub(component: any, callback: (data: T) => any) {
-      return this.instance.sub(component, callback);
+    sub(component: any, callback: (data: T, meta?: MapOf<DataMetaInfo>) => any) {
+      return this.instance.sub(component, (data) => { callback(data, this.meta); });
     }
-    unsub(component: any) {
-      autoUnsub(component);
+    keySub(component: any, keyGetter: string | GetterOf<string>, callback: (member: T[keyof T], memberMeta?: DataMetaInfo, memberKey?: string) => any) {
+      return this.instance.sub(component, async (data: T) => {
+        let key;
+        if (typeof keyGetter === 'string') {
+          key = keyGetter;
+        } else {
+          key = await Promise.resolve(keyGetter());
+        }
+        if (!data[key] || !this.meta[key]) { return; }
+        callback(data[key], this.meta[key], key);
+      });
     }
+    unsub(component: any) { autoUnsub(component); }
+    bump() { this.instance.bump(); }
   }
 
   export class ActionSync<T> {
@@ -196,9 +222,16 @@ export namespace rx {
     trace: Error;
   }
 
+  const actionDefaultLockMaxWait = 10000;
+  const actionDefaultLockForceKill = 30000;
+  const actionDefaultcacheTtl = 3000;
+
   export interface ActionOptions<T = any> {
     http?: { baseUrl: string };
     timeout?: number;
+    lockMaxWait?: number;
+    lockForceKill?: number;
+    cacheTtl?: number;
     onInvoke?: (e: ActionArgs<T>) =>  any;
     onRawResponse?: (response: any, oldState: T) => any;
     onError?: (data: any, oldState: T) => any;
@@ -215,9 +248,26 @@ export namespace rx {
     data: Data<T>;
   }
 
+  async function resolveLocks<T = any>(data: Data<T>, keys: string | string[], options: ActionOptions<T>) {
+    // if (typeof keys === 'string') { keys = [keys]; }
+    // for (const key of keys) {
+    //   while (data.locks[key]) { await data.locks[key]; await sleepms(100); }
+    //   let resolver = { resolve: null as () => any };
+    //   const lock = data.locks[key] = new Promise(resolve => resolver = () => { data.locks[key] = null; resolve(); });
+    //   setTimeout(() => { if (data.locks[key] === lock) { resolver(); } }, options.lockMaxWait ? options.lockMaxWait : actionDefaultLockMaxWait);
+    //   if (!data.fetchLasts[key]) { data.fetchLasts[key] = 0; }
+    //   if (Date.now() - data.fetchLasts[key] < (options.cacheTtl ? options.cacheTtl : actionDefaultcacheTtl)) {
+    //     options?.onResult?.(data.v, data.v); resolver();
+    //     data.bump();
+    //     return data.v;
+    //   }
+    // }
+  }
+
   export class Action<T> {
     static common = {
       static<T = any>(staticData: T, options?: ActionOptions<T>) {
+        if (!options) { options = {}; }
         return new Action<T>(options, async (e: ActionArgs<T>) => {
           options?.onInvoke?.(e);
           options?.onResult?.(staticData, staticData);
@@ -225,6 +275,7 @@ export namespace rx {
         });
       },
       default<T = any>(urlTemplate: string, options?: ActionOptions<T>) {
+        if (!options) { options = {}; }
         return new Action<T>(options, async (e: ActionArgs<T>) => {
           options?.onInvoke?.(e);
           const data = e.data;
@@ -232,7 +283,12 @@ export namespace rx {
           let resolver;
           const lock = data.lock = new Promise(resolve => resolver = () => { data.lock = null; resolve(); });
           setTimeout(() => { if (data.lock === lock) { resolver(); } }, 10000);
-          if (Date.now() - data.fetchLast < 3000) { options?.onResult?.(data.v, data.v); resolver(); return data.v; }
+          if (Date.now() - data.fetchLast < 3000) {
+            options?.onResult?.(data.v, data.v);
+            resolver();
+            data.bump();
+            return data.v;
+          }
           let url = urlTemplate;
           const srcConf = (e.source as any).conf;
           if (url.startsWith('$BASE_URL') && srcConf && srcConf.baseUrl) { url = url.replace('$BASE_URL', srcConf.baseUrl); }
@@ -240,7 +296,12 @@ export namespace rx {
           const oldVal = data.v;
           e.data.fetchLast = Date.now();
           options?.onRawResponse?.(res, oldVal);
-          if (!res || res.status !== 'ok') { options?.onError?.(res, oldVal); resolver(); return oldVal; }
+          if (!res || res.status !== 'ok') {
+            options?.onError?.(res, oldVal);
+            resolver();
+            data.bump();
+            return oldVal;
+          }
           data.setValue(res.result);
           options?.onResult?.(data.v, oldVal);
           resolver();
@@ -248,16 +309,22 @@ export namespace rx {
         });
       },
       propertyByKey<T = any>(urlTemplate: string, options?: ActionOptions<T>) {
+        if (!options) { options = {}; }
         return new Action<T>(options, async (e: ActionArgs<T>) => {
           options?.onInvoke?.(e);
           const data = e.data;
           const key = e.params.key;
+          const resolver = { resolve: null as () => any };
+          // await resolveLocks(data, key, options);
           while (data.locks[key]) { await data.locks[key]; await sleepms(100); }
-          let resolver;
-          const lock = data.locks[key] = new Promise(resolve => resolver = () => { data.locks[key] = null; resolve(); });
-          setTimeout(() => { if (data.locks[key] === lock) { resolver(); } }, 10000);
+          const lock = data.locks[key] = new Promise(resolve => resolver.resolve = () => { data.locks[key] = null; resolve(); });
+          setTimeout(() => { if (data.locks[key] === lock) { resolver.resolve(); } }, options.lockMaxWait ? options.lockMaxWait : actionDefaultLockMaxWait);
           if (!data.fetchLasts[key]) { data.fetchLasts[key] = 0; }
-          if (Date.now() - data.fetchLasts[key] < 3000) { options?.onResult?.(data.v, data.v); resolver(); return data.v; }
+          if (Date.now() - data.fetchLasts[key] < (options.cacheTtl ? options.cacheTtl : actionDefaultcacheTtl)) {
+            options?.onResult?.(data.v, data.v); resolver.resolve();
+            data.bump();
+            return data.v;
+          }
           let url = urlTemplate;
           const srcConf = (e.source as any).conf;
           if (url.startsWith('$BASE_URL') && srcConf && srcConf.baseUrl) { url = url.replace('$BASE_URL', srcConf.baseUrl); }
@@ -273,11 +340,16 @@ export namespace rx {
           data.meta[key].lastFetched = now;
           const oldVal = data.v;
           options?.onRawResponse?.(res, oldVal);
-          if (!res || res.status !== 'ok') { options?.onError?.(res, oldVal); resolver(); return oldVal; }
+          if (!res || res.status !== 'ok') {
+            options?.onError?.(res, oldVal);
+            resolver.resolve();
+            data.bump();
+            return oldVal;
+          }
           const newVal = setkv(data.v, key, res.result);
           data.setValue(newVal);
           options?.onResult?.(newVal, oldVal);
-          resolver();
+          resolver.resolve();
           return newVal;
         });
       }
@@ -364,7 +436,9 @@ export namespace rx {
         );
         this.effect$ = createEffect(() => effectsPipe);
         // tslint:disable-next-line: deprecation
-        this.effect$.subscribe(_ => {});
+        this.effect$.subscribe(_ => {
+          // console.log(_)
+        });
       } else {
         NgrxStoreRoot.actionsQueue.push(this);
       }
@@ -440,6 +514,9 @@ export namespace rx {
           this.subject$.next(this.currentValue);
         });
       }
+    }
+    bump() {
+      if (this.subject$) { this.subject$.next(this.currentValue); }
     }
   }
 

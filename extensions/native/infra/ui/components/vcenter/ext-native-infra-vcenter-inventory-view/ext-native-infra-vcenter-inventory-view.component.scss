@@ -1,0 +1,30 @@
+:host {
+
+  .loading-area {
+    width: 100%;
+    height: 100%;
+    transition: opacity 0.2s;
+    text-align: center;
+    .spinner-spacer {
+      width: 100%;
+      height: 25%;
+    }
+    clr-spinner {
+      margin-left: -5%;
+    }
+  }
+  .entity-not-found-area {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(140, 140, 140, 0.08);
+    margin: 0;
+    .entity-not-found-spacer {
+      padding-top: min(3rem, 20%);
+    }
+    .entity-not-found-card {
+      width: 80%;
+      height: 160px;
+      margin: 0 auto;
+    }
+  }
+}

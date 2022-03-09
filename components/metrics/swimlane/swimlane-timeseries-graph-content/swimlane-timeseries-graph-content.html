@@ -1,9 +1,9 @@
 <div #chartContainer class="chart-container">
-  <div *ngIf="!dataLoaded" class="loading-overlay">
+  <div *ngIf="!dataLoaded || showLoading" class="loading-overlay">
     <div class="spinner-spacer"></div>
     <clr-spinner class="spinner"></clr-spinner>
   </div>
-  <div *ngIf="noData" class="nodata-overlay">
+  <div *ngIf="noData && !showLoading" class="nodata-overlay">
     <div class="nodata-spacer"></div>
     <div class="nodata-text">NO DATA</div>
   </div>
@@ -14,7 +14,7 @@
   <div #descriptionDiv class="details">{{ graphConfig?.description }}</div>
   <div *ngIf="graphData?.length == 0" class="no-data"><div class="no-data-inner">NO DATA</div></div>
   <ngx-charts-line-chart
-    *ngIf="!noData"
+    *ngIf="!noData && !showLoading"
     [scheme]="graphConfig?.colorScheme"
     [view]="graphConfig?.view"
     [legend]="graphConfig?.legend"

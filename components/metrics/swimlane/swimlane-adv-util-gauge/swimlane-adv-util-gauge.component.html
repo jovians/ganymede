@@ -1,0 +1,29 @@
+<div class="adv-guage-cont" [ngClass]="styles">
+  <div class="text-info">
+    <!-- <ng-content select=".title-text"></ng-content> -->
+    <h4 class="title-text">{{ title }}
+      <a *ngIf="titleInfo" href="javascript://" role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-left">
+        <cds-icon [shape]="titleInfo.icon?.shape" [badge]="titleInfo.icon?.badge" [status]="titleInfo.icon?.status"></cds-icon>
+        <span class="tooltip-content">{{ titleInfo.message }}</span>
+      </a>
+    </h4>
+    <div class="percent-value" *ngIf="maxValue">{{ valuePercentString }} %</div>
+    <div class="percent-value" *ngIf="!maxValue">{{ valueString }} {{ valuePrefixString }}{{ unit }}</div>
+    <div class="current-value small-and-up" *ngIf="maxValue" >{{ valueString }} {{ valuePrefixString }}{{ unit }}</div>
+    <div class="max-value small-and-up" *ngIf="maxValue && !maxValueLineOverride">{{ maxValueString }} {{ maxValuePrefixString }}{{ unit }} {{ maxValueText }}</div>
+    <div class="max-value small-and-up" *ngIf="maxValue && maxValueLineOverride">{{ maxValueLineOverride }}</div>
+  </div>
+  <div class="inner-chart-cont">
+    <div class="swimlane-inner-chart" *ngIf="maxValue">
+      <ngx-charts-gauge
+        [scheme]="colorScheme"
+        [results]="graphData"
+        [min]="0" [max]="maxValue"
+        [angleSpan]="270"
+        [tooltipDisabled]="true"
+        [startAngle]="-135"
+        [showAxis]="false">
+      </ngx-charts-gauge>
+    </div>
+  </div>
+</div>

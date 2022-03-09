@@ -68,29 +68,40 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.mainDestor = exports.DestorInstance = exports.trustInfo = exports.rootAccessToken = void 0;
+exports.mainDestor = exports.DestorInstance = void 0;
 /*
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 var fs = require("fs");
 var http_shim_1 = require("../../server/src/http.shim");
 // import { DestorWorkerClient } from './destor.worker';
-var scopeName = "destor;pid=" + process.pid;
-var conf = fs.existsSync('config/ganymede.secrets.json') ?
-    JSON.parse(fs.readFileSync('config/ganymede.secrets.json', 'utf8'))
-    : JSON.parse(fs.readFileSync('ganymede.secrets.json', 'utf8'));
-var destorData = conf.destor;
-var sharedSecrets = conf.secret;
-var envSpecificSecrets = conf.envSpecificSecret;
-var authData = destorData === null || destorData === void 0 ? void 0 : destorData.auth;
-exports.rootAccessToken = authData.tokenRoot;
-exports.trustInfo = authData.trust;
+var scopeName = "destor;pid=".concat(process.pid);
+var conf;
+var destorData;
+var sharedSecrets;
+var envSpecificSecrets;
+var authData;
+var rootAccessToken;
+var trustInfo;
+function getConf() {
+    conf = fs.existsSync('config/ganymede.secrets.json') ?
+        JSON.parse(fs.readFileSync('config/ganymede.secrets.json', 'utf8'))
+        : JSON.parse(fs.readFileSync('ganymede.secrets.json', 'utf8'));
+    destorData = conf.destor;
+    sharedSecrets = conf.secret;
+    envSpecificSecrets = conf.envSpecificSecret;
+    authData = destorData === null || destorData === void 0 ? void 0 : destorData.auth;
+    rootAccessToken = authData.tokenRoot;
+    trustInfo = authData.trust;
+    return conf;
+}
+getConf();
 var testAuthTopology = {
     type: 'endpoints',
     endpoints: [
-        { endpoint: 'destor-endpoint', token: exports.rootAccessToken, trust: exports.trustInfo },
-        { endpoint: 'http://host.docker.internal:17070', token: exports.rootAccessToken, trust: exports.trustInfo },
-        { endpoint: 'http://localhost:17070', token: exports.rootAccessToken, trust: exports.trustInfo },
+        { endpoint: 'destor-endpoint', token: rootAccessToken, trust: trustInfo },
+        { endpoint: 'http://host.docker.internal:17070', token: rootAccessToken, trust: trustInfo },
+        { endpoint: 'http://localhost:17070', token: rootAccessToken, trust: trustInfo },
     ]
 };
 // DESTOR: Dynamically evoloving service topology orchestration resource
@@ -157,7 +168,7 @@ var DestorInstance = /** @class */ (function (_super) {
                 if (secret !== null) {
                     return [2 /*return*/, op.res.returnJson({ value: secret })];
                 }
-                return [2 /*return*/, op.endWithError(http_shim_1.HttpCode.NOT_FOUND, "SECRET_NOT_FOUND", "Cannot find " + op.req.params.path.join('.') + " (env=" + env + ")")];
+                return [2 /*return*/, op.endWithError(http_shim_1.HttpCode.NOT_FOUND, "SECRET_NOT_FOUND", "Cannot find ".concat(op.req.params.path.join('.'), " (env=").concat(env, ")"))];
             });
         });
     };
@@ -196,3 +207,11 @@ var DestorInstance = /** @class */ (function (_super) {
 exports.DestorInstance = DestorInstance;
 exports.mainDestor = new DestorInstance();
 exports.mainDestor.start();
+setInterval(function () {
+    try {
+        getConf();
+    }
+    catch (e) {
+        console.log(e);
+    }
+}, 15000);

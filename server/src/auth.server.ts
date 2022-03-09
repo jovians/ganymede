@@ -49,60 +49,60 @@ export class AuthServer extends GanymedeHttpServer {
     this.apiVersion = 'v1';
     this.apiPath = this.configGlobal.api.basePath;
     this.addDefaultProcessor(ReqProcessor.BASIC);
-    this.shellWorker = this.addWorker(ShellPassthruWorkerClient);
-    const config = completeConfig<typeof wsDefaultOptions>({ port: 7002 }, wsDefaultOptions);
-    this.wss = new WebSocket.Server(config);
-    let client;
-    this.wss.on('connection', (ws, req) => {
-      try {
-        const target = uuidv4();
-        const reqArgsStr = Buffer.from(req.url.split('/wss/__xterm_wss__/?a=').pop(), 'base64').toString('utf8');
-        const args = JSON.parse(reqArgsStr);
-        const sessionId = args.sessionId;
-        const ctrlSequence = String.fromCharCode(16, 16) + sessionId;
-        const ctrlSequenceBuffer = Buffer.from(ctrlSequence, 'ascii');
-        const ctrlSequenceLength = ctrlSequence.length;
-        ws.sessionId = sessionId;
-        ws.ip = req.headers['x-real-ip'];
-        this.handlers[target] = ws; // single handler per target
-        ws.on('message', (message: Buffer) => {
-          try {
-            if (message.length > 1 && message[0] === 16 && message[1] === 16 &&
-                message.compare(ctrlSequenceBuffer, 0, ctrlSequenceLength, 0, ctrlSequenceLength) === 0) {
-              const ctrlPayload = message.slice(ctrlSequenceLength).toString('utf8');
-              const ctrlLines = ctrlPayload.split('\n');
-              const ctrlAction = ctrlLines.shift();
-              const ctrlEncoding = ctrlLines.shift();
-              const ctrlData = ctrlLines.join('\n');
-              switch (ctrlAction) {
-                case 'resize': {
-                  const decoded = JSON.parse(ctrlData);
-                  const cols = decoded.cols ? decoded.cols : 80;
-                  const rows = decoded.rows ? decoded.rows : 24;
-                  this.shellWorker.resize(cols, rows);
-                  break;
-                }
-              }
-              return;
-            }
-            this.shellWorker.inputData(message.toString('base64'));
-          } catch (e) { console.log(e); }
-        });
-        ws.on('close', () => {
-          this.handlers[target] = null;
-          // console.log(`Handler for '${target}' disconnected. (ip=${ws.ip}, wsid=${ws.uuid})`);
-        });
-        client = ws;
-      } catch (e) {
-        console.log(e);
-      }
-    });
-    this.shellWorker.output$.subscribe(data => {
-      if (client) { client.send(data); }
-    });
-    this.shellWorker.close$.subscribe(_ => {
-      if (client) { client.send(client.ctrlPattern + 'closed'); }
-    });
+    // this.shellWorker = this.addWorker(ShellPassthruWorkerClient);
+    // const config = completeConfig<typeof wsDefaultOptions>({ port: 7002 }, wsDefaultOptions);
+    // this.wss = new WebSocket.Server(config);
+    // let client;
+    // this.wss.on('connection', (ws, req) => {
+    //   try {
+    //     const target = uuidv4();
+    //     const reqArgsStr = Buffer.from(req.url.split('/wss/__xterm_wss__/?a=').pop(), 'base64').toString('utf8');
+    //     const args = JSON.parse(reqArgsStr);
+    //     const sessionId = args.sessionId;
+    //     const ctrlSequence = String.fromCharCode(16, 16) + sessionId;
+    //     const ctrlSequenceBuffer = Buffer.from(ctrlSequence, 'ascii');
+    //     const ctrlSequenceLength = ctrlSequence.length;
+    //     ws.sessionId = sessionId;
+    //     ws.ip = req.headers['x-real-ip'];
+    //     this.handlers[target] = ws; // single handler per target
+    //     ws.on('message', (message: Buffer) => {
+    //       try {
+    //         if (message.length > 1 && message[0] === 16 && message[1] === 16 &&
+    //             message.compare(ctrlSequenceBuffer, 0, ctrlSequenceLength, 0, ctrlSequenceLength) === 0) {
+    //           const ctrlPayload = message.slice(ctrlSequenceLength).toString('utf8');
+    //           const ctrlLines = ctrlPayload.split('\n');
+    //           const ctrlAction = ctrlLines.shift();
+    //           const ctrlEncoding = ctrlLines.shift();
+    //           const ctrlData = ctrlLines.join('\n');
+    //           switch (ctrlAction) {
+    //             case 'resize': {
+    //               const decoded = JSON.parse(ctrlData);
+    //               const cols = decoded.cols ? decoded.cols : 80;
+    //               const rows = decoded.rows ? decoded.rows : 24;
+    //               this.shellWorker.resize(cols, rows);
+    //               break;
+    //             }
+    //           }
+    //           return;
+    //         }
+    //         this.shellWorker.inputData(message.toString('base64'));
+    //       } catch (e) { console.log(e); }
+    //     });
+    //     ws.on('close', () => {
+    //       this.handlers[target] = null;
+    //       // console.log(`Handler for '${target}' disconnected. (ip=${ws.ip}, wsid=${ws.uuid})`);
+    //     });
+    //     client = ws;
+    //   } catch (e) {
+    //     console.log(e);
+    //   }
+    // });
+    // this.shellWorker.output$.subscribe(data => {
+    //   if (client) { client.send(data); }
+    // });
+    // this.shellWorker.close$.subscribe(_ => {
+    //   if (client) { client.send(client.ctrlPattern + 'closed'); }
+    // });
   }
 
   @HTTP.GET(`/proxy-request`)

@@ -3,7 +3,8 @@
  */
 import { NgModule } from '@angular/core';
 import { ganyBaseModulesImport, Modules } from '../../ui.modules';
-import { VarDirective } from './directives/ng-var.directive';
+import { GanymedeDataViewModule } from './dataview/dataview.module';
+import { GanymedeLayoutModule } from './layout/layout.module';
 import { GanymedeMarkdownModule } from './markdown/markdown.module';
 import { GanymedeSwimlaneModule } from './metrics/swimlane/swimlane.module';
 import { GanymedeWavefrontModule } from './metrics/wavefront/wavefront.module';
@@ -17,6 +18,8 @@ import { GanymedeTemplateModule } from './templates/default/template.module';
   imports: [
     ...ganyBaseModulesImport,
     GanymedeServicesModule,
+    GanymedeDataViewModule,
+    GanymedeLayoutModule,
     GanymedeMarkdownModule,
     GanymedePagesModule,
     GanymedeSwimlaneModule,
@@ -25,17 +28,19 @@ import { GanymedeTemplateModule } from './templates/default/template.module';
     GanymedeTemplateModule,
   ],
   declarations: [
-    VarDirective,
+    
   ],
   exports: [
     ...ganyBaseModulesImport,
     GanymedeServicesModule,
+    GanymedeDataViewModule,
+    GanymedeLayoutModule,
     GanymedeMarkdownModule,
     GanymedePagesModule,
+    GanymedeSwimlaneModule,
     GanymedeWavefrontModule,
     GanymedeSettingsModule,
     GanymedeTemplateModule,
-    VarDirective,
   ]
 })
 export class GanymedeCoreModule {

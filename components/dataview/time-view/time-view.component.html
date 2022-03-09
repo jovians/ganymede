@@ -1,0 +1,16 @@
+<span style="white-space: nowrap;">{{ timeString }}</span>
+<span *ngIf="showDelta" style="opacity: 0.8; font-size: 96%;">{{ deltaString }}</span>
+<span style="margin-left: 0.2rem; font-size: 95%; white-space: nowrap;">
+  <!-- <span style="opacity: 0.5;">(</span> -->
+  <select [attr.id]="selectId" (change)="onViewOptionChange($event)">
+    <option value="local" [attr.selected]="mode && mode === 'local' ? 'selected' : null">Local</option>
+    <option value="utc" [attr.selected]="mode && mode === 'utc' ? 'selected' : null">UTC</option>
+    <option value="iso" [attr.selected]="mode && mode === 'iso' ? 'selected' : null">ISO</option>
+  </select>
+  <!-- <span style="opacity: 0.5;">)</span> -->
+  <span style="width: 0; overflow: hidden;">
+    <select [attr.id]="shadowSelectId" style="visibility: hidden;">
+      <option [attr.id]="shadowSelectId + '-option'"></option>
+    </select>
+  </span>
+</span>

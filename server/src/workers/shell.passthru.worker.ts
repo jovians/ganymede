@@ -61,7 +61,7 @@ export class ShellPassthruWorkerLogic extends AsyncWorkerExecutor {
   outputData(data: string) {
     this.returnCall('$outputData', data);
   }
-  handleAction(callId: string, action: string, payload?: string) {
+  async handleAction(callId: string, action: string, payload?: string) {
     switch (action) {
       case 'inputData':
         this.ptyProcess.write(Buffer.from(payload, 'base64'));

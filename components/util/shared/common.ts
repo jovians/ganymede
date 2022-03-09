@@ -2,7 +2,8 @@
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 
-import { Subject } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
+import { Class, ClassLineage } from '@jovian/type-tools';
 
 export const isNodeJs = (typeof process !== 'undefined') && (process.release.name === 'node');
 
@@ -69,8 +70,39 @@ export function topMomentOut(srcComponent: any, lockname: string, momentMs: numb
   }, momentMs);
 }
 
-export function bindSub<T = any>(component, subj: Subject<T>, getter: (data: T) => any) {
+export function bindSub<T = any>(component, subj: Subject<T> | Observable<T>, getter: (data: T) => any) {
   const subs = subj.subscribe(getter);
   if (!component.__rx_subs) { component.__rx_subs = []; }
   component.__rx_subs.push(subs);
+}
+
+export function moduleTypeMap(module: any, typeHintProperty: string) {
+  const classByName: {[name: string]: Class<any> } = {};
+  const classLineageByName: {[name: string]: Class<any>[] } = {};
+  const classLineageStringByName: {[name: string]: string[] } = {};
+  for (const propName of Object.keys(module)) {
+    const member = module[propName]; if (!member) { continue; }
+    const targetIsClass = member && !!member.prototype && !!member.constructor.name;
+    if (targetIsClass) {
+      classByName[propName] = member;
+      classLineageByName[propName] = ClassLineage.of(member);
+      classLineageStringByName[propName] = classLineageByName[propName].map(cls => {
+        classByName[cls.name] = cls;
+        return cls.name;
+      });
+    }
+  }
+  return { 
+    classByName,
+    classLineageByName,
+    classLineageStringByName,
+    checkInstanceOf: <T=any,P=any>(target: T, ancestor: Class<P>) => {
+      if (!target || !ancestor || !target[typeHintProperty]) { return false; }
+      const typeName = target[typeHintProperty];
+      const targetClass = classByName[target[typeHintProperty]];
+      if (!targetClass) { return false; }
+      const lca = ClassLineage.lastCommonAncestor(targetClass, ancestor);
+      return lca === ancestor;
+    },
+  };
 }

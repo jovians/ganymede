@@ -4,6 +4,6 @@
   "license": "UNLICENSED",
   "dependencies": {
     "@jovian/common": "0.0.3",
-    "vsphere-infra": "0.0.43"
+    "vsphere-infra": "0.0.49"
   }
 }

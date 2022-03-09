@@ -87,7 +87,7 @@ var SecureComm = /** @class */ (function () {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
                         channelMyPubkey = ecdhKeypair.publicKey.toString('base64');
-                        return [4 /*yield*/, axios.default.get("" + config.endpoint + config.encryptedChannelPath, {
+                        return [4 /*yield*/, axios.default.get("".concat(config.endpoint).concat(config.encryptedChannelPath), {
                                 timeout: 5000, headers: {
                                     Authorization: this.getAuthHeader(config.token, channelMyPubkey, config.defaultChannelExpire),
                                 }
@@ -176,7 +176,7 @@ var SecureComm = /** @class */ (function () {
                                 case 0: return [4 /*yield*/, this.waitForChannel()];
                                 case 1:
                                     if (!(_a.sent())) {
-                                        this.pushError(new Error("Unable to get channel on endpoint " + this.config.endpoint));
+                                        this.pushError(new Error("Unable to get channel on endpoint ".concat(this.config.endpoint)));
                                         return [2 /*return*/, resolve(null)];
                                     }
                                     try {
@@ -196,31 +196,31 @@ var SecureComm = /** @class */ (function () {
                                         reqOpts = { timeout: timeout, headers: { Authorization: this.getAuthHeader(this.config.token, this.channel.channelId) } };
                                         switch (reqObj.method) {
                                             case 'GET': {
-                                                axios.default.get("" + this.config.endpoint + reqPath + "?__enc=" + encPayload, reqOpts)
+                                                axios.default.get("".concat(this.config.endpoint).concat(reqPath, "?__enc=").concat(encPayload), reqOpts)
                                                     .then(function (res) { resolve(_this.unwrapEncryptedResponse(res)); })
                                                     .catch(function (e) { _this.pushError(e); resolve(null); });
                                                 break;
                                             }
                                             case 'PUT': {
-                                                axios.default.put("" + this.config.endpoint + reqPath, reqOpts)
+                                                axios.default.put("".concat(this.config.endpoint).concat(reqPath), reqOpts)
                                                     .then(function (res) { resolve(_this.unwrapEncryptedResponse(res)); })
                                                     .catch(function (e) { _this.pushError(e); resolve(null); });
                                                 break;
                                             }
                                             case 'POST': {
-                                                axios.default.post("" + this.config.endpoint + reqPath, reqOpts)
+                                                axios.default.post("".concat(this.config.endpoint).concat(reqPath), reqOpts)
                                                     .then(function (res) { resolve(_this.unwrapEncryptedResponse(res)); })
                                                     .catch(function (e) { _this.pushError(e); resolve(null); });
                                                 break;
                                             }
                                             case 'PATCH': {
-                                                axios.default.patch("" + this.config.endpoint + reqPath, reqOpts)
+                                                axios.default.patch("".concat(this.config.endpoint).concat(reqPath), reqOpts)
                                                     .then(function (res) { resolve(_this.unwrapEncryptedResponse(res)); })
                                                     .catch(function (e) { _this.pushError(e); resolve(null); });
                                                 break;
                                             }
                                             case 'DELETE': {
-                                                axios.default.delete("" + this.config.endpoint + reqPath, reqOpts)
+                                                axios.default.delete("".concat(this.config.endpoint).concat(reqPath), reqOpts)
                                                     .then(function (res) { resolve(_this.unwrapEncryptedResponse(res)); })
                                                     .catch(function (e) { _this.pushError(e); resolve(null); });
                                                 break;

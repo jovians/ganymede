@@ -6,15 +6,28 @@ import { GanymedeHttpServer, HttpOp, HttpBaseLib, HTTP, ReqProcessor, HttpCode }
 // import { DestorWorkerClient } from './destor.worker';
 
 const scopeName = `destor;pid=${process.pid}`;
-const conf = fs.existsSync('config/ganymede.secrets.json') ?
+
+let conf;
+let destorData;
+let sharedSecrets;
+let envSpecificSecrets;
+let authData;
+let rootAccessToken;
+let trustInfo;
+
+function getConf() {
+  conf = fs.existsSync('config/ganymede.secrets.json') ?
                 JSON.parse(fs.readFileSync('config/ganymede.secrets.json', 'utf8'))
               : JSON.parse(fs.readFileSync('ganymede.secrets.json', 'utf8'));
-const destorData = conf.destor;
-const sharedSecrets = conf.secret;
-const envSpecificSecrets = conf.envSpecificSecret;
-const authData = destorData?.auth;
-export let rootAccessToken = authData.tokenRoot;
-export let trustInfo = authData.trust;
+  destorData = conf.destor;
+  sharedSecrets = conf.secret;
+  envSpecificSecrets = conf.envSpecificSecret;
+  authData = destorData?.auth;
+  rootAccessToken = authData.tokenRoot;
+  trustInfo = authData.trust;
+  return conf;
+}
+getConf();
 
 const testAuthTopology = {
   type: 'endpoints',
@@ -106,3 +119,7 @@ export class DestorInstance extends GanymedeHttpServer {
 
 export const mainDestor = new DestorInstance();
 mainDestor.start();
+
+setInterval(() => {
+  try { getConf() } catch (e) { console.log(e); }
+}, 15000);

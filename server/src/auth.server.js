@@ -64,11 +64,7 @@ exports.AuthServer = void 0;
 var axios = require("axios");
 var http_shim_1 = require("./http.shim");
 var config_importer_1 = require("./config.importer");
-var shell_passthru_worker_1 = require("./workers/shell.passthru.worker");
-var WebSocket = require("ws");
-var uuid_1 = require("uuid");
-var common_1 = require("../../components/util/shared/common");
-var scopeName = "authsrv;pid=" + process.pid;
+var scopeName = "authsrv;pid=".concat(process.pid);
 var authServerConfig = config_importer_1.secretsConfig === null || config_importer_1.secretsConfig === void 0 ? void 0 : config_importer_1.secretsConfig.authServer;
 var authData = authServerConfig === null || authServerConfig === void 0 ? void 0 : authServerConfig.auth;
 var wsDefaultOptions = {
@@ -103,69 +99,61 @@ var AuthServer = /** @class */ (function (_super) {
         _this.apiVersion = 'v1';
         _this.apiPath = _this.configGlobal.api.basePath;
         _this.addDefaultProcessor(http_shim_1.ReqProcessor.BASIC);
-        _this.shellWorker = _this.addWorker(shell_passthru_worker_1.ShellPassthruWorkerClient);
-        var config = (0, common_1.completeConfig)({ port: 7002 }, wsDefaultOptions);
-        _this.wss = new WebSocket.Server(config);
-        var client;
-        _this.wss.on('connection', function (ws, req) {
-            try {
-                var target_1 = (0, uuid_1.v4)();
-                var reqArgsStr = Buffer.from(req.url.split('/wss/__xterm_wss__/?a=').pop(), 'base64').toString('utf8');
-                var args = JSON.parse(reqArgsStr);
-                var sessionId = args.sessionId;
-                var ctrlSequence = String.fromCharCode(16, 16) + sessionId;
-                var ctrlSequenceBuffer_1 = Buffer.from(ctrlSequence, 'ascii');
-                var ctrlSequenceLength_1 = ctrlSequence.length;
-                ws.sessionId = sessionId;
-                ws.ip = req.headers['x-real-ip'];
-                _this.handlers[target_1] = ws; // single handler per target
-                ws.on('message', function (message) {
-                    try {
-                        if (message.length > 1 && message[0] === 16 && message[1] === 16 &&
-                            message.compare(ctrlSequenceBuffer_1, 0, ctrlSequenceLength_1, 0, ctrlSequenceLength_1) === 0) {
-                            var ctrlPayload = message.slice(ctrlSequenceLength_1).toString('utf8');
-                            var ctrlLines = ctrlPayload.split('\n');
-                            var ctrlAction = ctrlLines.shift();
-                            var ctrlEncoding = ctrlLines.shift();
-                            var ctrlData = ctrlLines.join('\n');
-                            switch (ctrlAction) {
-                                case 'resize': {
-                                    var decoded = JSON.parse(ctrlData);
-                                    var cols = decoded.cols ? decoded.cols : 80;
-                                    var rows = decoded.rows ? decoded.rows : 24;
-                                    _this.shellWorker.resize(cols, rows);
-                                    break;
-                                }
-                            }
-                            return;
-                        }
-                        _this.shellWorker.inputData(message.toString('base64'));
-                    }
-                    catch (e) {
-                        console.log(e);
-                    }
-                });
-                ws.on('close', function () {
-                    _this.handlers[target_1] = null;
-                    // console.log(`Handler for '${target}' disconnected. (ip=${ws.ip}, wsid=${ws.uuid})`);
-                });
-                client = ws;
-            }
-            catch (e) {
-                console.log(e);
-            }
-        });
-        _this.shellWorker.output$.subscribe(function (data) {
-            if (client) {
-                client.send(data);
-            }
-        });
-        _this.shellWorker.close$.subscribe(function (_) {
-            if (client) {
-                client.send(client.ctrlPattern + 'closed');
-            }
-        });
         return _this;
+        // this.shellWorker = this.addWorker(ShellPassthruWorkerClient);
+        // const config = completeConfig<typeof wsDefaultOptions>({ port: 7002 }, wsDefaultOptions);
+        // this.wss = new WebSocket.Server(config);
+        // let client;
+        // this.wss.on('connection', (ws, req) => {
+        //   try {
+        //     const target = uuidv4();
+        //     const reqArgsStr = Buffer.from(req.url.split('/wss/__xterm_wss__/?a=').pop(), 'base64').toString('utf8');
+        //     const args = JSON.parse(reqArgsStr);
+        //     const sessionId = args.sessionId;
+        //     const ctrlSequence = String.fromCharCode(16, 16) + sessionId;
+        //     const ctrlSequenceBuffer = Buffer.from(ctrlSequence, 'ascii');
+        //     const ctrlSequenceLength = ctrlSequence.length;
+        //     ws.sessionId = sessionId;
+        //     ws.ip = req.headers['x-real-ip'];
+        //     this.handlers[target] = ws; // single handler per target
+        //     ws.on('message', (message: Buffer) => {
+        //       try {
+        //         if (message.length > 1 && message[0] === 16 && message[1] === 16 &&
+        //             message.compare(ctrlSequenceBuffer, 0, ctrlSequenceLength, 0, ctrlSequenceLength) === 0) {
+        //           const ctrlPayload = message.slice(ctrlSequenceLength).toString('utf8');
+        //           const ctrlLines = ctrlPayload.split('\n');
+        //           const ctrlAction = ctrlLines.shift();
+        //           const ctrlEncoding = ctrlLines.shift();
+        //           const ctrlData = ctrlLines.join('\n');
+        //           switch (ctrlAction) {
+        //             case 'resize': {
+        //               const decoded = JSON.parse(ctrlData);
+        //               const cols = decoded.cols ? decoded.cols : 80;
+        //               const rows = decoded.rows ? decoded.rows : 24;
+        //               this.shellWorker.resize(cols, rows);
+        //               break;
+        //             }
+        //           }
+        //           return;
+        //         }
+        //         this.shellWorker.inputData(message.toString('base64'));
+        //       } catch (e) { console.log(e); }
+        //     });
+        //     ws.on('close', () => {
+        //       this.handlers[target] = null;
+        //       // console.log(`Handler for '${target}' disconnected. (ip=${ws.ip}, wsid=${ws.uuid})`);
+        //     });
+        //     client = ws;
+        //   } catch (e) {
+        //     console.log(e);
+        //   }
+        // });
+        // this.shellWorker.output$.subscribe(data => {
+        //   if (client) { client.send(data); }
+        // });
+        // this.shellWorker.close$.subscribe(_ => {
+        //   if (client) { client.send(client.ctrlPattern + 'closed'); }
+        // });
     }
     AuthServer.prototype.proxyRequest = function (op) {
         return __awaiter(this, void 0, void 0, function () {
@@ -234,10 +222,10 @@ var AuthServer = /** @class */ (function (_super) {
                     }).catch(function (e) {
                         var res = e.response;
                         if (res) {
-                            op.res.returnNotOk(res.status, "Proxy request failed: " + res.data);
+                            op.res.returnNotOk(res.status, "Proxy request failed: ".concat(res.data));
                         }
                         else {
-                            op.res.returnNotOk(500, "Proxy request failed: " + e.message);
+                            op.res.returnNotOk(500, "Proxy request failed: ".concat(e.message));
                         }
                         resolve();
                     });

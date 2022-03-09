@@ -53,3 +53,5 @@ Thumbs.db
 .ganysource
 .extension.build.uuid
 jovian-ganymede-clr-*
+
+/package.json

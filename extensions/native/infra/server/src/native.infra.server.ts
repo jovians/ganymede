@@ -1,6 +1,7 @@
 /*
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
+import { ix } from '@jovian/type-tools';
 import { GanymedeHttpServer, HttpOp, HttpBaseLib, HTTP, ReqProcessor, HttpCode } from '../../../../../server/src/http.shim';
 import { secrets } from '../../../../../components/util/server/secrets.resolver';
 import { log } from '../../../../../components/util/shared/logger';
@@ -121,8 +122,18 @@ export class NativeInfraExtensionServer extends GanymedeHttpServer {
     return op.res.returnJson(heatData);
   }
 
-  async getVCenterByKey(op: HttpOp) {
-    const key = op.req.params?.key;
+  @HTTP.GET(`/vcenter/:key/managed-object`)
+  async getEntities(op: HttpOp) {
+    const guid = op.req.params.key;
+    const entityKey = guid.split(':').pop();
+    const vcKey = guid.split(':')[1];
+    const vc = await this.getVCenterByKey(op, vcKey); if (op.error) { return op.endWithError(); }
+    const entitiesSerialized = await vc.getEntities([entityKey]);
+    return op.res.returnJson(JSON.parse(entitiesSerialized)[0]);
+  }
+
+  async getVCenterByKey(op: HttpOp, key?: string) {
+    if (!key) { key = op.req.params?.key; }
     if (!key) {
       return op.raise(HttpCode.BAD_REQUEST, `PATH_PARAM_NOT_FOUND`, `'${key}' path parameter not defined.`);
     }

@@ -196,14 +196,14 @@ export class AsyncWorkerExecutor extends ix.Entity {
         return this.returnCall(callId, '');
       }
     }
-    const res = this.handleAction(callId, action, payload);
+    const res = await this.handleAction(callId, action, payload);
     if (!res && this.customAction[action]) {
       let resStr = await Promise.resolve(this.customAction[action](payload, this, callId, action));
       if (!resStr) { resStr = ''; }
       this.returnCall(callId, resStr);
     }
   }
-  handleAction(callId: string, action: string, payload?: string): any {}
+  async handleAction(callId: string, action: string, payload?: string): Promise<any> {}
   async ontermination() {}
 }
 

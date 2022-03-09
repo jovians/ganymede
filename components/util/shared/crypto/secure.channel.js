@@ -65,7 +65,7 @@ var SecureChannel = /** @class */ (function () {
         return accessorParts.join('.');
     };
     SecureChannel.getAccessorHeader = function (user, baseToken, nonceHex) {
-        return "Accessor " + SecureChannel.getAccessor(user, baseToken, nonceHex);
+        return "Accessor ".concat(SecureChannel.getAccessor(user, baseToken, nonceHex));
     };
     SecureChannel.verifyAccessor = function (accessorExpression, baseToken, timeWindow) {
         if (timeWindow === void 0) { timeWindow = 5000; }

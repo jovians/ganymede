@@ -6,9 +6,10 @@ import { Components } from 'src/app/ui.components';
 import { CoverityIssueV2, CoverityReportSummaryView } from '../../coverity.models';
 import { ExtNativeCoverityService } from '../shared/ext-native-coverity.service';
 
-declare var Prism;
-if (Prism) {
-  Prism.plugins.filterHighlightAll.reject.addSelector('pre[tabindex] > code');
+declare var window: any;
+declare var Prism: any;
+if (window.Prism) {
+  window.Prism.plugins.filterHighlightAll.reject.addSelector('pre[tabindex] > code');
 }
 
 @Component({

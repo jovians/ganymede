@@ -7,6 +7,7 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { GanymedeLayoutModule } from '../../layout/layout.module';
 import { SwimlaneTimeseriesGraphContent } from './swimlane-timeseries-graph-content/swimlane-timeseries-graph-content';
 import { SwimlaneAdvPieChartComponent } from './swimlane-adv-pie-chart/swimlane-adv-pie-chart.component';
+import { SwimlaneAdvUtilGaugeComponent } from './swimlane-adv-util-gauge/swimlane-adv-util-gauge.component';
 
 @NgModule({
   imports: [
@@ -17,10 +18,12 @@ import { SwimlaneAdvPieChartComponent } from './swimlane-adv-pie-chart/swimlane-
   declarations: [
     SwimlaneTimeseriesGraphContent,
     SwimlaneAdvPieChartComponent,
+    SwimlaneAdvUtilGaugeComponent,
   ],
   exports: [
     SwimlaneTimeseriesGraphContent,
     SwimlaneAdvPieChartComponent,
+    SwimlaneAdvUtilGaugeComponent,
   ],
 })
 export class GanymedeSwimlaneModule {

@@ -23,16 +23,17 @@ export enum ThemeBases {
 
 export interface ThemeInfo {
   default?: boolean;
-  dark?: boolean;
   cssFile: string;
+  dark?: boolean;
+  bg?: string;
 }
 
 export class ThemeController extends ix.Entity {
   registry: {[themeName: string]: {[themeType: string]: ThemeInfo }} = {
     [ThemeBases.CLARITY]: {
-      [ThemeTypes.LIGHT]: { cssFile: `${themesPath}/clr-ui.light.css`, default: true },
-      [ThemeTypes.DARK]: { cssFile: `${themesPath}/clr-ui.dark.css`, dark: true },
-      [ThemeTypes.BLACK]: { cssFile: `${themesPath}/clr-ui.black.css`, dark: true },
+      [ThemeTypes.LIGHT]: { cssFile: `${themesPath}/clr-ui.light.css`, default: true, bg: '#fafafa' },
+      [ThemeTypes.DARK]: { cssFile: `${themesPath}/clr-ui.dark.css`, dark: true, bg: '#1b2a32' },
+      [ThemeTypes.BLACK]: { cssFile: `${themesPath}/clr-ui.black.css`, dark: true, bg: '#000000' },
     }
   };
   currentThemeBase: string = null;
@@ -106,6 +107,9 @@ export class ThemeController extends ix.Entity {
     this.currentThemeType = themeType;
     this.isDark = theme.dark ? true : false;
     document.body.setAttribute('theme', `${themeBase}-${themeType}`);
+    document.body.setAttribute('theme-family', this.isDark ? 'dark' : 'light');
+    const html = document.getElementsByTagName('html')[0];
+    html.style.background = theme.bg ? theme.bg : null;
     this.persistThemeOnLocalStorage();
   }
   handleEntrypoint() {
