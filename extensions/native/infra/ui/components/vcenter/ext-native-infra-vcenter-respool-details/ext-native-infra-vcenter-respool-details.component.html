@@ -1,0 +1,111 @@
+<ng-container *ngIf="moData && data">
+  <h3 class="vcenter-title" style="margin-top: 0.65rem; margin-left: 0.9rem; margin-bottom: 0.1rem;">
+    <cds-icon [attr.shape]="data.vapp ? 'vmw-app' : 'resource-pool'" size="md"></cds-icon>
+    {{ data.name }}
+  </h3>
+  <div *ngIf="moData.owner || (moData.parent && moData.parent.indexOf('$mo:Datacenter:datacenter') === -1)" style="margin-left: 0.9rem; margin-bottom: 0.1rem;">
+    <span style="margin-right: 0.25rem;">Parent: </span>
+    <gany-ext-native-infra-vcenter-entity-link [entityId]="moData.parent || moData.owner" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-entity-link>
+  </div>
+  <gany-grid [minWidth]="'540px'" class="mtop" style="width: calc(100% - 1rem); padding-left: 1rem;">
+    <!-- Status Section -->
+    <div class="card grid-card">
+      <div class="card-header">Status & Info</div>
+      <div class="card-block card-block-content">
+        <div class="card-text card-content">
+          <div style="display: block; margin: 0 auto; width: 345px; transform: translate(0, -12px);">
+            <swimlane-adv-util-gauge
+              [title]="'CPU'" style="display: inline-block;"
+              [value]="data.status.cpu.usage" [valuePrefix]="'M'"
+              [maxValue]="data.status.cpu.capacity" [maxValuePrefix]="'M'"
+              [thresholdPercent]="70" [unit]="'Hz'" [size]="'sm'"></swimlane-adv-util-gauge>
+            <swimlane-adv-util-gauge
+              [title]="'MEM'" style="display: inline-block;"
+              [value]="data.status.mem.usage" [valuePrefix]="'0i'"
+              [maxValue]="data.status.mem.capacity" [maxValuePrefix]="'0i'"
+              [thresholdPercent]="80" [unit]="'B'" [size]="'sm'"></swimlane-adv-util-gauge>
+          </div>
+          <clr-stack-view>
+            <!-- Name -->
+            <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Name</clr-stack-label>
+              <clr-stack-content>{{ data.name }}</clr-stack-content>
+            </clr-stack-block>
+            <!-- Type -->
+            <!-- <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Type</clr-stack-label>
+              <clr-stack-content>{{ data.vapp ? 'VirtualApp' : 'ResourcePool' }}</clr-stack-content>
+            </clr-stack-block> -->
+            <!-- Status -->
+            <!-- <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Status</clr-stack-label>
+              <clr-stack-content>{{ data.status.statusText }}</clr-stack-content>
+            </clr-stack-block> -->
+            <!-- CPU Alloc -->
+            <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>CPU Alloc.</clr-stack-label>
+              <clr-stack-content>{{ data.alloc.cpu.summaryLine }}</clr-stack-content>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Reservation</clr-stack-label><clr-stack-content>{{ data.alloc.cpu.reservation }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Expandable</clr-stack-label><clr-stack-content>{{ data.alloc.cpu.expandable ? 'True' : 'False' }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Shares</clr-stack-label><clr-stack-content>{{ data.alloc.cpu.shares }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Limit</clr-stack-label><clr-stack-content>{{ data.alloc.cpu.limit }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block *ngIf="data.alloc.cpu.overheadLimit" [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Overhead Limit</clr-stack-label><clr-stack-content>{{ data.alloc.cpu.overheadLimit }}</clr-stack-content>
+              </clr-stack-block>
+            </clr-stack-block>
+            <!-- MEM Alloc -->
+            <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>MEM Alloc.</clr-stack-label>
+              <clr-stack-content>{{ data.alloc.mem.summaryLine }}</clr-stack-content>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Reservation</clr-stack-label><clr-stack-content>{{ data.alloc.mem.reservation }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Expandable</clr-stack-label><clr-stack-content>{{ data.alloc.mem.expandable ? 'True' : 'False' }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Shares</clr-stack-label><clr-stack-content>{{ data.alloc.mem.shares }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Limit</clr-stack-label><clr-stack-content>{{ data.alloc.mem.limit }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block *ngIf="data.alloc.mem.overheadLimit" [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+                <clr-stack-label>Overhead Limit</clr-stack-label><clr-stack-content>{{ data.alloc.mem.overheadLimit }}</clr-stack-content>
+              </clr-stack-block>
+            </clr-stack-block>
+            <!-- Status -->
+            <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Shared Scalable</clr-stack-label>
+              <clr-stack-content>{{ data.sharesScalable ? 'True' : 'False' }}</clr-stack-content>
+            </clr-stack-block>
+          </clr-stack-view>
+        </div>
+      </div>
+    </div>
+    <!-- VM Section -->
+    <div class="card grid-card" *ngIf="moData.vm">
+      <clr-datagrid>
+        <clr-dg-column>Virtual Machines ({{ moData.vm.length }})</clr-dg-column>
+        <clr-dg-row *clrDgItems="let vmId of moData.vm">
+          <clr-dg-cell>
+            <gany-ext-native-infra-vcenter-entity-link [entityId]="vmId" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-entity-link>
+          </clr-dg-cell>
+        </clr-dg-row>
+        <clr-dg-footer>
+          <clr-dg-pagination #pagination [clrDgPageSize]="10">
+            {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of {{ pagination.totalItems }} VM(s)
+          </clr-dg-pagination>
+        </clr-dg-footer>
+      </clr-datagrid>
+    </div>
+  </gany-grid>
+  <div class="mbot5"></div>
+</ng-container>

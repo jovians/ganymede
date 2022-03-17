@@ -55,8 +55,7 @@ export class ExtNativeInfraVcenterInventoryViewComponent  extends ix.Entity impl
   ngOnInit(): void {
     const keyGetter = () => this.selectedGuid;
     this.vcenter.entityByGuid.keySub(this, keyGetter, member => {
-      const m: VirtualMachineFullDetails = member;
-      console.log(member);
+      // console.log(member);
       this.moData = member;
       this.moType = this.moData.$type;
       if (this.dataLoadingTarget === this.moData.$guid) {

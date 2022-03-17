@@ -65,6 +65,7 @@ export interface VcenterInventoryStubsData {
   folders: VcenterInventoryStubNode[];
   vms: VcenterInventoryStubNode[];
   vapps: VcenterInventoryStubNode[];
+  vswitch: VcenterInventoryStubNode[];
   byIid: {[iid: string]: VcenterInventoryStubNode};
   guidByEntityKey: {[entityKey: string]: string};
 }

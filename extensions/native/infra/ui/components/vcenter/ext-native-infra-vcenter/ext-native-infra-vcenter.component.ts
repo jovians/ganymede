@@ -184,6 +184,7 @@ export class ExtNativeInfraVcenterComponent extends ix.Entity implements OnInit,
       case 'Datacenter': return 'cloud-network';
       case 'ComputeResource': return 'cluster';
       case 'VirtualApp': return 'vmw-app';
+      case 'VirtualSwitch': return 'cloud-network';
     }
     return '';
   }
@@ -201,6 +202,7 @@ export class ExtNativeInfraVcenterComponent extends ix.Entity implements OnInit,
       folders: [],
       vms: [],
       vapps: [],
+      vswitch: [],
       byIid: {},
       guidByEntityKey:{},
     };
@@ -239,6 +241,7 @@ export class ExtNativeInfraVcenterComponent extends ix.Entity implements OnInit,
         case 'Datacenter': data.datacenters.push(stub); break;
         case 'ComputeResource': data.clusters.push(stub); break;
         case 'VirtualApp': data.vapps.push(stub); break;
+        case 'VirtualSwitch': data.vswitch.push(stub); break;
       }
     }
     // second pass with parent hierarchy
@@ -262,12 +265,15 @@ export class ExtNativeInfraVcenterComponent extends ix.Entity implements OnInit,
       if (!dc.hostFolder || !dc.hostFolder.children) { continue; }
       for (const cluster of dc.hostFolder.children) {
         cluster.children = cluster.children.sort((a, b) => {
-          if (b.entityType === 'ResourcePool') { return -1; }
+          if (b.entityType === 'ResourcePool' || b.entityType === 'VirtualApp') { return -1; }
         });
       }
       dc.hostFolder.children.sort((a, b) => a.name.localeCompare(b.name));
       dc.datastoreFolder.children.sort((a, b) => a.name.localeCompare(b.name));
-      dc.networkFolder.children.sort((a, b) => a.name.localeCompare(b.name));
+      dc.networkFolder.children = dc.networkFolder.children.sort((a, b) => {
+        if (a.entityType === 'VirtualSwitch') { return -1; }
+        return a.name.localeCompare(b.name) > 0 ? 1 : -1;
+      });
       this.recursiveSortByName(dc.vmFolder.children);
     }
     data.mainDatacenter = data.datacenters[0];

@@ -2,6 +2,7 @@
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 import { MoBaseDetails, moref, stringNumber } from './mo.general';
+import { ResourceConfigSpec } from './mo.respool.models';
 
 export class VirtualMachineFullDetails extends MoBaseDetails {
   $registeredIP: string;
@@ -392,6 +393,7 @@ class GuestInfo {
       hostName: string;
       domainName: string;
       ipAddress: string[];
+      searchDomain: string[];
     };
     ipRouteConfig: {
       ipRoute: {
@@ -426,24 +428,6 @@ class VirtualMachineFileLayout {
   disk: { key: number; diskFile: string; }[];
   swapFile: string;
 }
-
-class ResourceConfigSpec {
-  _type: 'ResourceConfigSpec';
-  entity: moref;
-  cpuAllocation: {
-    reservation: number;
-    expandableReservation: boolean;
-    limit: stringNumber;
-    shares: { shares: number; level: string; };
-  };
-  memoryAllocation: {
-    reservation: number;
-    expandableReservation: boolean;
-    limit: stringNumber;
-    shares: { shares: number; level: string; };
-    overheadLimit: number;
-  }
-};
 
 class VirtualMachineRuntimeInfo {
   _type: 'VirtualMachineRuntimeInfo';

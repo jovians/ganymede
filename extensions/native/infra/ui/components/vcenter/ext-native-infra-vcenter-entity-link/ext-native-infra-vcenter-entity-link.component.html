@@ -1,4 +1,4 @@
-<span *ngIf="!showCustomLink" style="white-space: nowrap;">
+<span *ngIf="!showCustomLink" [ngClass]="{'wba': wordBreakAll, 'nwba': !wordBreakAll}">
   <cds-icon *ngIf="showIcon" [shape]="iconShape" [ngStyle]="iconStyle" [badge]="iconBadge" [status]="iconStatus"></cds-icon>
   <a [routerLink]="routerLink" [queryParams]="queryParams" queryParamsHandling="merge">{{ entityName }}</a>
   <ng-content></ng-content>

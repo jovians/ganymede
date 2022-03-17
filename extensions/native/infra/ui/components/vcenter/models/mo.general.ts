@@ -15,3 +15,11 @@ export class MoBaseDetails {
   parent: string;
   overallStatus: string;
 }
+export class Permission {
+  _type: 'Permission';
+  entity: morefg;
+  principal: string;
+  group: boolean;
+  roleId: number;
+  propagate: boolean;
+}

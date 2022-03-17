@@ -29,6 +29,11 @@ import { ExtNativeInfraVcenterEntityLinkComponent } from './components/vcenter/e
 import { GanymedeDataViewModule } from 'src/app/ganymede/components/dataview/dataview.module';
 import { ExtNativeInfraVcenterDatastoreDetailsComponent } from './components/vcenter/ext-native-infra-vcenter-datastore-details/ext-native-infra-vcenter-datastore-details.component';
 import { ExtNativeInfraVcenterHostDetailsComponent } from './components/vcenter/ext-native-infra-vcenter-host-details/ext-native-infra-vcenter-host-details.component';
+import { ExtNativeInfraVcenterClusterDetailsComponent } from './components/vcenter/ext-native-infra-vcenter-cluster-details/ext-native-infra-vcenter-cluster-details.component';
+import { ExtNativeInfraVcenterRespoolDetailsComponent } from './components/vcenter/ext-native-infra-vcenter-respool-details/ext-native-infra-vcenter-respool-details.component';
+import { ExtNativeInfraVcenterNetworkDetailsComponent } from './components/vcenter/ext-native-infra-vcenter-network-details/ext-native-infra-vcenter-network-details.component';
+import { ExtNativeInfraVcenterFolderDetailsComponent } from './components/vcenter/ext-native-infra-vcenter-folder-details/ext-native-infra-vcenter-folder-details.component';
+import { ExtNativeInfraVcenterVswitchDetailsComponent } from './components/vcenter/ext-native-infra-vcenter-vswitch-details/ext-native-infra-vcenter-vswitch-details.component';
 
 ClarityIcons.addIcons(...[
   cloudNetworkIcon,
@@ -41,14 +46,13 @@ ClarityIcons.addIcons(...[
   clusterIcon,
   vmwAppIcon,
   warningStandardIcon,
+  cloudNetworkIcon,
 ]);
 
 @NgModule({
   imports: [
     ...ganyBaseModulesImport,
     GanymedeCoreModule,
-    // GanymedeWavefrontModule,
-    // GanymedeXtermModule,
   ],
   declarations: [
     ExtNativeInfraPageComponent,
@@ -59,6 +63,11 @@ ClarityIcons.addIcons(...[
     ExtNativeInfraVcenterEntityLinkComponent,
     ExtNativeInfraVcenterDatastoreDetailsComponent,
     ExtNativeInfraVcenterHostDetailsComponent,
+    ExtNativeInfraVcenterClusterDetailsComponent,
+    ExtNativeInfraVcenterRespoolDetailsComponent,
+    ExtNativeInfraVcenterNetworkDetailsComponent,
+    ExtNativeInfraVcenterFolderDetailsComponent,
+    ExtNativeInfraVcenterVswitchDetailsComponent,
   ],
   exports: [
     ExtNativeInfraPageComponent,

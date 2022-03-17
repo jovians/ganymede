@@ -3,7 +3,6 @@
  */
 import { VsphereInfra, VsphereDatacenter } from 'vsphere-infra';
 import { Mo } from 'vsphere-infra/src/vsphere-soap/managed.objects';
-import { Vo } from 'vsphere-infra/src/vsphere-soap/mo.prop.classes';
 
 import { AsyncWorkerClient, AsyncWorkerExecutor } from '../../../../../components/util/server/async.worker.proc';
 import { getProcessResourceSnapshot, ProcessResourceSnapshot } from '../../../../../server/src/util/process.resource';
@@ -55,11 +54,11 @@ export class ExtInfraWorkerLogic extends AsyncWorkerExecutor {
     for (const entity of entities) { await entity.refresh(); }
     const entitiesObjects = await Promise.all(entities.map(async entity => {
       const obj = JSON.parse(entity.serialize());
-      obj.rawSource = entity.getSourceData();
-      if (entity.$type === 'VirtualMachine') {
-        const host = (await this.vcenter.getMany([(entity as Mo.VirtualMachine).runtime.host]))[0] as Mo.HostSystem;
-        obj.cpuHz = host.hardware.cpuInfo.hz;
-      }
+      // obj.rawSource = entity.getSourceData();
+      // if (entity.$type === 'VirtualMachine') {
+      //   const host = (await this.vcenter.getMany([(entity as Mo.VirtualMachine).runtime.host]))[0] as Mo.HostSystem;
+      //   obj.cpuHz = host.hardware.cpuInfo.hz;
+      // }
       return obj;
     }));
     return JSON.stringify(entitiesObjects);

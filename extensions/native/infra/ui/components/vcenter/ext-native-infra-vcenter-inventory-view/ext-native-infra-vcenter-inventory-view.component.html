@@ -39,9 +39,14 @@
       </div>
     </div>
     <div *ngIf="!dataLoadingForWhile && !entityNotFound">
-      <gany-ext-native-infra-vcenter-host-details *ngIf="moType === 'HostSystem'" [moData]="moData" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-host-details>
       <gany-ext-native-infra-vcenter-vm-details *ngIf="moType === 'VirtualMachine'" [moData]="moData" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-vm-details>
+      <gany-ext-native-infra-vcenter-folder-details *ngIf="moType === 'Folder'" [moData]="moData" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-folder-details>
+      <gany-ext-native-infra-vcenter-host-details *ngIf="moType === 'HostSystem'" [moData]="moData" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-host-details>
       <gany-ext-native-infra-vcenter-datastore-details *ngIf="moType === 'Datastore'" [moData]="moData" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-datastore-details>
+      <gany-ext-native-infra-vcenter-network-details *ngIf="moType === 'Network'" [moData]="moData" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-network-details>
+      <gany-ext-native-infra-vcenter-cluster-details *ngIf="moType === 'ComputeResource'" [moData]="moData" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-cluster-details>
+      <gany-ext-native-infra-vcenter-respool-details *ngIf="moType === 'ResourcePool' || moType === 'VirtualApp'" [moData]="moData" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-respool-details>
+      <gany-ext-native-infra-vcenter-vswitch-details *ngIf="moType === 'VirtualSwitch'" [moData]="moData" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-vswitch-details>
     </div>
   </as-split-area>
 </as-split>

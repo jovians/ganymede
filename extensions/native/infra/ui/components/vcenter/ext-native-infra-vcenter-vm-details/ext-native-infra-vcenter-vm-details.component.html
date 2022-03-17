@@ -3,6 +3,10 @@
     <cds-icon shape="vm" size="md"></cds-icon>
     {{ data.name }}
   </h3>
+  <div *ngIf="moData.parent && moData.parent.indexOf('$mo:Datacenter:datacenter') === -1" style="margin-left: 0.9rem; margin-bottom: 0.1rem;">
+    <span style="margin-right: 0.25rem;">Parent: </span>
+    <gany-ext-native-infra-vcenter-entity-link [entityId]="moData.parent" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-entity-link>
+  </div>
   <gany-grid [minWidth]="'540px'" class="mtop" style="width: calc(100% - 1rem); padding-left: 1rem;">
     <!-- Status Section -->
     <div class="card grid-card">
@@ -34,8 +38,12 @@
             </clr-stack-block>
             <!-- Top IPv4 Address if any -->
             <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
-              <clr-stack-label>IP Address</clr-stack-label>
+              <clr-stack-label>Primary IP</clr-stack-label>
               <clr-stack-content>{{ moData.summary.guest.ipAddress ? moData.summary.guest.ipAddress : '(Unassigned)' }}</clr-stack-content>
+              <clr-stack-block *ngIf="data.status.netDetails?.ipList" [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="4">
+                <clr-stack-label>IP List</clr-stack-label>
+                <div *ngFor="let ipEntry of data.status.netDetails.ipList">{{ ipEntry }}</div>
+              </clr-stack-block>
             </clr-stack-block>
             <!-- Network -->
             <clr-stack-block *ngIf="data.status.network" [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
@@ -43,6 +51,26 @@
               <clr-stack-content>
                 <gany-ext-native-infra-vcenter-entity-link [entityId]="data.status.network.iid" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-entity-link>
               </clr-stack-content>
+              <!-- <clr-stack-block *ngIf="data.status.netDetails" [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="2">
+                <clr-stack-label>DNS Hostname</clr-stack-label>
+                <clr-stack-content style="word-break: break-all;">{{ data.status.netDetails.hostname }}</clr-stack-content>
+              </clr-stack-block> -->
+              <clr-stack-block *ngIf="data.status.netDetails" [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="3">
+                <clr-stack-label>DHCP</clr-stack-label>
+                <clr-stack-content>{{ data.status.netDetails.dhcp ? 'Yes' : 'No' }}</clr-stack-content>
+              </clr-stack-block>
+              <clr-stack-block *ngIf="data.status.netDetails" [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="4">
+                <clr-stack-label>Nameservers</clr-stack-label>
+                <div *ngFor="let nsEntry of data.status.netDetails.ns">{{ nsEntry }}</div>
+              </clr-stack-block>
+              <clr-stack-block *ngIf="data.status.netDetails && data.status.netDetails.searchDomain" [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="4">
+                <clr-stack-label>Search Domain</clr-stack-label>
+                <div *ngFor="let searchEntry of data.status.netDetails.searchDomain">{{ searchEntry }}</div>
+              </clr-stack-block>
+              <clr-stack-block *ngIf="data.status.netDetails" [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="5">
+                <clr-stack-label>Routes</clr-stack-label>
+                <div *ngFor="let routeInfo of data.status.netDetails.routes">{{ routeInfo }}</div>
+              </clr-stack-block>
             </clr-stack-block>
             <!-- Datastore -->
             <clr-stack-block *ngIf="data.status.datastore" [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
@@ -110,7 +138,7 @@
               <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="3">
                 <clr-stack-label>Limit</clr-stack-label><clr-stack-content>{{ memInfo.limit }}</clr-stack-content>
               </clr-stack-block>
-              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="3">
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="4">
                 <clr-stack-label>Overhead</clr-stack-label><clr-stack-content>{{ memInfo.consumedOverhead }}</clr-stack-content>
               </clr-stack-block>
             </clr-stack-block>
@@ -151,10 +179,10 @@
               <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
                 <clr-stack-label>Type</clr-stack-label><clr-stack-content>{{ netInfo.type }}</clr-stack-content>
               </clr-stack-block>
-              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="2">
                 <clr-stack-label>Mac Address</clr-stack-label><clr-stack-content>{{ netInfo.macAddress }}</clr-stack-content>
               </clr-stack-block>
-              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-block [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="3">
                 <clr-stack-label>Backed by</clr-stack-label>
                 <clr-stack-content>
                   <gany-ext-native-infra-vcenter-entity-link [entityId]="netInfo.backingId" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-entity-link>
@@ -174,7 +202,7 @@
               <clr-stack-block *ngIf="cdDrive.connected" [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
                 <clr-stack-label>File</clr-stack-label><clr-stack-content>{{ cdDrive.file }}</clr-stack-content>
               </clr-stack-block>
-              <clr-stack-block *ngIf="cdDrive.connected" [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-block *ngIf="cdDrive.connected" [clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="2">
                 <clr-stack-label>Location</clr-stack-label>
                 <clr-stack-content>
                   <gany-ext-native-infra-vcenter-entity-link [entityId]="cdDrive.backingId" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-entity-link>
@@ -233,6 +261,14 @@
     <div class="card-block card-block-content">
       <div class="card-text card-content">
         <pre style="width: 100%; font-family: inherit; border: none; white-space: pre-line;">{{ moData.config.annotation }}</pre>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="data.vapp && data.vapp.userData" class="card" style="width: calc(100% - 2rem); margin-left: 1rem;">
+    <div class="card-header">User Data</div>
+    <div class="card-block card-block-content">
+      <div class="card-text card-content">
+        <pre [attr.id]="ixId + '-user-data'" class="codepre line-numbers" style="visibility: hidden;"><code class="language-shell">{{ data.vapp.userData }}</code></pre>
       </div>
     </div>
   </div>

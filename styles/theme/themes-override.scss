@@ -6,4 +6,8 @@ body[theme-family="dark"] {
       fill: rgba(255, 255, 255, 0.66);
     }
   }
+
+  .codepre {
+    border: .05rem solid rgba(140, 140, 140, 0.3);
+  }
 }

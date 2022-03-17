@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 export class TimeViewComponent implements OnInit, OnChanges, OnDestroy {
   @Input() time: number | string = 0;
   @Input() format: 'datetime' | 'time' | 'date' = 'datetime';
-  @Input() mode: 'iso' | 'utc' | 'local' = 'local';
+  @Input() mode: 'iso' | 'utc' | 'local' | 'ts' = 'local';
   @Input() timePrecision: 'hr' | 'min' | 'sec' = 'min';
   @Input() copyIcon = false;
   @Input() ampm = true;
@@ -89,6 +89,7 @@ export class TimeViewComponent implements OnInit, OnChanges, OnDestroy {
           case 'local': this.timeString = `${this.timeObj.toLocaleDateString()} ${this.getTimeString()}`; break;
           case 'utc': this.timeString = `${this.timeObj.toLocaleDateString('UTC')} ${this.getTimeStringUTC()}`; break;
           case 'iso': this.timeString = this.timeObj.toISOString(); break;
+          case 'ts': this.timeString = this.timeObj.getTime().toFixed(0); break;
         }
       break;
     }

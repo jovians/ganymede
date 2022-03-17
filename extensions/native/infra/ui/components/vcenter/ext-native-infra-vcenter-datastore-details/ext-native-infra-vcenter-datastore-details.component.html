@@ -3,6 +3,10 @@
     <cds-icon shape="storage" size="md"></cds-icon>
     {{ data.name }}
   </h3>
+  <div *ngIf="moData.parent && moData.parent.indexOf('$mo:Datacenter:datacenter') === -1" style="margin-left: 0.9rem; margin-bottom: 0.1rem;">
+    <span style="margin-right: 0.25rem;">Parent: </span>
+    <gany-ext-native-infra-vcenter-entity-link [entityId]="moData.parent" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-entity-link>
+  </div>
   <gany-grid [minWidth]="'540px'" class="mtop" style="width: calc(100% - 1rem); padding-left: 1rem;">
     <!-- Summary Section -->
     <div class="card grid-card">
@@ -231,7 +235,7 @@
     <!-- Hosts Section -->
     <div class="card grid-card" *ngIf="moData.host && moData.host.length > 0">
       <clr-datagrid>
-        <clr-dg-column>Hosts</clr-dg-column>
+        <clr-dg-column>Hosts ({{ moData.host.length }})</clr-dg-column>
         <clr-dg-row *clrDgItems="let host of moData.host">
           <clr-dg-cell>
             <gany-ext-native-infra-vcenter-entity-link [entityId]="host.key" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-entity-link>
@@ -247,7 +251,7 @@
     <!-- VM Section -->
     <div class="card grid-card" *ngIf="moData.vm && moData.vm.length > 0">
       <clr-datagrid>
-        <clr-dg-column>Virtual Machines</clr-dg-column>
+        <clr-dg-column>Virtual Machines ({{ moData.vm.length }})</clr-dg-column>
         <clr-dg-row *clrDgItems="let vmId of moData.vm">
           <clr-dg-cell>
             <gany-ext-native-infra-vcenter-entity-link [entityId]="vmId" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-entity-link>

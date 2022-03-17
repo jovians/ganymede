@@ -5,4 +5,10 @@
     color: var(--clr-link-color, #5bc4f1);
   }
 
+  .wba {
+    word-break: break-all;
+  }
+  .nwba {
+    white-space: nowrap;
+  }
 }

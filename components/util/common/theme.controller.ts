@@ -5,7 +5,7 @@
 import { ix } from '@jovian/type-tools';
 import { ganymedeAppData } from '../../../../../../ganymede.app';
 
-// declare var window: any;
+const cssPath = 'assets/css';
 const themesPath = 'assets/css/theme';
 let themeSectionDiv = null;
 
@@ -110,7 +110,14 @@ export class ThemeController extends ix.Entity {
     document.body.setAttribute('theme-family', this.isDark ? 'dark' : 'light');
     const html = document.getElementsByTagName('html')[0];
     html.style.background = theme.bg ? theme.bg : null;
+    this.loadExtensionThemes();
     this.persistThemeOnLocalStorage();
+  }
+  loadExtensionThemes() {
+    const prism = document.getElementById('GANY_IMPORT_PRISM_JS_STYLE');
+    if (prism) {
+      prism.setAttribute('href', this.isDark ? `${cssPath}/prism.dark.css` : `${cssPath}/prism.css`);
+    }
   }
   handleEntrypoint() {
     this.loadThemeFromLocalStorage(true);

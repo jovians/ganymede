@@ -15,7 +15,8 @@ export class Unit {
     return v;
   }
 
-  static adjust = (n: number, prefix?: Prefix): { value: string, prefix: Prefix } => {
+  static adjust = (n: number | string, prefix?: Prefix): { value: string, prefix: Prefix } => {
+    if (typeof n === 'string') { n = parseFloat(n); }
     if (n < 0.01 && n >= 0) { return { value: '0', prefix }; }
     if (n < 1) {
       return { value: Unit.sliceDecimalZeroes(n.toFixed(2)), prefix };
@@ -32,7 +33,8 @@ export class Unit {
     }
   };
 
-  static formatted = (n: number, prefix: Prefix, unit: string): string => {
+  static formatted = (n: number | string, prefix: Prefix, unit: string): string => {
+    if (typeof n === 'string') { n = parseFloat(n); }
     const fmat = this.adjust(n, prefix);
     return `${fmat.value} ${fmat.prefix}${unit}`;
   };
@@ -66,4 +68,13 @@ export class Unit {
       default: return { prefix, factor: 1 };
     }
   };
+
+  static simplePercent = (value: number | string, max: number | string) => {
+    if (typeof value === 'string') { value = parseFloat(value); }
+    if (typeof max === 'string') { max = parseFloat(max); }
+    const percent = value / max * 100;
+    const percentStr = (percent >= 1 || percent === 0) ? percent.toFixed(0) : percent.toFixed(1);
+    return `${percentStr}%`;
+  }
+
 }

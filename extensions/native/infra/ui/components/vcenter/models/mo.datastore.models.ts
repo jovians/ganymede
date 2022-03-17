@@ -84,8 +84,10 @@ export class StorageIORMInfo {
   reservationEnabled: boolean;
   statsAggregationDisabled: boolean;
 };
+
 export class DatastoreSummary {
   _type: 'DatastoreSummary';
+  isAlias: boolean;
   datastore: moref;
   name: string;
   url: string;

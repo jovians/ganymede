@@ -1,6 +1,7 @@
 /*
  * Copyright 2014-2021 Jovian; all rights reserved.
  */
+import { DatastoreSummary } from './mo.datastore.models';
 import { MoBaseDetails, moref, morefg, uuid, stringNumber } from './mo.general';
 
 export class HostFullDetails extends MoBaseDetails {
@@ -8,6 +9,7 @@ export class HostFullDetails extends MoBaseDetails {
   config: HostConfigInfo;
   configManager: HostConfigManager;
   datastore: moref[];
+  datastoreSummary: DatastoreSummary[];
   hardware: HostHardware;
   network: moref[];
   licensableResource: HostLicensableResourceInfo;
@@ -484,7 +486,16 @@ class HostConfigInfo {
       autoNegotiateSupported: boolean;
       enhancedNetworkingStackSupported: boolean;
       ensInterruptSupported: boolean;
-    }[];      
+    }[];
+    rdmaDevice: {
+      key: string;
+      device: string;
+      driver: string;
+      description: string;
+      backing: { _type: 'HostRdmaDevicePnicBacking'; pairedUplink: string; };
+      connectionInfo: { state: string; mtu: number; speedInMbps: number; };
+      capability: { roceV1Capable: boolean; roceV2Capable: boolean; iWarpCapable: boolean; };
+    }[];
     vnic: HostVNicCandidate[];
     dnsConfig: {
       dhcp: boolean; virtualNicDevice: string; hostName: string;
@@ -515,7 +526,7 @@ class HostConfigInfo {
     nsxTransportNodeId: string;
   };
   vmotion: {
-    netConfig: { candidateVnic: HostVNicCandidate[]; };
+    netConfig: { candidateVnic: HostVNicCandidate[]; selectedVnic: string };
     ipConfig: HostNetworkIpConfig;
   };
   virtualNicManagerInfo: {
@@ -764,6 +775,7 @@ class HostRuntimeInfo {
   vFlashResourceRuntimeInfo: HostVFlashResourceRuntimeInfo;
   hostMaxVirtualDiskCapacity: stringNumber;
   cryptoState: string;
+  cryptoKeyId: { keyId: string; providerId: { id: string; }; };
 };
 
 

@@ -11,6 +11,7 @@ export class ExtNativeInfraVcenterEntityLinkComponent implements OnInit, OnChang
   @Input() entityId = '';
   @Input() showIcon = true;
   @Input() showCustomLink = false;
+  @Input() wordBreakAll = false;
   @Input() inventoryStubs: VcenterInventoryStubsData;
   iconShape: string = '';
   iconStyle: {[key: string]: string} = {};
@@ -47,7 +48,7 @@ export class ExtNativeInfraVcenterEntityLinkComponent implements OnInit, OnChang
       break;
       case 'Folder':
         this.iconShape = 'folder';
-        this.queryParams.view = 'vms';
+        // this.queryParams.view = 'vms';
         this.iconStyle = { 'margin-right': '0.25rem', 'transform': 'translate(0, -0.08rem)' };
       break;
       case 'Network':
@@ -77,7 +78,12 @@ export class ExtNativeInfraVcenterEntityLinkComponent implements OnInit, OnChang
       break;
       case 'VirtualApp':
         this.iconShape = 'vmw-app';
-        this.queryParams.view = 'vms';
+        this.queryParams.view = 'hosts';
+        this.iconStyle = { 'margin-right': '0.25rem', 'transform': 'translate(0, -0.08rem)' };
+      break;
+      case 'VirtualSwitch':
+        this.iconShape = 'cloud-network';
+        this.queryParams.view = 'networks';
         this.iconStyle = { 'margin-right': '0.25rem', 'transform': 'translate(0, -0.08rem)' };
       break;
     }

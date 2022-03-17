@@ -1,0 +1,121 @@
+<ng-container *ngIf="moData && data">
+  <h3 class="vcenter-title" style="margin-top: 0.65rem; margin-left: 0.9rem; margin-bottom: 0.1rem;">
+    <cds-icon shape="cluster" size="md"></cds-icon>
+    {{ data.name }}
+  </h3>
+  <div *ngIf="moData.parent && moData.parent.indexOf('$mo:Datacenter:datacenter') === -1" style="margin-left: 0.9rem; margin-bottom: 0.1rem;">
+    <span style="margin-right: 0.25rem;">Parent: </span>
+    <gany-ext-native-infra-vcenter-entity-link [entityId]="moData.parent" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-entity-link>
+  </div>
+  <gany-grid [minWidth]="'540px'" class="mtop" style="width: calc(100% - 1rem); padding-left: 1rem;">
+    <!-- Status Section -->
+    <div class="card grid-card">
+      <div class="card-header">Status & Info</div>
+      <div class="card-block card-block-content">
+        <div class="card-text card-content">
+          <div style="display: block; margin: 0 auto; width: 490px; transform: translate(0, -12px);">
+            <swimlane-adv-util-gauge
+              [title]="data.status.cpu.cpuTitle" style="display: inline-block;"
+              [value]="data.status.cpu.usage" [valuePrefix]="'M'"
+              [maxValue]="data.status.cpu.capacity" [maxValuePrefix]="'M'"
+              [thresholdPercent]="70" [unit]="'Hz'" [size]="'sm'"></swimlane-adv-util-gauge>
+            <swimlane-adv-util-gauge
+              [title]="'MEM'" style="display: inline-block;"
+              [value]="data.status.mem.usage" [valuePrefix]="'Mi'"
+              [maxValue]="data.status.mem.capacity" [maxValuePrefix]="'Mi'"
+              [thresholdPercent]="80" [unit]="'B'" [size]="'sm'"></swimlane-adv-util-gauge>
+            <swimlane-adv-util-gauge
+              [title]="'DISK'" style="display: inline-block;"
+              [value]="data.status.disk.usage" [valuePrefix]="'Gi'"
+              [maxValue]="data.status.disk.capacity" [maxValuePrefix]="'Gi'"
+              [thresholdPercent]="80" [unit]="'B'" [size]="'sm'"></swimlane-adv-util-gauge>
+          </div>
+          <clr-stack-view>
+            <!-- Host Status -->
+            <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Host Status</clr-stack-label>
+              <clr-stack-content>{{ data.status.host.hostCountEffective }} / {{ data.status.host.hostCount }} ({{ data.status.host.percentUp }})</clr-stack-content>
+            </clr-stack-block>
+            <!-- VM Count -->
+            <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>VM Count</clr-stack-label>
+              <clr-stack-content>
+                <span>{{ data.status.vmCount }} Total</span>
+                <span *ngIf="data.status.vmCountPowerOff > 0"> ({{ data.status.vmCountPowerOff }} Powered Off)</span>
+              </clr-stack-content>
+            </clr-stack-block>
+            <!-- vMotion Count -->
+            <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Total vMotions</clr-stack-label>
+              <clr-stack-content>{{ data.status.vmotionCount }}</clr-stack-content>
+            </clr-stack-block>
+            <!-- DRS Score -->
+            <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>DRS Score</clr-stack-label>
+              <clr-stack-content>{{ data.status.drsScore }}</clr-stack-content>
+            </clr-stack-block>
+            <!-- Current Failover Level -->
+            <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Failover Level</clr-stack-label>
+              <clr-stack-content>{{ data.status.currentFailoverLevel }}</clr-stack-content>
+            </clr-stack-block>
+            <!-- Maintenance Status -->
+            <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-label>Under Maintenance</clr-stack-label>
+              <clr-stack-content>{{ data.status.underMaintenance ? 'Yes' : 'No' }}</clr-stack-content>
+            </clr-stack-block>
+          </clr-stack-view>
+        </div>
+      </div>
+    </div>
+    <!-- Host Section -->
+    <div class="card grid-card" *ngIf="moData.host && moData.host.length > 0">
+      <clr-datagrid>
+        <clr-dg-column>Hosts ({{ moData.host.length }})</clr-dg-column>
+        <clr-dg-row *clrDgItems="let hostId of moData.host">
+          <clr-dg-cell>
+            <gany-ext-native-infra-vcenter-entity-link [entityId]="hostId" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-entity-link>
+          </clr-dg-cell>
+        </clr-dg-row>
+        <clr-dg-footer>
+          <clr-dg-pagination #pagination [clrDgPageSize]="10">
+            {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of {{ pagination.totalItems }} Host(s)
+          </clr-dg-pagination>
+        </clr-dg-footer>
+      </clr-datagrid>
+    </div>
+    <!-- Datastore Section -->
+    <div class="card grid-card" *ngIf="moData.datastore && moData.datastore.length > 0">
+      <clr-datagrid>
+        <clr-dg-column>Datastores ({{ moData.datastore.length }})</clr-dg-column>
+        <clr-dg-row *clrDgItems="let dsId of moData.datastore">
+          <clr-dg-cell>
+            <gany-ext-native-infra-vcenter-entity-link [entityId]="dsId" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-entity-link>
+          </clr-dg-cell>
+        </clr-dg-row>
+        <clr-dg-footer>
+          <clr-dg-pagination #pagination [clrDgPageSize]="10">
+            {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of {{ pagination.totalItems }} Datastore(s)
+          </clr-dg-pagination>
+        </clr-dg-footer>
+      </clr-datagrid>
+    </div>
+    <!-- Network Section -->
+    <div class="card grid-card" *ngIf="moData.network && moData.network.length > 0">
+      <clr-datagrid>
+        <clr-dg-column>Networks ({{ moData.network.length }})</clr-dg-column>
+        <clr-dg-row *clrDgItems="let netId of moData.network">
+          <clr-dg-cell>
+            <gany-ext-native-infra-vcenter-entity-link [entityId]="netId" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-entity-link>
+          </clr-dg-cell>
+        </clr-dg-row>
+        <clr-dg-footer>
+          <clr-dg-pagination #pagination [clrDgPageSize]="10">
+            {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of {{ pagination.totalItems }} VM(s)
+          </clr-dg-pagination>
+        </clr-dg-footer>
+      </clr-datagrid>
+    </div>
+  </gany-grid>
+  <div class="mbot5"></div>
+</ng-container>

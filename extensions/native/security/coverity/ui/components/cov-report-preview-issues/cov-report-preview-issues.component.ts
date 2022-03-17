@@ -2,15 +2,10 @@
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { PrismHighlightService } from 'src/app/ganymede/components/services/prism-highlight.service';
 import { Components } from 'src/app/ui.components';
 import { CoverityIssueV2, CoverityReportSummaryView } from '../../coverity.models';
 import { ExtNativeCoverityService } from '../shared/ext-native-coverity.service';
-
-declare var window: any;
-declare var Prism: any;
-if (window.Prism) {
-  window.Prism.plugins.filterHighlightAll.reject.addSelector('pre[tabindex] > code');
-}
 
 @Component({
   selector: 'gany-ext-native-sec-cov-report-preview-issues',
@@ -27,12 +22,13 @@ export class CovReportPreviewIssuesComponent implements OnInit {
   @Input() isDeltaView = false;
   @Input() lineVicinity = 3;
   
-  fileCache: {[fileName: string]: { content?: string, issues: CoverityIssueV2[] }} = {};
-  highlightLocker = {};
+  fileCache: {[fileName: string]: { content?: string, issues: CoverityIssueV2[] }} = {};;
   collapseAll = false;
-  occasionalChecker;
 
-  constructor(private covService: ExtNativeCoverityService) {
+  constructor(
+    private covService: ExtNativeCoverityService,
+    private prism: PrismHighlightService,
+  ) {
     
   }
 
@@ -44,38 +40,8 @@ export class CovReportPreviewIssuesComponent implements OnInit {
     this.collapseAll = !this.collapseAll;
   }
 
-  nudgeHighlight() {
-    const locker = this.highlightLocker = {};
-    setTimeout(() => {
-      if (locker !== this.highlightLocker) { return; }
-      Prism.highlightAll();
-    }, 1000);
-  }
-
   langClass(issue: CoverityIssueV2) {
-    switch(issue.language.toLowerCase()) {
-      case 'c/c++': return 'language-clike';
-      case 'cuda': return 'language-clike';
-      case 'c#': return 'language-csharp';
-      case 'java': return 'language-java';
-      case 'apex': return 'language-apex';
-      case 'kotlin': return 'language-kotlin';
-      case 'text': return 'language-text';
-      case 'vb.net': return 'language-vbnet';
-      case 'scala': return 'language-scala';
-      case 'fortran': return 'language-fortran';
-      case 'go': return 'language-go';
-      case 'html': return 'language-markup';
-      case 'javascript': return 'language-javascript';
-      case 'objective-c': return 'language-objectivec';
-      case 'php': return 'language-php';
-      case 'python': return 'language-python';
-      case 'html': return 'language-markup';
-      case 'ruby': return 'language-ruby';
-      case 'swift': return 'language-swift';
-      case 'typescript': return 'language-typescript';
-      default: return 'language-text';
-    }
+    this.prism.getLanguageClass(issue.language)
   }
 
   filesCount() {
@@ -112,7 +78,7 @@ export class CovReportPreviewIssuesComponent implements OnInit {
         for (const issue2 of this.fileCache[issue.file].issues) {
           issue2.fileRef = { content, slice: this.getSlice(issue2, content) };
         }
-        this.nudgeHighlight();
+        this.prism.nudgeHighlight(this, false, 1000);
       }
     });
     return '';

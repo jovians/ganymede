@@ -1,5 +1,6 @@
 import { Component, OnInit, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
 import { autoUnsub, ix } from '@jovian/type-tools';
+import { PrismHighlightService } from 'src/app/ganymede/components/services/prism-highlight.service';
 import { moduleTypeMap } from 'src/app/ganymede/components/util/shared/common';
 import { Unit } from 'src/app/ganymede/components/util/shared/unit.utils';
 import * as VM from '../models/mo.vm.models';
@@ -15,8 +16,10 @@ export class ExtNativeInfraVcenterVmDetailsComponent extends ix.Entity implement
   @Input() moData: VM.VirtualMachineFullDetails;
   @Input() inventoryStubs: VcenterInventoryStubsData;
   data = this.populateData();
+  userDataRendered = false;
   vmTypeMap = moduleTypeMap(VM, '_type');
-  constructor() {
+  
+  constructor(private prism: PrismHighlightService) {
     super('ext-native-infra-vcenter-vm-details');
   }
   
@@ -41,7 +44,7 @@ export class ExtNativeInfraVcenterVmDetailsComponent extends ix.Entity implement
 
   populateData() {
     if (!this.moData) { return; } 
-    return {
+    const data = {
       name: decodeURIComponent(this.moData.name),
       status: {
         power: this.getPowerState(),
@@ -51,6 +54,7 @@ export class ExtNativeInfraVcenterVmDetailsComponent extends ix.Entity implement
         host: this.getHost(),
         cluster: this.getCluster(),
         network: this.getNetwork(),
+        netDetails: this.getNetworkDetails(),
         datastore: this.getDatastore(),
         resPool: this.getResourcePool(),
       },
@@ -61,10 +65,19 @@ export class ExtNativeInfraVcenterVmDetailsComponent extends ix.Entity implement
         gpus: this.getGpuInfo(),
         other: this.getOtherHardware(),
       },
+      vapp: this.getVAppConfigs(),
       meta: {
         createDate: new Date(this.moData.config.createDate).toISOString(),
       }
     };
+    this.prism.nudgeHighlight(this).then(result => {
+      const el = document.getElementById(`${this.ixId}-user-data`);
+      if (el && el.getAttribute('tabindex') === '0') {
+        this.userDataRendered = true;
+        el.style.visibility = 'visible';
+      }
+    });
+    return data;
   }
 
   getPowerState() {
@@ -95,6 +108,29 @@ export class ExtNativeInfraVcenterVmDetailsComponent extends ix.Entity implement
   getNetwork() {
     const netGuid = this.moData.network[0]; if (!netGuid) { return null; }
     return this.stubByIid(this.guidToIid(netGuid));
+  }
+  getNetworkDetails() {
+    if (!this.moData.guest || !this.moData.guest.ipStack || this.moData.guest.ipStack.length === 0) { return null; }
+    const netInfo = this.moData.guest.net ? this.moData.guest.net[0] : null;
+    const info = this.moData.guest.ipStack[0];
+    let hostname: string;
+    if (info.dnsConfig.hostName && info.dnsConfig.domainName) {
+      hostname = `${info.dnsConfig.hostName}.${info.dnsConfig.domainName}`;
+    } else if (info.dnsConfig.hostName) {
+      hostname = info.dnsConfig.hostName;
+    } else if (info.dnsConfig.domainName) {
+      hostname = info.dnsConfig.domainName;
+    } else {
+      hostname = `(Unknown)`;
+    }
+    return {
+      dhcp: info.dnsConfig.dhcp,
+      hostname: hostname,
+      ipList: netInfo ? netInfo.ipConfig.ipAddress.map(ipInfo => `${ipInfo.ipAddress} (${ipInfo.state})`) : null,
+      ns: info.dnsConfig.ipAddress,
+      routes: info.ipRouteConfig.ipRoute.map(route => `${route.network}/${route.prefixLength}`).filter((v, i, s) => s.indexOf(v) === i),
+      searchDomain: info.dnsConfig.searchDomain,
+    };
   }
   getResourcePool() {
     return this.stubByIid(this.guidToIid(this.moData.resourcePool));
@@ -255,6 +291,14 @@ export class ExtNativeInfraVcenterVmDetailsComponent extends ix.Entity implement
       scsiControllers: [...scsiControllers.map(dev => dev.deviceInfo.label)],
       usbControllers: [...usbController.map(dev => dev.deviceInfo.label)],
       inputDevices: [...inputDevices.map(dev => dev.deviceInfo.label)],
+    };
+  }
+  getVAppConfigs() {
+    if (!this.moData.config.vAppConfig) { return null; }
+    const userDataProperty = this.moData.config.vAppConfig.property ? this.moData.config.vAppConfig.property.filter(a => a.label === 'user-data')[0] : null;
+    const userData = userDataProperty ? Buffer.from(userDataProperty.value, 'base64').toString('utf8') : '';
+    return {
+      userData,
     };
   }
 
