@@ -5,7 +5,7 @@ $gauge-pad-2: 4px;
 :host {
   ::ng-deep {
     svg.ngx-charts {
-      margin: calc($gauge-pad / 2 * -1);
+      margin: calc($gauge-pad-2 / 2 * -1);
       g text { display: none; }
       g.gauge {
         > g:nth-child(2) {

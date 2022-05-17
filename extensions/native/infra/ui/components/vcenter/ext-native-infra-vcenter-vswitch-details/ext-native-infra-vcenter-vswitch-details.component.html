@@ -3,7 +3,7 @@
     <cds-icon shape="cloud-network" size="md"></cds-icon>
     {{ data.name }}
   </h3>
-  <div *ngIf="moData.owner || (moData.parent && moData.parent.indexOf('$mo:Datacenter:datacenter') === -1)" style="margin-left: 0.9rem; margin-bottom: 0.1rem;">
+  <div *ngIf="moDataHasOwner() || (moData.parent && moData.parent.indexOf('$mo:Datacenter:datacenter') === -1)" style="margin-left: 0.9rem; margin-bottom: 0.1rem;">
     <span style="margin-right: 0.25rem;">Parent: </span>
     <gany-ext-native-infra-vcenter-entity-link [entityId]="moData.parent" [inventoryStubs]="inventoryStubs"></gany-ext-native-infra-vcenter-entity-link>
   </div>

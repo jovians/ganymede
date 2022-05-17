@@ -34,6 +34,7 @@ export class ExtNativeInfraVcenterComponent extends ix.Entity implements OnInit,
   quickStatsLast = 0;
   quickStatsData = null;
   quickStatsGraphData = null;
+  quickStatsShowLoading = true;
   dataLoading = false;
   vCenterList = this.app.extensions.native.infra.inventory.vcenter.list;
   vCenterMap = {};

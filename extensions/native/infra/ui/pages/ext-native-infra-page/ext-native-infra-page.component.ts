@@ -32,6 +32,7 @@ export class ExtNativeInfraPageComponent extends ix.Entity implements OnInit, On
   overviewOrder = ['aws', 'gcp', 'azure', 'vcenter'];
   isDefunct = false;
 
+  orderer: KVComparator;
   kvOrder = kvOrder;
 
   constructor(

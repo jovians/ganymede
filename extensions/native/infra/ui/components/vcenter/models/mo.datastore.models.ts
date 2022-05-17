@@ -27,6 +27,7 @@ export class DatastoreCapability {
   vmfsSparseSupported: boolean;
   vsanSparseSupported: boolean;
   vmdkExpandSupported: boolean;
+  clusteredVmdkSupported: boolean;
 }
 
 export class DatastoreHostMount {

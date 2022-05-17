@@ -181,7 +181,7 @@ export class XtermTerminalController extends ix.Entity {
     if (this.wrapper.ready) {
       this.makeConnection();
     } else {
-      this.wrapper.ready$.listenFrom(this, () => {
+      this.ixListen(this.wrapper.ready$, () => {
         this.makeConnection();
       });
     }
@@ -196,13 +196,13 @@ export class XtermTerminalController extends ix.Entity {
       this.wsClient.onmessage = e => {
         this.wrapper.terminal.write(e.data);
       };
-      this.wrapper.key$.listenFrom(this, e => {
+      this.ixListen(this.wrapper.key$, e => {
         this.wsClient.send(e.key);
       });
-      this.wrapper.data$.listenFrom(this, data => {
+      this.ixListen(this.wrapper.data$, data => {
         this.wsClient.send(data);
       });
-      this.wrapper.resize$.listenFrom(this, e => {
+      this.ixListen(this.wrapper.resize$, e => {
         this.sendResize(e.cols, e.rows);
       });
     };

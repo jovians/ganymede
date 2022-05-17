@@ -5,7 +5,7 @@ WORKDIR /usr/nodejs_server
 COPY src/app/ganymede/server/install.deps.js .
 COPY dist-server/dependencies.json /usr/nodejs_server/src/app/dependencies.json
 COPY dist-server-deps/* ./src/app
-RUN node install.deps.js
+RUN node install.deps.jsx
 
 COPY dist-server/* /usr/nodejs_server/src/app
 

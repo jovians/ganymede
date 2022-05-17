@@ -75,7 +75,7 @@
                 <clr-stack-label>VMK-NIC(s)</clr-stack-label><clr-stack-content>{{ netInfo.vmknic }}</clr-stack-content>
               </clr-stack-block>
             </clr-stack-block>
-            <!-- Update Time -->
+            <!-- Up Time -->
             <clr-stack-block *ngIf="data.meta.upSince" [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
               <clr-stack-label>Up Since</clr-stack-label>
               <gany-time-view [time]="data.meta.upSince" [showDelta]="true"></gany-time-view>

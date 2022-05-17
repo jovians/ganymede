@@ -123,12 +123,13 @@ export class ExtNativeInfraVcenterVmDetailsComponent extends ix.Entity implement
     } else {
       hostname = `(Unknown)`;
     }
+    const routes = info.ipRouteConfig?.ipRoute ? info.ipRouteConfig.ipRoute : []; 
     return {
       dhcp: info.dnsConfig.dhcp,
       hostname: hostname,
       ipList: netInfo ? netInfo.ipConfig.ipAddress.map(ipInfo => `${ipInfo.ipAddress} (${ipInfo.state})`) : null,
       ns: info.dnsConfig.ipAddress,
-      routes: info.ipRouteConfig.ipRoute.map(route => `${route.network}/${route.prefixLength}`).filter((v, i, s) => s.indexOf(v) === i),
+      routes: routes.map(route => `${route.network}/${route.prefixLength}`).filter((v, i, s) => s.indexOf(v) === i),
       searchDomain: info.dnsConfig.searchDomain,
     };
   }

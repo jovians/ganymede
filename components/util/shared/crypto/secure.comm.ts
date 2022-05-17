@@ -5,7 +5,7 @@ import * as axios from 'axios';
 import { FourQ } from '@jovian/fourq';
 import { v4 as uuidv4 } from 'uuid';
 
-import { SecureChannel, SecureChannelPeer, SecureChannelTypes } from './secure.channel';
+import { SecureChannel, SecureChannelPeer, SecureChannelTypes, SecureHandshake } from './secure.channel';
 
 export interface SecureCommConfig {
   endpoint: string;
@@ -50,9 +50,8 @@ export class SecureComm {
   }
 
   getAuthHeader(token: string, channelPubKeyB64: string, channelExp?: number) {
-    let header = SecureChannel.getAccessorHeader('internal', token) + '_' + channelPubKeyB64;
-    if (channelExp) { header = header + '_' + channelExp; }
-    return header;
+    const headerResult = SecureHandshake.getAuthHeader('internal', channelPubKeyB64, token);
+    return headerResult?.data;
   }
 
   channelInit() {
@@ -70,8 +69,8 @@ export class SecureComm {
         const pubkey = config.trust ? Buffer.from(config.trust.split('::')[1], 'base64') : null;
         const sigData = res.data.result;
         if (config.trust) {
-          const valid = SecureChannel.verifyStamp(sigData, pubkey);
-          if (!valid) {
+          const validResult = SecureHandshake.verifyStamp(sigData, pubkey);
+          if (!validResult || validResult.bad || !validResult.data) {
             return resolve(false);
           }
         }

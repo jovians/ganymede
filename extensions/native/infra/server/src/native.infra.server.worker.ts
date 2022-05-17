@@ -25,13 +25,14 @@ export class ExtInfraWorkerLogic extends AsyncWorkerExecutor {
   constructor(workerData: any) {
     super(workerData);
     VsphereInfra.grant();
-    const vinfra = new VsphereInfra(this.mainScope);
+    const vinfra = new VsphereInfra(this.mainScope as any);
     vinfra.behavior.setVerbose(true);
     // vinfra.behavior.setJsonLogs(true);
     vinfra.getDatacenter(workerData).then(vc => {
       this.vcenter = vc;
       this.vcenter.updateInventoryInterval(60);
       this.setAsReady();
+      // this.vcenter.error$.subscribe(e => { console.log(e.message); });
     });
   }
   async handleAction(callId: string, action: string, payload?: string) {
@@ -54,11 +55,11 @@ export class ExtInfraWorkerLogic extends AsyncWorkerExecutor {
     for (const entity of entities) { await entity.refresh(); }
     const entitiesObjects = await Promise.all(entities.map(async entity => {
       const obj = JSON.parse(entity.serialize());
-      // obj.rawSource = entity.getSourceData();
-      // if (entity.$type === 'VirtualMachine') {
-      //   const host = (await this.vcenter.getMany([(entity as Mo.VirtualMachine).runtime.host]))[0] as Mo.HostSystem;
-      //   obj.cpuHz = host.hardware.cpuInfo.hz;
-      // }
+      obj.rawSource = entity.getSourceData();
+      if (entity.$type === 'VirtualMachine') {
+        const host = (await this.vcenter.getMany([(entity as Mo.VirtualMachine).runtime.host]))[0] as Mo.HostSystem;
+        obj.cpuHz = host.hardware.cpuInfo.hz;
+      }
       return obj;
     }));
     return JSON.stringify(entitiesObjects);

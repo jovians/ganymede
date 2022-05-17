@@ -74,5 +74,8 @@ ganymede.patch.ts
 # node.js profiles
 /isolate-*
 
+# Angular cache
+/.angular
+
 # secrets should not be committed
 ganymede.secrets.json

@@ -67,7 +67,7 @@
             <clr-stack-block [clrStackViewLevel]="1" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
               <clr-stack-label>Capabilities</clr-stack-label>
               <clr-stack-content>{{ data.meta.capabilityListLength }} Config Flag(s)</clr-stack-content>
-              <clr-stack-block *ngIf="data.meta.clusteredVmdkSupported !== null"[clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
+              <clr-stack-block *ngIf="data.meta.capability.clusteredVmdkSupported !== null"[clrStackViewLevel]="2" [clrStackViewSetsize]="3" [clrStackViewPosinset]="1">
                 <clr-stack-label>Clustered VMDK</clr-stack-label>
                 <clr-stack-content>{{ data.meta.capability.clusteredVmdkSupported ? 'Supported' : 'Unsupported' }}</clr-stack-content>
               </clr-stack-block>

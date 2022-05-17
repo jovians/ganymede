@@ -54,6 +54,10 @@ export class ExtNativeInfraVcenterVswitchDetailsComponent extends ix.Entity impl
     };
   }
 
+  moDataHasOwner() {
+    return (this.moData as any).owner ? true : false
+  }
+
   stubByIid(iid: string) {
     if (!iid || !this.inventoryStubs) { return null; }
     return this.inventoryStubs.byIid[iid];

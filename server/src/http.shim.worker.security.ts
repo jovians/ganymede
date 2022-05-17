@@ -2,7 +2,7 @@
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 import { AsyncWorkerClient, AsyncWorkerExecutor } from '../../components/util/server/async.worker.proc';
-import { SecureChannel, SecureChannelPeer } from '../../components/util/shared/crypto/secure.channel';
+import { SecureChannel, SecureHandshake, SecureChannelPeer } from '../../components/util/shared/crypto/secure.channel';
 import { FourQ } from '@jovian/fourq';
 
 export class SecureChannelWorkerClient extends AsyncWorkerClient {
@@ -15,7 +15,7 @@ export class SecureChannelWorkerClient extends AsyncWorkerClient {
       iden: peerInfo.iden,
       data: peerInfo.data,
     });
-    return this.call<SecureChannel>(`newChannel`, peerInfoEncoded, r => SecureChannel.fromJSON(r));
+    return this.call<SecureChannel>(`newChannel`, peerInfoEncoded, r => SecureHandshake.fromJSON(r));
   }
 }
 const thisWorkerClass = SecureChannelWorkerClient;

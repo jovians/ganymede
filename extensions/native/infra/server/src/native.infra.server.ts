@@ -5,6 +5,8 @@ import { ix } from '@jovian/type-tools';
 import { GanymedeHttpServer, HttpOp, HttpBaseLib, HTTP, ReqProcessor, HttpCode } from '../../../../../server/src/http.shim';
 import { secrets } from '../../../../../components/util/server/secrets.resolver';
 import { log } from '../../../../../components/util/shared/logger';
+import { AWSAccountsCollator, AWSAccountServicesCollator } from 'aws-infra';
+import { prefetchedCreds } from 'aws-infra/src/util/auth';
 
 import { ExtInfraWorkerClient } from './native.infra.server.worker';
 
@@ -13,14 +15,22 @@ const scopeName = `ext-infra;pid=${process.pid}`;
 export class NativeInfraExtensionServer extends GanymedeHttpServer {
   // appServer: GanymedeHttpServer;
   // iface = 'json';
+  awsCollator = new AWSAccountsCollator();
   extData: any;
-  vcenters: { [key: string]: ExtInfraWorkerClient } = {};
-  vcentersDefunct: {[key: string]: any } = {};
+  aws: { [key: string]: AWSAccountServicesCollator } = {};
+  awsDefunct: {[key: string]: any } = {};
+  vcenter: { [key: string]: ExtInfraWorkerClient } = {};
+  vcenterDefunct: {[key: string]: any } = {};
 
   cache = {
     inventoryData: this.cacheDefine<object>({ path: `native.infra.inventoryData` }),
-    allObjects: this.cacheDefine<object>({ path: `native.infra.allObjects/:key`, matchExactly: true }),
-    quickStats: this.cacheDefine<object>({ path: `native.infra.quickStats/:key`, matchExactly: true }),
+    aws: {
+      ec2: this.cacheDefine<object>({ path: `native.infra.aws.ec2-list/:key`, matchExactly: true }),
+    },
+    vcenter: {
+      allObjects: this.cacheDefine<object>({ path: `native.infra.vcenter.all-objects/:key`, matchExactly: true }),
+      quickStats: this.cacheDefine<object>({ path: `native.infra.vcenter.quick-stats/:key`, matchExactly: true }),
+    },
   };
 
   constructor(extData: any, globalConfData: any) {
@@ -29,7 +39,35 @@ export class NativeInfraExtensionServer extends GanymedeHttpServer {
     this.apiVersion = 'v1';
     this.apiPath = `${this.configGlobal.ext.basePath}/native/infra`;
     this.addDefaultProcessor(ReqProcessor.BASIC);
-    this.enumerateVCenters();
+    this.initializeAll();
+  }
+
+  async initializeAll() {
+    await Promise.all([
+      this.enumerateVCenters(),
+      this.enumerateAWS(),
+    ]);
+    log.info('Ganymede native.infra extension initialized.');
+  }
+
+  async enumerateAWS() {
+    if (!this.extData.inventory.aws) { return; }
+    if (this.extData.inventory.aws.type === 'fixed') {
+      for (const invData of this.extData.inventory.aws.list) {
+        const inv = JSON.parse(JSON.stringify(invData));
+        if (inv.type === 'aws') {
+          (async () => {
+            this.aws[inv.key] = await this.awsCollator.addAccount({
+              key: inv.key, credentialsResolver: prefetchedCreds({
+                accessKeyId: await secrets.resolve(inv.username),
+                secretAccessKey: await secrets.resolve(inv.password),
+                sessionToken: inv.sessionToken ? await secrets.resolve(inv.sessionToken) : null,
+              }),
+            });
+          })();
+        }
+      }
+    }
   }
 
   async enumerateVCenters() {
@@ -37,39 +75,28 @@ export class NativeInfraExtensionServer extends GanymedeHttpServer {
     if (this.extData.inventory.vcenter.type === 'fixed') {
       for (const invData of this.extData.inventory.vcenter.list) {
         const inv = JSON.parse(JSON.stringify(invData));
-        if (inv.type === 'aws') {
-          // TODO
-        } else if (inv.type === 'gcp') {
-          // TODO
-        } else if (inv.type === 'azure') {
-          // TODO
-        } else if (inv.type === 'vcenter') {
-          // continue;
-          inv.username = await secrets.resolve(inv.username);
-          inv.password = await secrets.resolve(inv.password);
-          if (!inv.username || !inv.password) {
-            console.log(`Failed to resolve credentials for '${inv.key}'`);
-            continue;
-          }
-          inv.watch = true;
-
-          const workerData = {
-            workerFile: ExtInfraWorkerClient.workerFile,
-            ...inv,
-            scopeName,
+        inv.username = await secrets.resolve(inv.username);
+        inv.password = await secrets.resolve(inv.password);
+        if (!inv.username || !inv.password) {
+          console.log(`Failed to resolve credentials for '${inv.key}'`);
+          continue;
+        }
+        inv.watch = true;
+        const workerData = {
+          workerFile: ExtInfraWorkerClient.workerFile,
+          ...inv,
+          scopeName,
+        };
+        if (!inv.defunct) {
+          this.vcenter[inv.key] = this.addWorker(ExtInfraWorkerClient, workerData);
+        } else {
+          this.vcenterDefunct[inv.key] = {
+            deprecated: inv.deprecated ? true : false,
+            defunct: inv.defunct ? true : false,
           };
-          if (!inv.defunct) {
-            this.vcenters[inv.key] = this.addWorker(ExtInfraWorkerClient, workerData);
-          } else {
-            this.vcentersDefunct[inv.key] = {
-              deprecated: inv.deprecated ? true : false,
-              defunct: inv.defunct ? true : false,
-            };
-          }
         }
       }
     }
-    log.info('Ganymede native.infra extension initialized.');
   }
 
   async beforeStart() {
@@ -83,11 +110,30 @@ export class NativeInfraExtensionServer extends GanymedeHttpServer {
     });
   }
 
+  @HTTP.GET(`/aws/:key/ec2-list`)
+  async AwsGetAllObjects(op: HttpOp) {
+    const aws = await this.getAwsByKey(op); if (op.error) { return op.endWithError(); }
+    const cacheAccess = { version: Date.now(), matchExactly: true };
+    op.cache.handler(this.cache.vcenter.allObjects, cacheAccess, async resolve => {
+      // const inventorySerialized = await vc.inventorySerialized();
+      // if (!inventorySerialized) {
+      //   return op.endWithError(500, `NOT_READY_INV`, `[${op.req.params.key}] utilization summary not ready yet`);
+      // }
+      resolve({
+        list: [
+          ...await aws.ec2.in('us-east-1').listEC2Instances(),
+          ...await aws.ec2.in('us-west-1').listEC2Instances(),
+          ...await aws.ec2.in('us-west-2').listEC2Instances(),
+        ],
+      });
+    });
+  }
+
   @HTTP.GET(`/vcenter/:key/all-objects`)
-  async getAllObjects(op: HttpOp) {
+  async vCenterGetAllObjects(op: HttpOp) {
     const vc = await this.getVCenterByKey(op); if (op.error) { return op.endWithError(); }
     const cacheAccess = { version: await vc.inventoryChangedLast(), matchExactly: true };
-    op.cache.handler(this.cache.allObjects, cacheAccess, async resolve => {
+    op.cache.handler(this.cache.vcenter.allObjects, cacheAccess, async resolve => {
       const inventorySerialized = await vc.inventorySerialized();
       if (!inventorySerialized) {
         return op.endWithError(500, `NOT_READY_INV`, `[${op.req.params.key}] utilization summary not ready yet`);
@@ -97,33 +143,33 @@ export class NativeInfraExtensionServer extends GanymedeHttpServer {
   }
 
   @HTTP.GET(`/vcenter/:key/quick-stats`)
-  async getQuickStats(op: HttpOp) {
+  async vCenterGetQuickStats(op: HttpOp) {
     const vc = await this.getVCenterByKey(op); if (op.error) { return op.endWithError(); }
     const cacheAccess = { version: await vc.u9nChangedLast(), matchExactly: true };
     if (cacheAccess.version < 0) {
       return op.endWithError(500, `NOT_READY_UTIL_SUMMARY`, `[${op.req.params.key}] utilization summary not ready yet`);
     }
-    op.cache.handler(this.cache.quickStats, cacheAccess, async resolve => {
+    op.cache.handler(this.cache.vcenter.quickStats, cacheAccess, async resolve => {
       resolve(JSON.parse(await vc.u9nSerialized()));
     });
   }
 
   @HTTP.GET(`/vcenter/:key/watcher-resource`)
-  async getWatcherResource(op: HttpOp) {
+  async vCenterGetWatcherResource(op: HttpOp) {
     const vc = await this.getVCenterByKey(op); if (op.error) { return op.endWithError(); }
     const processResourceSnapshot = await vc.processResourceSnapshot();
     return op.res.returnJson(processResourceSnapshot);
   }
 
   @HTTP.GET(`/vcenter/:key/watcher-failure-heat`)
-  async getWatcherFailureHeat(op: HttpOp) {
+  async vCenterGetWatcherFailureHeat(op: HttpOp) {
     const vc = await this.getVCenterByKey(op); if (op.error) { return op.endWithError(); }
     const heatData = await vc.failureHeat();
     return op.res.returnJson(heatData);
   }
 
   @HTTP.GET(`/vcenter/:key/managed-object`)
-  async getEntities(op: HttpOp) {
+  async vCenterGetEntities(op: HttpOp) {
     const guid = op.req.params.key;
     const entityKey = guid.split(':').pop();
     const vcKey = guid.split(':')[1];
@@ -132,19 +178,36 @@ export class NativeInfraExtensionServer extends GanymedeHttpServer {
     return op.res.returnJson(JSON.parse(entitiesSerialized)[0]);
   }
 
+  async getAwsByKey(op: HttpOp, key?: string) {
+    if (!key) { key = op.req.params?.key; }
+    if (!key) {
+      return op.raise(HttpCode.BAD_REQUEST, `PATH_PARAM_NOT_FOUND`, `'${key}' path parameter not defined.`);
+    }
+    if (this.awsDefunct[key]) {
+      return op.raise(HttpCode.BAD_REQUEST, `AWS_ACCOUNT_DEFUNCT`, `[${key}] AWS Account is defunct`);
+    }
+    let awsAcc = this.aws[key];
+    if (awsAcc && (awsAcc as any).then) { awsAcc = await awsAcc; }
+    if (!awsAcc) {
+      return op.raise(HttpCode.BAD_REQUEST, `NO_AWS ACCOUNT_KEY`, `[${key}] cannot find AWS account by key ${key}`);
+    }
+    return awsAcc;
+  }
+
   async getVCenterByKey(op: HttpOp, key?: string) {
     if (!key) { key = op.req.params?.key; }
     if (!key) {
       return op.raise(HttpCode.BAD_REQUEST, `PATH_PARAM_NOT_FOUND`, `'${key}' path parameter not defined.`);
     }
-    if (this.vcentersDefunct[key]) {
+    if (this.vcenterDefunct[key]) {
       return op.raise(HttpCode.BAD_REQUEST, `VCENTER_DEFUNCT`, `[${key}] vCenter is defunct`);
     }
-    let vc = this.vcenters[key];
+    let vc = this.vcenter[key];
     if (vc && (vc as any).then) { vc = await vc; }
     if (!vc) {
       return op.raise(HttpCode.BAD_REQUEST, `NO_VCENTER_KEY`, `[${key}] cannot find vCenter by key ${key}`);
     }
     return vc;
   }
+
 }

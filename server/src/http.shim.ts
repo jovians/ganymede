@@ -3,7 +3,7 @@
  */
 import * as express from 'express';
 import { ServerConstDataGlobal } from './const';
-import { SecureChannel, SecureChannelPayload, SecureChannelPeer, SecureChannelTypes } from '../../components/util/shared/crypto/secure.channel';
+import { SecureHandshake, SecureChannel, SecureChannelPayload, SecureChannelPeer, SecureChannelTypes } from '../../components/util/shared/crypto/secure.channel';
 import { Class } from '@jovian/type-tools';
 import { SecureChannelWorkerClient } from './http.shim.worker.security';
 import { AsyncWorkerClient } from '../../components/util/server/async.worker.proc';
@@ -161,7 +161,7 @@ export class GanymedeHttpServer {
     if (this.config.security.secureChannel.enabled && this.config.security.secureChannel.signingKey) {
       const channelKey = this.config.security.secureChannel.signingKey;
       if (!this.config.security.secureChannel.publicKey) {
-        this.config.security.secureChannel.publicKey = SecureChannel.getPublicKeyFrom(channelKey);
+        this.config.security.secureChannel.publicKey = SecureHandshake.getPublicKeyFrom(channelKey);
       }
       for (let i = 0; i < this.config.workers.secureChannelWorkers.initialCount; ++i) {
         this.addWorker(SecureChannelWorkerClient, {
@@ -241,7 +241,7 @@ export class GanymedeHttpServer {
   setBaseLayer() {
     switch (this.config.type) {
       case HttpBaseLib.EXPRESS:
-        this.baseApp = express();
+        this.baseApp = (express as any)();
         const secOptions = this.configGlobal.http.securityHeaders;
         if (secOptions.profile === 'allow-all') {
           this.baseApp.use((req, res, next) => {
@@ -415,11 +415,11 @@ export class GanymedeHttpServer {
     if (!accessorConf.baseTokenBuffer) {
       accessorConf.baseTokenBuffer = Buffer.from(accessorConf.baseToken, 'base64');
     }
-    const accessData = SecureChannel.verifyAccessor(accessorExpression, accessorConf.baseTokenBuffer, timeWindow);
-    if (!accessData) {
+    const accessDataResult = SecureHandshake.verifyAccessor(accessorExpression, accessorConf.baseTokenBuffer, timeWindow);
+    if (accessDataResult.bad) {
       return op.raise(HttpCode.UNAUTHORIZED, `BAD_ACCESSOR`, `Not a valid accessor`);
     }
-    return { ...accessData, channelPublicKey: authSplit[1] };
+    return { ...accessDataResult.data, channelPublicKey: authSplit[1] };
   }
 
   getSecureChannel(op: HttpOp) {

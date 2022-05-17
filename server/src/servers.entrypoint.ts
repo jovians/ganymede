@@ -4,7 +4,7 @@
 import { AuthServer } from './auth.server';
 import { ServerConst } from './const';
 import { GanymedeServerExtensions } from './extensions';
-import { SecureChannel } from '../../components/util/shared/crypto/secure.channel';
+import { SecureChannel, SecureHandshake } from '../../components/util/shared/crypto/secure.channel';
 import * as fs from 'fs';
 import * as axios from 'axios';
 import * as dns from 'dns';
@@ -53,12 +53,12 @@ export class ServerEntryPoint {
           try {
             const res = await axios.default.get(destor.endpoint, {
               timeout: 7000,
-              headers: { Authorization: SecureChannel.getAccessorHeader('internal', destor.token) },
+              headers: { Authorization: SecureHandshake.getAccessorHeader('internal', destor.token) },
             });
             if (res.status !== 200) { continue; }
             const pubkeyB64 = destor.trust.split('::')[1];
-            const verified = SecureChannel.verifyStamp(res.data.result, pubkeyB64);
-            if (!verified) { continue; }
+            const verifiedResult = SecureHandshake.verifyStamp(res.data.result, pubkeyB64);
+            if (!verifiedResult || verifiedResult.bad || verifiedResult.data === false) { continue; }
             destorInfo.list.push(destor);
           } catch (e) { console.log(e); continue; }
         }
@@ -121,11 +121,12 @@ function destorGet(target: any) {
   return new Promise<string>(resolve => {
     const pubkeyB64 = target.trust.split('::')[1];
     axios.default.get(target.endpoint,
-      { headers: { Authorization: SecureChannel.getAccessorHeader('internal', target.token) } }
+      { headers: { Authorization: SecureHandshake.getAccessorHeader('internal', target.token) } }
     ).then(r => {
       if (r.status && r.data.status === 'ok') {
-        const verified = SecureChannel.verifyStamp(r.data.result, pubkeyB64);
-        resolve(verified ? verified.payload : null);
+        const verifiedResult = SecureHandshake.verifyStamp(r.data.result, pubkeyB64);
+        if (verifiedResult.bad) { return resolve(null); }
+        resolve(r.data.result);
       } else { resolve(null); }
     }).catch(e => {
       if (e.response) {
