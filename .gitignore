@@ -3,7 +3,7 @@
 # compiled output
 /dist
 /dist-electron
-# /components/**/*.js
+/components/**/*.js
 
 # dependencies
 /node_modules
