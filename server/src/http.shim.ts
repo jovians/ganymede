@@ -390,10 +390,10 @@ export class GanymedeHttpServer {
   }
 
   async stamp() {
-    const payload = this.timeAuth();
+    const payload = SecureHandshake.timeAuth();
     const payloadB64 = Buffer.from(payload, 'ascii').toString('base64');
     const sig = await this.pickWorker(SecureChannelWorkerClient).signMessage(payloadB64);
-    return { payload, sig };
+    return { payload: payloadB64, sig };
   }
 
   checkAccessor(op: HttpOp) {
@@ -409,17 +409,17 @@ export class GanymedeHttpServer {
     } else {
       return { accessor: null, t: 0, channelPublicKey: '' };
     }
-    const authSplit = authorizationHeader.split('_');
-    const accessorExpression = authSplit[0].split(' ')[1];
+    const authInfo = SecureHandshake.parseAuthHeader(authorizationHeader);
+    const accessorExpression = authInfo.accessorExpression;
     const timeWindow = this.config.security.accessor.timeWindow;
     if (!accessorConf.baseTokenBuffer) {
-      accessorConf.baseTokenBuffer = Buffer.from(accessorConf.baseToken, 'base64');
+      accessorConf.baseTokenBuffer = Buffer.from(accessorConf.baseToken, 'ascii');
     }
     const accessDataResult = SecureHandshake.verifyAccessor(accessorExpression, accessorConf.baseTokenBuffer, timeWindow);
     if (accessDataResult.bad) {
       return op.raise(HttpCode.UNAUTHORIZED, `BAD_ACCESSOR`, `Not a valid accessor`);
     }
-    return { ...accessDataResult.data, channelPublicKey: authSplit[1] };
+    return { ...accessDataResult.data, channelPublicKey: authInfo.peerEcdhPublicKey };
   }
 
   getSecureChannel(op: HttpOp) {

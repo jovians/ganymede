@@ -29,14 +29,16 @@ export class SecureChannelWorkerLogic extends AsyncWorkerExecutor {
   }
   async handleAction(callId: string, action: string, payload?: string) {
     switch (action) {
-      case 'signMessage':
+      case 'signMessage': {
         const sig = FourQ.sign(Buffer.from(payload, 'base64'), this.signingKey);
         return this.returnCall(callId, sig.data.toString('base64'));
-      case 'newChannel':
+      }
+      case 'newChannel': {
         const peerInfo: SecureChannelPeer = JSON.parse(payload);
         peerInfo.ecdhPublicKey = Buffer.from(peerInfo.ecdhPublicKey as unknown as string, 'base64');
         const channel = new SecureChannel(peerInfo.type, 'generate', JSON.parse(payload));
         return this.returnCall(callId, channel.toJSON());
+      }
     }
   }
 }

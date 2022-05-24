@@ -4,10 +4,11 @@
 import { AuthServer } from './auth.server';
 import { ServerConst } from './const';
 import { GanymedeServerExtensions } from './extensions';
-import { SecureChannel, SecureHandshake } from '../../components/util/shared/crypto/secure.channel';
+import { SecureHandshake } from '../../components/util/shared/crypto/secure.channel';
 import * as fs from 'fs';
 import * as axios from 'axios';
 import * as dns from 'dns';
+import { dp } from '@jovian/type-tools';
 
 const cluster = require('cluster');
 
@@ -120,12 +121,16 @@ function dnsLookUp(host: string) {
 function destorGet(target: any) {
   return new Promise<string>(resolve => {
     const pubkeyB64 = target.trust.split('::')[1];
-    axios.default.get(target.endpoint,
-      { headers: { Authorization: SecureHandshake.getAccessorHeader('internal', target.token) } }
-    ).then(r => {
+    // const ecdhKeypair = FourQ.ecdhGenerateKeyPair();
+    const authHeaderResult = SecureHandshake.getAuthHeader('internal',  '', target.token);
+    if (authHeaderResult.bad) { return resolve(null); }
+    const auth = SecureHandshake.parseAuthHeader(authHeaderResult.data);
+    axios.default.get(target.endpoint, { headers: { Authorization: authHeaderResult.data } }).then(r => {
       if (r.status && r.data.status === 'ok') {
+        dp(r.data.result, pubkeyB64);
         const verifiedResult = SecureHandshake.verifyStamp(r.data.result, pubkeyB64);
         if (verifiedResult.bad) { return resolve(null); }
+        if (!verifiedResult.data) { return resolve(null); }
         resolve(r.data.result);
       } else { resolve(null); }
     }).catch(e => {

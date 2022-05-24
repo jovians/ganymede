@@ -2,7 +2,7 @@
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 import { FourQ, DiffieHellmanKeyPair, CryptoScheme } from '@jovian/fourq';
-import { Unum, passthru, Result, ok } from '@jovian/type-tools';
+import { Unum, passthru, Result, ok, dp } from '@jovian/type-tools';
 import * as crypto from 'crypto';
 
 const verticalBarBuffer = Buffer.from('|', 'ascii');

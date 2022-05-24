@@ -1,8 +1,9 @@
 {
   "name": "@jovian/ganymede-clr-polyfills",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "dependencies": {
     "assert": "2.0.0",
+    "browserify-zlib": "^0.2.0",
     "crypto-browserify": "3.12.0",
     "events": "3.3.0",
     "https-browserify": "1.0.0",

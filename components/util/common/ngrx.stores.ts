@@ -7,7 +7,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Class, PartialCustom } from '@jovian/type-tools';
 import { BehaviorSubject, from, Observable, of, Subscription } from 'rxjs';
 import { catchError, map, mergeMap } from 'rxjs/operators';
-import { sleepms } from '@jovian/type-tools/common/ix.timer';
+import { sleepms } from '@jovian/type-tools';
 
 export namespace rx {
 
