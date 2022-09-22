@@ -4,10 +4,13 @@
 import { Store, createAction, createReducer, ActionCreator, on } from '@ngrx/store';
 import { Action as NgrxAction, ActionReducer, TypedAction } from '@ngrx/store/src/models';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { Class, PartialCustom } from '@jovian/type-tools';
+import { promise, Class, PartialCustom } from '@jovian/type-tools';
 import { BehaviorSubject, from, Observable, of, Subscription } from 'rxjs';
 import { catchError, map, mergeMap } from 'rxjs/operators';
-import { sleepms } from '@jovian/type-tools';
+
+function sleepms(ms: number) {
+  return promise(async (resolve) => { setTimeout(resolve, ms)});
+}
 
 export namespace rx {
 
