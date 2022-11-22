@@ -3,15 +3,13 @@
   "version": "0.0.1",
   "license": "UNLICENSED",
   "dependencies": {
-    "@jovian/common": "^0.0.12",
+    "@jovian/fourq": "^1.0.26",
+    "@jovian/type-tools": "^6.1.46",
     "aws-infra": "0.0.2",
-    "vsphere-infra": "0.0.56"
+    "vsphere-infra": "0.0.57"
   },
   "devDependencies": {
-    "@types/node": "^17.0.35",
-    "codelyzer": "^6.0.2",
-    "ts-node": "~10.8.0",
-    "tslint": "~5.20.1",
-    "typescript": "^4.6.4"
+    "@types/node": "^18.11.9",
+    "typescript": "^4.9.3"
   }
 }

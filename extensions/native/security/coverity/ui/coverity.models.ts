@@ -58,6 +58,7 @@ export interface CoverityRawIssueOccurenceV2 {
   language: string;
   mainEventDescription: string;
   mainEventLineNumber: number;
+  mainEventHash: string; // added
   mergeWithLowercaseFile: boolean;
   score: number
   subcategory: string;
@@ -178,7 +179,7 @@ export interface CoverityReportSummaryView {
     comparisonIssueMap?: CoverityReportSummaryViewBySeverity;
     comparisonIssueMapTotal?: CoverityReportSummaryViewBySeverity;
     deltaIssueMap?: CoverityReportSummaryViewBySeverity;
-  }
+  };
 }
 
 interface CoverityReportSummaryViewBySeverity {
