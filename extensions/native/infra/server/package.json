@@ -4,8 +4,8 @@
   "license": "UNLICENSED",
   "dependencies": {
     "@jovian/fourq": "^1.0.26",
-    "@jovian/type-tools": "^6.1.46",
-    "aws-infra": "0.0.2",
+    "@jovian/type-tools": "^6.1.47",
+    "aws-infra": "0.0.3",
     "vsphere-infra": "0.0.57"
   },
   "devDependencies": {
