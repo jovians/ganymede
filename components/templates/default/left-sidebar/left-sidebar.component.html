@@ -1,4 +1,4 @@
-<section class="sidenav-content">
+<section *ngIf="!treeViewData" class="sidenav-content">
   <div class="header-nav main-menu-container nav-group" *ngIf="this.app.displayMode === 'NARROW'">
     <section class="main-menu-section">
       <!-- <label [for]="'main-menu-item-' + idemGuard + '-' + i" class="main-menu">Main Menu</label> -->
@@ -15,9 +15,9 @@
   </section> -->
   <ng-template ngFor let-itemData [ngForOf]="navItems" let-i="index">
     <a *ngIf="!itemData.children" [ngClass]="{'active': router.url === '/' + itemData.link}"
-        [routerLink]="[itemData.link]" (click)="endHere($event)" class="nav-link">{{ itemData.name | translate }}</a>
+        [routerLink]="[itemData.link]" (pointerdown)="linker.validate(itemData)" (click)="linker.endHere($event)" class="nav-link">{{ itemData.name | translate }}</a>
     <section *ngIf="itemData.leftNavType !== 'category' && itemData.children?.length"
-      [ngClass]="{'active': navActiveStatus(itemData)}" (click)="endHere($event)" class="nav-group collapsible">
+      [ngClass]="{'active': navActiveStatus(itemData)}" (pointerdown)="linker.validate(itemData)" (click)="linker.endHere($event)" class="nav-group collapsible">
       <input [id]="'sidenav-item-' + idemGuard + '-' + i" type="checkbox">
       <label [for]="'sidenav-item-' + idemGuard + '-' + i">{{ itemData.name | translate }}</label>
       <ul class="nav-list">
@@ -25,16 +25,17 @@
           <li [ngClass]="{'hollow-disabled': item.defunct}">
             <a class="nav-link"
                 [ngClass]="{'active': navActiveStatus(item)}"
-                [routerLink]="getRouterLink(item)"
-                [queryParamsHandling]="getQueryParamsHandling(item)"
-                (click)="endHere($event)">{{ item.name | translate }}</a>
+                [routerLink]="linker.routerLink(item)"
+                [queryParams]="linker.queryParams(item)"
+                (pointerdown)="linker.validate(item)"
+                (click)="linker.endHere($event)">{{ item.name | translate }}</a>
           </li>
         </ng-template>
       </ul>
     </section>
     <section *ngIf="itemData.leftNavType === 'category' && itemData.children?.length"
       [ngClass]="{'active': navActiveStatus(itemData)}"
-      [routerLink]="itemData.hasContent ? [itemData.link] : null" (click)="endHere($event)" class="nav-group">
+      [routerLink]="itemData.hasContent ? [itemData.link] : null" (pointerdown)="linker.validate(itemData)" (click)="linker.endHere($event)" class="nav-group">
       <input [id]="'sidenav-item-' + idemGuard + '-' + i" type="checkbox">
       <label [for]="'sidenav-item-' + idemGuard + '-' + i">{{ itemData.name | translate }}</label>
       <ul class="nav-list">
@@ -42,12 +43,22 @@
           <li [ngClass]="{'hollow-disabled': item.defunct}">
             <a class="nav-link"
               [ngClass]="{'active': navActiveStatus(item)}"
-              [routerLink]="getRouterLink(item)"
-              [queryParamsHandling]="getQueryParamsHandling(item)"
-              (click)="endHere($event)">{{ item.name | translate }}</a>
+              [routerLink]="linker.routerLink(item)"
+              [queryParams]="linker.queryParams(item)"
+              (pointerdown)="linker.validate(item)"
+              (click)="linker.endHere($event)">{{ item.name | translate }}</a>
           </li>
         </ng-template>
       </ul>
     </section>
   </ng-template>
+</section>
+<section *ngIf="treeViewData" class="sidenav-content">
+  <clr-tree [clrLazy]="true">
+    <clr-tree-node *clrRecursiveFor="let node of treeViewData.root$ | async; getChildren: treeViewData.getChildren"
+                  [clrExpanded]="node?.expanded" [clrExpandable]="node?.expandable">
+        <cds-icon *ngIf="node?.icon" [attr.shape]="node.icon"></cds-icon>
+        {{ node?.text }}
+    </clr-tree-node>
+  </clr-tree>
 </section>

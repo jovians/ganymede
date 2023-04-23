@@ -1,15 +1,15 @@
 /*
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
+import { AsyncWorkerClient, AsyncWorkerExecutor } from 'ts-comply/nodejs';
 import { VsphereInfra, VsphereDatacenter } from 'vsphere-infra';
 import { Mo } from 'vsphere-infra/src/vsphere-soap/managed.objects';
-
-import { AsyncWorkerClient, AsyncWorkerExecutor } from '../../../../../components/util/server/async.worker.proc';
 import { getProcessResourceSnapshot, ProcessResourceSnapshot } from '../../../../../server/src/util/process.resource';
+import { SSLTrust } from 'ssl-trust';
 
-export class ExtInfraWorkerClient extends AsyncWorkerClient {
+export class ExtInfraVCenterWorkerClient extends AsyncWorkerClient {
   static workerFile = __filename;
-  constructor(workerData: any) { super(workerData, ExtInfraWorkerClient.workerFile); }
+  constructor(workerData: any) { super(workerData, { workerFile: ExtInfraVCenterWorkerClient.workerFile }); }
   processResourceSnapshot() { return this.call<ProcessResourceSnapshot>(`processResourceSnapshot`, '', r => JSON.parse(r)); }
   inventoryChangedLast() { return this.call<number>(`inventoryChangedLast`, '', response => parseInt(response, 10)); }
   inventorySerialized() { return this.call(`inventorySerialized`); }
@@ -18,9 +18,9 @@ export class ExtInfraWorkerClient extends AsyncWorkerClient {
   getEntities(entityKeys: string[]) { return this.call(`getEntities`, JSON.stringify(entityKeys));  }
   failureHeat() { return this.call<{error: number, defunct: number}>(`failureHeat`, '', r => JSON.parse(r));  }
 }
-const thisWorkerClass = ExtInfraWorkerClient;
+const thisWorkerClass = ExtInfraVCenterWorkerClient;
 
-export class ExtInfraWorkerLogic extends AsyncWorkerExecutor {
+export class ExtInfraVCenterWorkerLogic extends AsyncWorkerExecutor {
   private vcenter: VsphereDatacenter;
   constructor(workerData: any) {
     super(workerData);
@@ -28,12 +28,15 @@ export class ExtInfraWorkerLogic extends AsyncWorkerExecutor {
     const vinfra = new VsphereInfra(this.mainScope as any);
     vinfra.behavior.setVerbose(true);
     // vinfra.behavior.setJsonLogs(true);
-    vinfra.getDatacenter(workerData).then(vc => {
-      this.vcenter = vc;
+    (async() => {
+      if (workerData.cert === 'auto-resolve-intermediate') {
+        workerData.cert = await SSLTrust.getIntermediateCert(workerData.url);
+        // console.log('cert resolved', workerData.cert)
+      }
+      this.vcenter = await vinfra.getDatacenter(workerData)
       this.vcenter.updateInventoryInterval(60);
       this.setAsReady();
-      // this.vcenter.error$.subscribe(e => { console.log(e.message); });
-    });
+    })();
   }
   async handleAction(callId: string, action: string, payload?: string) {
     if (!this.vcenter) { return this.returnCall(callId); }
@@ -46,7 +49,7 @@ export class ExtInfraWorkerLogic extends AsyncWorkerExecutor {
       case 'getEntities': return this.returnCall(callId, await this.getEntities(JSON.parse(payload)));
       case 'failureHeat': return this.returnCall(callId, JSON.stringify({
         error: this.vcenter.ixReconn.errorHeat.value,
-        defunct: this.vcenter.ixReconn.defunctHeat.value
+        defunct: this.vcenter.ixReconn.defunctHeat.value,
       }));
     }
   }
@@ -69,6 +72,6 @@ export class ExtInfraWorkerLogic extends AsyncWorkerExecutor {
 if (process.env.WORKER_DATA_BASE64) {
   const workerData = JSON.parse(Buffer.from(process.env.WORKER_DATA_BASE64, 'base64').toString('utf8'));
   if (workerData.workerFile === thisWorkerClass.workerFile) {
-    new ExtInfraWorkerLogic(workerData).getSelf();
+    new ExtInfraVCenterWorkerLogic(workerData).getSelf();
   }
 }

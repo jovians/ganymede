@@ -11,11 +11,11 @@
   ],
   "include": [
     "**/*.ts",
-    "node_modules/@jovian/type-tools/**/*.ts",
-    "node_modules/@jovian/type-tools-iface/**/*.ts",
+    "node_modules/ts-comply/**/*.ts",
     "src/app/ganymede/components/util/**/*.ts"
   ],
   "exclude": [
+    "**/nodejs/**",
     "**/*.spec.ts",
     "**/*.aux.ts",
     "**/aux/**/*",
@@ -31,7 +31,6 @@
     "src/assets/i18n/**/*",
     "src/assets-root/**/*",
     "src/app/ganymede/*.ts",
-    "src/app/ganymede/src/**/*",
     "src/app/ganymede/npm-deps/**/*",
     "src/app/ganymede/defaults/**/*",
     "src/app/ganymede/template/**/*",
@@ -43,7 +42,6 @@
     "src/test.ts",
     "src/ganymede.app.interface.ts",
     "src/app/ganymede/components/util/sw/sw.ts",
-    "src/app/ganymede/components/util/server/**/*",
-    "node_modules/@jovian/type-tools/node/**/*.ts",
+    "src/app/ganymede/components/util/server/**/*"
   ]
 }

@@ -1,10 +1,10 @@
 import { Component, OnInit, Input, SimpleChanges, OnChanges, OnDestroy } from '@angular/core';
-import { autoUnsub, ix } from '@jovian/type-tools';
+import { autoUnsub, ix } from 'ts-comply';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AppService, rx } from 'src/app/ganymede/components/services/app.service';
 import { bindSub } from 'src/app/ganymede/components/util/shared/common';
 import { VcenterInventoryStubNode, VcenterInventoryStubsData } from '../vcenter.models';
-import { ExtNativeInfraService } from '../../shared/ext-native-infra.service';
+import { ExtNativeInfraService } from '../../../services/ext-native-infra.service';
 import { VirtualMachineFullDetails } from '../models/mo.vm.models';
 
 @Component({

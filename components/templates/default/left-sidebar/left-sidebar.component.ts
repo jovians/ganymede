@@ -3,10 +3,11 @@
  */
 import { AfterViewInit, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { Components } from '../../../../../ui.components';
 import { AppService } from '../../../services/app.service';
 import { RouteObservingService } from '../../../services/route-observing.service';
+import { RouteDataNavigatableContent, TreeViewAsyncData, currentRoute, linker } from '../../../util/common/route.model';
 
 @Component({
   selector: 'app-left-sidebar',
@@ -18,6 +19,8 @@ export class LeftSidebarComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @Input() navItems = [];
   @Input() menuList;
+  @Input() treeViewData: TreeViewAsyncData = null;
+  linker = linker;
   idemGuard = Date.now();
   private routeSubscription: Subscription;
   private selectedRef = null;
@@ -31,7 +34,9 @@ export class LeftSidebarComponent implements OnInit, AfterViewInit, OnDestroy {
     this.menuList = app.template.header.nav;
   }
 
-  ngOnInit() { }
+  ngOnInit() {
+    
+  }
 
   ngAfterViewInit() {
     this.handleUrlChange(this.routeObserver.currentUrl);
@@ -61,24 +66,11 @@ export class LeftSidebarComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  navActiveStatus(itemData) {
+  navActiveStatus(itemData: RouteDataNavigatableContent) {
     return this.router.url.startsWith('/' + itemData.link);
   }
 
-  endHere(e) { e.stopPropagation(); }
-
   ngOnDestroy() {
     if (this.routeSubscription) { this.routeSubscription.unsubscribe(); }
-  }
-
-  getRouterLink(item) {
-    return [item.link];
-  }
-
-  getQueryParamsHandling(item) {
-    if (item.preserveQueryParams) {
-      return 'preserve';
-    }
-    return '';
   }
 }

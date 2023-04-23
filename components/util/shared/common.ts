@@ -2,8 +2,9 @@
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 
-import { Subject, Observable } from 'rxjs';
-import { Class, ClassLineage } from '@jovian/type-tools';
+import { Subject, Observable, of } from 'rxjs';
+import { Class, ClassLineage } from 'ts-comply';
+import { Result, errorResult, ok, promise, Promise2 } from 'ts-comply';
 
 export const isNodeJs = (typeof process !== 'undefined') && (process.release.name === 'node');
 
@@ -106,3 +107,24 @@ export function moduleTypeMap(module: any, typeHintProperty: string) {
     },
   };
 }
+
+export function resultify<T>(obs: Observable<T>): Promise2<Result<T>> {
+  return promise(async (resolve) => {
+    try {
+      const subs = obs.pipe(
+        // catchError(e => {
+        //   resolve(errorResult(e));
+        //   return of(null); 
+        // })
+      ).subscribe(async (data) => {
+        subs.unsubscribe();
+        if (data !== null) {
+          resolve(ok(data as  any));
+        }
+      });
+    } catch(e) {
+      resolve(errorResult(e));
+    }
+  });
+}
+

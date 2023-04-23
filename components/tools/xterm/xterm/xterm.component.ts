@@ -2,7 +2,7 @@
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 import { Component, OnInit, OnDestroy, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { ix } from '@jovian/type-tools';
+import { ix } from 'ts-comply';
 import { v4 as uuidv4 } from 'uuid';
 import { XtermTerminalWrapper } from '../xterm.models';
 import { XtermService } from '../xterm.service';

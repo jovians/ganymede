@@ -1,7 +1,7 @@
 /*
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
-import { Class } from '@jovian/type-tools';
+import { Class } from 'ts-comply';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';

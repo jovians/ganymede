@@ -1,6 +1,6 @@
 import { Component, OnInit, OnChanges, OnDestroy, Input, TemplateRef, SimpleChanges, ViewChild, ElementRef } from '@angular/core';
 import { completeConfigDirectly } from '../../../util/shared/common';
-import { ix } from '@jovian/type-tools';
+import { ix } from 'ts-comply';
 import { SizeUtil } from '../../../util/common/size.util';
 import { DomTreeUtil } from '../../../util/common/dom.tree.util';
 import { DataFetcher } from 'src/app/ganymede/models/data.fetcher.model';

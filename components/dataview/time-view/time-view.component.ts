@@ -60,7 +60,7 @@ export class TimeViewComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   deltaUpdate() {
-    if (this.time <= 0) { return; }
+    if (this.time as number <= 0) { return; }
     this.deltaString = this.showDelta ? ` (${this.getDelta()})` : '';
     this.updateTime();
   }

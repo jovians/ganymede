@@ -2,7 +2,7 @@
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 
-import { ix } from '@jovian/type-tools';
+import { ix } from 'ts-comply';
 import { LifecycleLinker, LifecycleLinkType } from './lifecycle.linker';
 
 interface MutationWatcherConfig {

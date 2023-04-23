@@ -2,7 +2,7 @@
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 import { ChildProcess, spawn, execSync } from 'child_process';
-import { Class, ix } from '@jovian/type-tools';
+import { Class, ix } from 'ts-comply';
 import { v4 as uuidv4 } from 'uuid';
 import * as os from 'os';
 

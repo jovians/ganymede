@@ -44,3 +44,10 @@ body[theme-family="dark"] {
     }
   }
 }
+
+body[theme="CLARITY-BLACK"] {
+  clr-dropdown-menu.dropdown-menu {
+    border-color: rgba(255,255,255,0.2) !important;
+    box-shadow: 0 0.05rem 0.15rem rgba(255,255,255,.1) !important;
+  }
+}

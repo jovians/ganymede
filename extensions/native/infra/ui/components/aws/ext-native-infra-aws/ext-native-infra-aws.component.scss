@@ -1,0 +1,41 @@
+:host {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-flow: column;
+
+  .vcenter-title {
+    margin-left: 1rem;
+    margin-top: 1rem;
+    flex: 0 1 auto;
+    .vcenter-url {
+      margin-left: 0.3rem;
+      font-size: 60%;
+      opacity: 0.6;
+    }
+  }
+
+  .tabs-panel {
+    flex: 1 1 auto;
+    overflow: hidden;
+    .entity-tree-area {
+      width: 100%;
+      height: 100%;
+      overflow-x: hidden;
+      overflow-y: scroll;
+    }
+    .summary-page {
+      width: calc(99% - 1rem);
+      height: calc(100% - 0.5rem);
+      margin-left: 1rem;
+      margin-top: 0.5rem;
+      overflow-x: hidden;
+      overflow-y: scroll;
+      .metric-card {
+        min-width: 30%;
+        height: 6rem;
+        margin: 0;
+      }
+    }
+  }
+}

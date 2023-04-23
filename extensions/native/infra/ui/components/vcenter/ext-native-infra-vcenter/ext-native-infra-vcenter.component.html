@@ -1,7 +1,10 @@
 <ng-container *ngIf="(vcenter.quickStats.data$ | async)[key]; let stats;">
   <h3 class="vcenter-title">
     {{ vCenter.name }}
-    <span class="vcenter-url">{{ vCenter.url }} (key={{ key }})</span>
+    <span class="vcenter-url">
+      <span class="label">{{ key }}</span>
+      {{ vCenter.url }}
+    </span>
   </h3>
   <clr-tabs class="tabs-panel" *ngIf="!dataLoading">
     <clr-tab class="tab-panel">

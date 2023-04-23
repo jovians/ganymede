@@ -34,6 +34,7 @@ import { ExtNativeInfraVcenterRespoolDetailsComponent } from './components/vcent
 import { ExtNativeInfraVcenterNetworkDetailsComponent } from './components/vcenter/ext-native-infra-vcenter-network-details/ext-native-infra-vcenter-network-details.component';
 import { ExtNativeInfraVcenterFolderDetailsComponent } from './components/vcenter/ext-native-infra-vcenter-folder-details/ext-native-infra-vcenter-folder-details.component';
 import { ExtNativeInfraVcenterVswitchDetailsComponent } from './components/vcenter/ext-native-infra-vcenter-vswitch-details/ext-native-infra-vcenter-vswitch-details.component';
+import { ExtNativeInfraAwsComponent } from './components/aws/ext-native-infra-aws/ext-native-infra-aws.component';
 
 ClarityIcons.addIcons(...[
   cloudNetworkIcon,
@@ -68,6 +69,7 @@ ClarityIcons.addIcons(...[
     ExtNativeInfraVcenterNetworkDetailsComponent,
     ExtNativeInfraVcenterFolderDetailsComponent,
     ExtNativeInfraVcenterVswitchDetailsComponent,
+    ExtNativeInfraAwsComponent,
   ],
   exports: [
     ExtNativeInfraPageComponent,

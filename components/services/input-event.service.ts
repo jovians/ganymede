@@ -2,7 +2,7 @@
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 import { Injectable } from '@angular/core';
-import { ix } from '@jovian/type-tools';
+import { ix } from 'ts-comply';
 
 declare var window: Window;
 declare var document: Document;

@@ -7,7 +7,7 @@ import { DomTreeUtil } from '../../../util/common/dom.tree.util';
 import { SizeUtil } from '../../../util/common/size.util';
 import { MutationUtil } from '../../../util/common/mutation.observer';
 import { topMomentOut } from '../../../util/shared/common';
-import { ix } from '@jovian/type-tools';
+import { ix } from 'ts-comply';
 
 @Component({
   selector: 'app-wavefront-embedded-chart',

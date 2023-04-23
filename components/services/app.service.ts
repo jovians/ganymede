@@ -7,7 +7,6 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Store } from '@ngrx/store';
 import { Actions } from '@ngrx/effects';
-import { Observable } from 'rxjs';
 
 import { EnvService } from '../services/env.service';
 import { rx } from '../util/common/ngrx.stores';
@@ -23,8 +22,9 @@ import { DisplayMode } from '../util/common/size.util';
 import { Subject, Subscription } from 'rxjs';
 import { InputEventService } from './input-event.service';
 import { CryptoService } from './crypto.service';
+import { AppPromised } from '../util/common/app.promised';
 
-export { autoUnsub, ix } from '@jovian/type-tools';
+export { autoUnsub, ix } from 'ts-comply';
 
 declare var window: any;
 
@@ -101,6 +101,10 @@ export class AppService extends GanymedeAppData {
     if (this.features.serviceWorker && this.features.serviceWorker.enabled) {
       ServiceWorkerUtil.initialize();
     }
+
+    AppPromised.http = http;
+    AppPromised.data = this;
+    AppPromised.readyResolver(this);
   }
 
   async run(cmd: { namespace: string, command: string, params?: any }) {

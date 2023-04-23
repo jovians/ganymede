@@ -5,7 +5,7 @@ import { UrlMatchResult, UrlSegment } from '@angular/router';
 import { ResourceGuard } from '../../services/resource-guard';
 import {
   baseRouteData, currentRoute, RouteDataPage,
-  RouteData, RouteMatchableDefinition, RouteDataNavigatableContent
+  RouteData, RouteMatchableDefinition, RouteDataNavigatableContent, BasicRouteAdvancedSettings, setRouteContentId, initRouteContentNode, routeComponentExceptionMap
 } from './route.model';
 
 export { RouteData, RouteMatchableDefinition, RouteDataPage, RouteDataNavigatableContent };
@@ -16,7 +16,7 @@ export function getBaseRouteData(baseRoute: string) {
   return baseRouteData[baseRoute];
 }
 
-export function consumeSubDir(path: string, routeData?: RouteData, exceptions?: {[path: string]: any}) {
+export function consumeSubDir(path: string, routeData?: RouteData, exceptions?: {[path: string]: RouteDataNavigatableContent}) {
   const pathSplit = path.split('/');
   const matcher = (segments: UrlSegment[]) => {
     currentRoute.routeChildData = routeData as any;
@@ -24,6 +24,7 @@ export function consumeSubDir(path: string, routeData?: RouteData, exceptions?: 
     if (exceptions) {
       const fullPath = segments.map(seg => seg.path).join('/');
       if (exceptions[fullPath]) {
+        currentRoute.routeChildData = exceptions[fullPath];
         return null;
       }
     }
@@ -93,44 +94,39 @@ export function consumeSubDir(path: string, routeData?: RouteData, exceptions?: 
   return matcher;
 }
 
-export function asRouteBasic<T = any>(subdir: string, routeData: RouteData<T>) {
-  const exceptions: {[path: string]: any} = {};
+export function asRouteBasic<T = any>(subdir: string, routeData: RouteData<T>, advancedSettings?: BasicRouteAdvancedSettings) {
+  const componentExceptions: {[path: string]: any} = routeComponentExceptionMap[subdir] = {};
   const otherRouteDivisions: RouteMatchableDefinition[] = [];
   const routeDef: RouteMatchableDefinition = {
-    matcher: consumeSubDir(subdir, routeData, exceptions),
-    exceptions,
+    matcher: consumeSubDir(subdir, routeData, componentExceptions),
+    exceptions: componentExceptions,
     component: null,
     canActivate: [ResourceGuard],
     data: routeData,
     basePath: subdir,
   };
-  if (routeData.pageData) {
-    routeData.pageData.path = subdir;
-  }
-  if (routeData.pageData.children) {
-    const basepath = routeData.pageData.mountpath ?
+  if (routeData.pageData) { routeData.pageData.path = subdir; }
+  const basepath = routeData.pageData.mountpath ?
                       routeData.pageData.mountpath + '/' + routeData.pageData.path
                     : routeData.pageData.path;
-    for (const childRoute of routeData.pageData.children) {
-      childRoute.link = basepath + '/' + childRoute.path;
-      if (childRoute.component) { exceptions[childRoute.link] = childRoute; }
-      if (childRoute.children) {
-        for (const childRoute2 of childRoute.children) {
-          childRoute2.link = basepath + '/' + childRoute.path + '/' + childRoute2.path;
-          if (childRoute2.component) { exceptions[childRoute2.link] = childRoute2; }
-        }
-      }
+  initRouteContentNode({
+    domain: subdir,
+    item: routeData.pageData,
+    parent: null,
+    advancedRouteUriHandler: advancedSettings?.uriBehavior,
+    settings: { basepath },
+  });
+  if (componentExceptions) {
+    for (const exceptionLink of Object.keys(componentExceptions)) {
+      const route = componentExceptions[exceptionLink];
+      otherRouteDivisions.push({
+        path: exceptionLink,
+        component: route.component,
+        canActivate: [ResourceGuard],
+        data: routeData,
+        basePath: subdir,
+      });
     }
-  }
-  for (const exceptedRoute of Object.keys(exceptions)) {
-    const route = exceptions[exceptedRoute];
-    otherRouteDivisions.push({
-      path: exceptedRoute,
-      component: route.component,
-      canActivate: [ResourceGuard],
-      data: routeData,
-      basePath: subdir,
-    });
   }
   return {
     main: routeDef,

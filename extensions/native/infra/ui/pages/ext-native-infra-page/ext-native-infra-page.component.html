@@ -23,6 +23,11 @@
 </ng-container>
 
 <ng-container *ngIf="type==='vcenter'">
-  <div *ngIf="isDefunct" style="margin: 2rem; font-size: 2rem; opacity: 0.5">Defunct vCenter entry</div>
+  <div *ngIf="isDefunct" style="margin: 2rem; font-size: 2rem; opacity: 0.5">Defunct {{ getProviderShortName(type) }} entry</div>
   <gany-ext-native-infra-vcenter *ngIf="!isDefunct" [key]="key"></gany-ext-native-infra-vcenter>
+</ng-container>
+
+<ng-container *ngIf="type==='aws'">
+  <div *ngIf="isDefunct" style="margin: 2rem; font-size: 2rem; opacity: 0.5">Defunct {{ getProviderShortName(type) }} entry</div>
+  <gany-ext-native-infra-aws *ngIf="!isDefunct" [key]="key"></gany-ext-native-infra-aws>
 </ng-container>

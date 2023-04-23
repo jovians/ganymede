@@ -1,0 +1,162 @@
+<ng-container *ngIf="(aws?.quickStats?.data$ | async)[key]; let stats;">
+  <h3 class="vcenter-title">
+    {{ awsInfo.name }}
+    <span class="vcenter-url" *ngVar="regionsInfo[currentRegion] as selectedRegionInfo">
+      <span class="label">{{ key }}</span>
+      {{ selectedRegionInfo.group + ' (' + selectedRegionInfo.name + ')' }}
+    </span>
+    <clr-dropdown *ngVar="regionsInfo[currentRegion] as selectedRegionInfo" style="float: right; margin-right: 1rem;">
+      <button class="btn btn-outline-primary btn-sm" clrDropdownTrigger>
+          View: {{ selectedRegionInfo.group + ' (' + selectedRegionInfo.name + ')' }}
+          <cds-icon size="xs" shape="angle" direction="down" style="margin-top: 0rem;"></cds-icon>
+      </button>
+      <clr-dropdown-menu clrPosition="bottom-right" *clrIfOpen>
+        <!-- <label class="dropdown-header" aria-hidden="true">Dropdown header</label> -->
+        <div aria-label="Dropdown header Action 1" clrDropdownItem (click)="regionSwitch('global')()">Global (All Regions)</div>
+        <clr-dropdown *ngFor="let regionGroupKP of regionsGroup | keyvalue">
+          <button clrDropdownTrigger>{{ regionGroupName[regionGroupKP.key] }}</button>
+          <clr-dropdown-menu clrPosition="left-top">
+            <div *ngFor="let regionInfo of regionGroupKP.value" aria-label="Dropdown header Action 1"
+                 clrDropdownItem [clrDisabled]="regionInfo.disabled" (click)="regionInfo.regionSwitchAction()">{{
+              regionInfo.group + ' (' + regionInfo.name + ')'
+            }}<span class="label" style="margin-left: 0.3rem;">{{ regionInfo.key }}</span></div>
+          </clr-dropdown-menu>
+        </clr-dropdown>
+        <!-- <div aria-label="Dropdown header Disabled Action" [clrDisabled]="true" clrDropdownItem>Disabled Action</div> -->
+        <!-- <div class="dropdown-divider" role="separator" aria-hidden="true"></div> -->
+        <!-- <div clrDropdownItem>Link 2</div> -->
+      </clr-dropdown-menu>
+    </clr-dropdown>
+  </h3>
+  <clr-tabs class="tabs-panel" *ngIf="!dataLoading">
+    <clr-tab class="tab-panel">
+      <button clrTabLink style="margin-left: 1.25rem;" (click)="tabSelect('summary')">
+        Summary
+      </button>
+      <ng-template [(clrIfActive)]="tabActiveState.summary">
+        <clr-tab-content *ngVar="quickStatsData as stats">
+          <div class="summary-page">
+            <h4 *ngVar="regionsInfo[currentRegion] as selectedRegionInfo" style="margin-top: 0.6rem;">
+              Total EC2 Reservations in {{ selectedRegionInfo.group + ' (' + selectedRegionInfo.name + ')' }}
+            </h4>
+            <div class="clr-row">
+              <div class="clr-col-7">
+                <table class="table table-compact" style="margin-top: 0.3rem;">
+                  <thead>
+                    <tr>
+                      <th style="font-size: 65%;">Max</th>
+                      <th>Active</th>
+                      <th>Inactive</th>
+                      <th>Defunct</th>
+                    </tr>
+                  </thead>
+                  <tbody class="aws-table-body">
+                    <tr>
+                      <td>EC2</td>
+                      <td>{{ stats.metrics.active.ec2Count }}</td>
+                      <td>{{ stats.metrics.inactive.ec2Count }}</td>
+                      <td>{{ stats.metrics.defunct.ec2Count }}</td>
+                    </tr>
+                    <tr>
+                      <td>CPU</td>
+                      <td>{{ Unit.formatted(stats.metrics.active.cpuGHz, 'G', 'Hz') }}</td>
+                      <td>{{ Unit.formatted(stats.metrics.inactive.cpuGHz, 'G', 'Hz') }}</td>
+                      <td>{{ Unit.formatted(stats.metrics.defunct.cpuGHz, 'G', 'Hz') }}</td>
+                    </tr>
+                    <tr>
+                      <td>MEM</td>
+                      <td>{{ Unit.formatted(stats.metrics.active.memoryGiB, 'Gi', 'B') }}</td>
+                      <td>{{ Unit.formatted(stats.metrics.inactive.memoryGiB, 'Gi', 'B') }}</td>
+                      <td>{{ Unit.formatted(stats.metrics.defunct.memoryGiB, 'Gi', 'B') }}</td>
+                    </tr>
+                    <tr>
+                      <td>EBS</td>
+                      <td>{{ Unit.formatted(stats.metrics.active.ebsDiskGiB, 'Gi', 'B') }}</td>
+                      <td>{{ Unit.formatted(stats.metrics.inactive.ebsDiskGiB, 'Gi', 'B') }}</td>
+                      <td>{{ Unit.formatted(stats.metrics.defunct.ebsDiskGiB, 'Gi', 'B') }}</td>
+                    </tr>
+                    <tr>
+                      <td>NET</td>
+                      <td>{{ Unit.formatted(stats.metrics.active.netThroughputGBps, 'G', 'Bps') }}</td>
+                      <td>{{ Unit.formatted(stats.metrics.inactive.netThroughputGBps, 'G', 'Bps') }}</td>
+                      <td>{{ Unit.formatted(stats.metrics.defunct.netThroughputGBps, 'G', 'Bps') }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </clr-tab-content>
+      </ng-template>
+    </clr-tab>
+    <clr-tab>
+      <button clrTabLink (click)="tabSelect('ec2')">
+        EC2
+      </button>
+      <ng-template [(clrIfActive)]="tabActiveState.ec2">
+        <clr-tab-content>
+          <div class="entity-tree-area">
+            <!-- <gany-ext-native-infra-vcenter-inventory-view
+              *ngIf="inventoryStubs.datacenters.length > 0"
+              [stubs]="inventoryStubs.mainDatacenter.hostFolder.children"
+              [inventoryStubs]="inventoryStubs"
+              [uiStateTracker]="uiStateTracker"
+            ></gany-ext-native-infra-vcenter-inventory-view> -->
+          </div>
+        </clr-tab-content>
+      </ng-template>
+    </clr-tab>
+    <!-- <clr-tab>
+      <button clrTabLink (click)="tabSelect('vms')">
+        VMs {{ getEntityCount(inventoryStubs.vms) }}
+      </button>
+      <ng-template [(clrIfActive)]="tabActiveState.vms">
+        <clr-tab-content>
+          <div class="entity-tree-area">
+            <gany-ext-native-infra-vcenter-inventory-view
+              *ngIf="inventoryStubs.datacenters.length > 0"
+              [stubs]="inventoryStubs.mainDatacenter.vmFolder.children"
+              [inventoryStubs]="inventoryStubs"
+              [uiStateTracker]="uiStateTracker"
+            ></gany-ext-native-infra-vcenter-inventory-view>
+          </div>
+        </clr-tab-content>
+      </ng-template>
+    </clr-tab>
+    <clr-tab>
+      <button clrTabLink (click)="tabSelect('datastores')">
+        Datastores {{ getEntityCount(inventoryStubs.datastores) }}
+      </button>
+      <ng-template [(clrIfActive)]="tabActiveState.datastores">
+        <clr-tab-content *clrIfActive="currentTab === 'datastores'">
+          <div class="entity-tree-area">
+            <gany-ext-native-infra-vcenter-inventory-view
+              *ngIf="inventoryStubs.datacenters.length > 0"
+              [stubs]="inventoryStubs.mainDatacenter.datastoreFolder.children"
+              [inventoryStubs]="inventoryStubs"
+              [uiStateTracker]="uiStateTracker"
+            ></gany-ext-native-infra-vcenter-inventory-view>        
+          </div>
+        </clr-tab-content>
+      </ng-template>
+    </clr-tab>
+    <clr-tab>
+      <button clrTabLink (click)="tabSelect('networks')">
+        Networks {{ getEntityCount(inventoryStubs.networks) }}
+      </button>
+      <ng-template [(clrIfActive)]="tabActiveState.networks">
+        <clr-tab-content *clrIfActive="currentTab === 'networks'">
+          <div class="entity-tree-area">
+            <gany-ext-native-infra-vcenter-inventory-view
+              *ngIf="inventoryStubs.datacenters.length > 0"
+              [stubs]="inventoryStubs.mainDatacenter.networkFolder.children"
+              [inventoryStubs]="inventoryStubs"
+              [uiStateTracker]="uiStateTracker"
+            ></gany-ext-native-infra-vcenter-inventory-view>        
+          </div>
+        </clr-tab-content>
+      </ng-template>
+    </clr-tab> -->
+  </clr-tabs>
+</ng-container>
+

@@ -3,7 +3,7 @@
  */
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { AppService } from '../../services/app.service';
+import { AppService, autoUnsub } from '../../services/app.service';
 import { Subscription } from 'rxjs';
 import { RouteObservingService } from '../../services/route-observing.service';
 import { LeftSidebarComponent } from './left-sidebar/left-sidebar.component';
@@ -11,8 +11,9 @@ import { ResourceGuard } from '../../services/resource-guard';
 import { preResolvePath } from '../../util/common/route.pre-resolver';
 import { Components } from '../../../../ui.components';
 import { DisplayMode, SizeUtil } from '../../util/common/size.util';
-import { currentRoute } from '../../util/common/route.model';
+import { currentRoute, TreeViewAsyncData } from '../../util/common/route.model';
 import { log } from '../../util/shared/logger';
+import { bindSub } from '../../util/shared/common';
 
 @Component({
   selector: 'app-root',
@@ -37,6 +38,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   resGuard = ResourceGuard;
 
   leftSidebarNavItems = [];
+  leftSidebarTreeViewData: TreeViewAsyncData = null;
   activatedRouteDataSubscribed = false;
   private routerSubscription: Subscription;
 
@@ -72,6 +74,11 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
       this.leftSidebarVisibleSaved = this.leftSidebarVisible;
       this.rightSidebarVisibleSaved = this.rightSidebarVisible;
     });
+    currentRoute.activatedRoute = route;
+    bindSub(this, this.route.params, params => { currentRoute.uriData.params = params; });
+    bindSub(this, this.route.queryParams, queryParams => { currentRoute.uriData.queryParams = queryParams; });
+    bindSub(this, this.route.fragment, fragment => { currentRoute.uriData.fragment = fragment; });
+    bindSub(this, this.route.data, data => { currentRoute.uriData.data = data; });
   }
 
   ngAfterViewInit(): void {
@@ -129,8 +136,13 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
     if (data.pageData) {
       this.leftSidebarNavItems = [];
+      this.leftSidebarTreeViewData = null;
       if (data.pageData.type === 'basic' || data.pageData.type === 'basic-contents') {
-        this.leftSidebarNavItems = data.pageData.children;
+        if (data.pageData.treeView) {
+          this.leftSidebarTreeViewData = data.pageData.treeView;
+        } else {
+          this.leftSidebarNavItems = data.pageData.children;
+        }
       }
     } else {
       this.leftSidebarNavItems = [];
@@ -167,6 +179,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit() {}
 
   ngOnDestroy() {
+    autoUnsub(this);
     if (this.routerSubscription) { this.routerSubscription.unsubscribe(); }
   }
 

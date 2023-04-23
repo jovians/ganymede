@@ -8,7 +8,7 @@ import { SizeUtil } from '../../../util/common/size.util';
 import { DomTreeUtil } from '../../../util/common/dom.tree.util';
 import { completeConfigDirectly } from '../../../util/shared/common';
 import { namedCurves } from '../d3.curves.map';
-import { ix } from '@jovian/type-tools';
+import { ix } from 'ts-comply';
 
 export const oneHour = 3600 * 1000;
 export const oneDay = 24 * oneHour;

@@ -1,6 +1,8 @@
 <div [ngClass]="{'card': true, 'no-card': noCard }" style="margin: 0;">
   <div class="card-header" *ngIf="!noHeader">
-    <button *ngIf="!entryData?.defunct" class="btn btn-sm btn-link nav-button" [routerLink]="['/' + entryData?.link]">View</button>
+    <button *ngIf="!entryData?.defunct" class="btn btn-sm btn-link nav-button"
+            [routerLink]="linker.routerLink(entryData)"
+            [queryParams]="linker.queryParams(entryData)">View</button>
     <div style="width: calc(100% - 2rem);">{{ entryData?.name }}</div>
   </div>
   <div class="card-block card-block-content">
@@ -8,6 +10,8 @@
       <div *ngIf="entryData?.defunct" class="entity-defunct">DEFUNCT</div>
       <div *ngIf="!dataLoaded && dataLoadFailed && !entryData?.defunct" class="loading-failure">Data Load Failed</div>
       <clr-spinner *ngIf="dataLoadingShow && !dataLoaded && !dataLoadFailed && !entryData?.defunct" class="loading-spinner"></clr-spinner>
+      
+      <!-- vCenter -->
       <ng-container *ngIf="entryData?.type==='vcenter' && !entryData?.defunct">
         <ng-container *ngIf="(vcenter.quickStats.data$ | async)[key]; let stats;">
           <div class="clr-row" style="margin-top: -0.25rem;">
@@ -62,13 +66,19 @@
             <div class="clr-col">
               <div class="other-details" style="margin-top: 0.4rem;">
                 <div class="aligned-right">
-                  <cds-icon *ngIf="!vmHostsInText" shape="vm" size="16" style="margin-right: 0.3rem; transform: translate(0, -0.03rem);"></cds-icon>
-                  <b>{{ stats.vmCount }} </b><span *ngIf="vmHostsInText" style="font-size: 80%;">VMs</span>
+                  <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-xs tooltip-top-left no-link">
+                    <cds-icon *ngIf="!vmHostsInText" shape="vm" size="16" style="margin-right: 0.3rem; transform: translate(0, -0.03rem);"></cds-icon>
+                    <b>{{ stats.vmCount }} </b><span *ngIf="vmHostsInText" style="font-size: 80%;">VMs</span>
+                    <span class="tooltip-content">{{ stats.vmCount }} VMs</span>
+                  </a>
                   <!-- &nbsp;<span style="font-size: 90%;">{{ stats.vmCount > 1 ? 'VMs' : 'VM' }}</span> -->
                   <span class="num-div">&nbsp; | &nbsp;</span>
                   <span style="width: 0.3rem;">&nbsp;</span>
-                  <cds-icon *ngIf="!vmHostsInText" shape="host-group" size="16" style="margin-right: 0.3rem; transform: translate(0, -0.03rem);" [badge]="hostHasIssues(stats)"></cds-icon>
-                  <b>{{ stats.hostCount }} </b><span *ngIf="vmHostsInText" style="font-size: 80%;">Hosts</span>
+                  <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-xs tooltip-top-left no-link">
+                    <cds-icon *ngIf="!vmHostsInText" shape="host-group" size="16" style="margin-right: 0.3rem; transform: translate(0, -0.03rem);" [badge]="vcenterHostHasIssues(stats)"></cds-icon>
+                    <b>{{ stats.hostCount }} </b><span *ngIf="vmHostsInText" style="font-size: 80%;">Hosts</span>
+                    <span class="tooltip-content">{{ stats.hostCount }} Hosts</span>
+                  </a>
                   <!-- &nbsp;<span style="font-size: 90%;">{{ stats.hostCount > 1 ? 'Hosts' : 'Host' }}</span> -->
                 </div>
                 <br>
@@ -116,10 +126,140 @@
           </div>
         </ng-container>
       </ng-container>
+
+      <!-- AWS -->
       <ng-container *ngIf="entryData?.type==='aws' && !entryData?.defunct">
+        <ng-container *ngIf="(aws.quickStats.data$ | async)[key]; let stats;">
+          <div class="clr-row" style="margin-top: -0.25rem;">
+            <!-- utilization bars -->
+            <div class="clr-col-7">
+              <table class="table table-compact" style="margin-top: 0.3rem;">
+                <thead>
+                  <tr>
+                    <th style="font-size: 65%;">Max</th>
+                    <th>Active</th>
+                    <th>Inactive</th>
+                  </tr>
+                </thead>
+                <tbody class="aws-table-body">
+                  <tr>
+                    <td>CPU</td>
+                    <td>{{ unit(stats.metrics.active.cpuGHz, 'G', 'Hz') }}</td>
+                    <td>{{ unit(stats.metrics.inactive.cpuGHz, 'G', 'Hz') }}</td>
+                  </tr>
+                  <tr>
+                    <td>MEM</td>
+                    <td>{{ unit(stats.metrics.active.memoryGiB, 'Gi', 'B') }}</td>
+                    <td>{{ unit(stats.metrics.inactive.memoryGiB, 'Gi', 'B') }}</td>
+                  </tr>
+                  <tr>
+                    <td>EBS</td>
+                    <td>{{ unit(stats.metrics.active.ebsDiskGiB, 'Gi', 'B') }}</td>
+                    <td>{{ unit(stats.metrics.inactive.ebsDiskGiB, 'Gi', 'B') }}</td>
+                  </tr>
+                  <tr>
+                    <td>NET</td>
+                    <td>{{ unit(stats.metrics.active.netThroughputGBps, 'G', 'Bps') }}</td>
+                    <td>{{ unit(stats.metrics.inactive.netThroughputGBps, 'G', 'Bps') }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div *ngIf="false" style="display: block; margin: 0 auto; width: 490px; transform: translate(0, -12px);">
+                <swimlane-adv-util-gauge
+                  [title]="'CPU'" style="display: inline-block;"
+                  [value]="stats.metrics.active.cpuGHz" [valuePrefix]="'G'"
+                  [maxValue]="stats.metrics.active.cpuGHz + stats.metrics.inactive.cpuGHz" [maxValuePrefix]="'G'"
+                  [thresholdPercent]="70" [unit]="'Hz'" [size]="'sm'"></swimlane-adv-util-gauge>
+                <swimlane-adv-util-gauge
+                  [title]="'MEM'" style="display: inline-block;"
+                  [value]="stats.metrics.active.memoryGiB" [valuePrefix]="'Gi'"
+                  [maxValue]="stats.metrics.active.memoryGiB + stats.metrics.inactive.memoryGiB" [maxValuePrefix]="'Gi'"
+                  [thresholdPercent]="80" [unit]="'B'" [size]="'sm'"></swimlane-adv-util-gauge>
+                <swimlane-adv-util-gauge
+                  [title]="'EBS'" style="display: inline-block;"
+                  [value]="stats.metrics.active.ebsDiskGiB" [valuePrefix]="'Gi'"
+                  [maxValue]="stats.metrics.active.ebsDiskGiB + stats.metrics.inactive.ebsDiskGiB" [maxValuePrefix]="'Gi'"
+                  [thresholdPercent]="80" [unit]="'B'" [size]="'sm'"></swimlane-adv-util-gauge>
+              </div>
+            </div>
+            <!-- info details -->
+            <div class="clr-col">
+              <div class="other-details" style="margin-top: 0.4rem;">
+                <div class="aligned-right" style="white-space: nowrap;">
+                  <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-left no-link">
+                    <cds-icon *ngIf="!vmHostsInText" shape="vm" size="16" badge="success" style="margin-right: 0.3rem; transform: translate(0, -0.03rem);"></cds-icon>
+                    <b>{{ stats.metrics.active.ec2Count }} </b><span *ngIf="vmHostsInText" style="font-size: 80%;">VMs</span>
+                    <span class="tooltip-content">{{ stats.metrics.active.ec2Count }} EC2 Instances Running</span>
+                  </a>
+                  <!-- &nbsp;<span style="font-size: 90%;">{{ stats.vmCount > 1 ? 'VMs' : 'VM' }}</span> -->
+                  <span class="num-div">&nbsp; | &nbsp;</span>
+                  <span style="width: 0.3rem;">&nbsp;</span>
+                  <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-left no-link">
+                    <cds-icon *ngIf="!vmHostsInText" shape="vm" size="16" badge="warning" style="margin-right: 0.3rem; transform: translate(0, -0.03rem);" [badge]="vcenterHostHasIssues(stats)"></cds-icon>
+                    <b>{{ stats.metrics.inactive.ec2Count }} </b><span *ngIf="vmHostsInText" style="font-size: 80%;">Hosts</span>
+                    <span class="tooltip-content">{{ stats.metrics.inactive.ec2Count }} EC2 Instances Inactive</span>
+                  </a>
+                  <!-- &nbsp;<span style="font-size: 90%;">{{ stats.hostCount > 1 ? 'Hosts' : 'Host' }}</span> -->
+                </div>
+                <br>
+                <div class="aligned-right" style="white-space: nowrap; margin-top: 0.2rem;">
+                  <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-left no-link">
+                    <cds-icon shape="storage" size="13" style="margin-right: 0.3rem; transform: translate(0, -0.03rem);"></cds-icon>
+                    <b style="font-size: 70%">Volumes {{ unit(stats.metrics.availableVolumeGiB, 'Gi', 'B') }} </b><span *ngIf="vmHostsInText" style="font-size: 80%;">VMs</span>
+                    <span class="tooltip-content">{{ unit(stats.metrics.availableVolumeGiB, 'Gi', 'B') }} Available Volumes</span>
+                  </a>
+                </div>
+                <div style="height: 0.5rem;"></div>
+                <div *ngIf="false" class="aligned-right small-stats">
+                  <!-- <span style="font-size: 80%">CPU: </span> -->
+                  <span *ngVar="Unit.adjust(stats.overview.totalCpu - stats.overview.consumedCpu, 'G') as cpuNow">
+                    <b>{{ cpuNow.value }}</b><span style="font-size: 80%"> {{ cpuNow.prefix }}Hz free</span>
+                  </span>
+                  <span class="num-div"> / </span>
+                  <span *ngVar="Unit.adjust(stats.overview.totalCpu, 'G') as cpuTotal">
+                    {{ cpuTotal.value }}<span style="font-size: 80%"> {{ cpuTotal.prefix }}Hz</span>  
+                  </span>
+                  <!-- <cds-icon shape="cpu" size="16" style="margin-left: 0.2rem;"></cds-icon> -->
+                </div>
+                <br>
+                <div *ngIf="false" class="aligned-right small-stats">
+                  <!-- <span style="font-size: 80%">Mem: </span> -->
+                  <!-- <cds-icon shape="memory" size="15" style="margin-right: 0.2rem;"></cds-icon> -->
+                  <span *ngVar="Unit.adjust((stats.overview.totalMem - stats.overview.consumedMem) / 1024, 'Ti') as memNow">
+                    <b>{{ memNow.value }}</b><span style="font-size: 80%"> {{ memNow.prefix }}B free</span>
+                  </span>
+                  <span class="num-div"> / </span>
+                  <span *ngVar="Unit.adjust(stats.overview.totalMem / 1024, 'Ti') as memTotal">
+                    {{ memTotal.value }}<span style="font-size: 80%"> {{ memTotal.prefix }}B</span>
+                  </span>
+                </div>
+                <br>
+                <div *ngIf="false" class="aligned-right small-stats">
+                  <!-- <span style="font-size: 80%">Disk: </span> -->
+                  <cds-icon shape="storage" size="13" style="margin-right: 0.3rem; transform: translate(0, -0.03rem);"></cds-icon>
+                  <span *ngVar="Unit.adjust((stats.overview.totalStorage - stats.overview.consumedStorage) / 1024, 'Ti') as diskNow">
+                    <b>{{ diskNow.value }}</b><span style="font-size: 80%"> {{ diskNow.prefix }}B free</span>
+                  </span>
+                  <span class="num-div"> / </span>
+                  <span *ngVar="Unit.adjust(stats.overview.totalStorage / 1024, 'Ti') as diskTotal">
+                    {{ diskTotal.value }}<span style="font-size: 80%"> {{ diskTotal.prefix }}B</span>
+                  </span>
+                </div>
+                <br>
+                <div style="height: 0.3rem;"></div>
+                <div *ngIf="entryData.desc" class="aligned-right desc-box"><b>{{ entryData.desc }}</b></div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </ng-container>
+
+      <!-- OTHER -->
+      <ng-container *ngIf="entryData?.type==='any' && !entryData?.defunct">
         <div *ngIf="!dataLoaded && dataLoadFailed" class="loading-failure">Data Load Failed</div>
         <clr-spinner *ngIf="dataLoadingShow && !dataLoaded && !dataLoadFailed" class="loading-spinner"></clr-spinner>
       </ng-container>
+
     </div>
   </div>
   <!-- <div class="card-footer">

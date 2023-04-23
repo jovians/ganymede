@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
-import { autoUnsub, ix } from '@jovian/type-tools';
+import { autoUnsub, ix } from 'ts-comply';
 import { PrismHighlightService } from 'src/app/ganymede/components/services/prism-highlight.service';
 import { moduleTypeMap } from 'src/app/ganymede/components/util/shared/common';
 import { Unit } from 'src/app/ganymede/components/util/shared/unit.utils';

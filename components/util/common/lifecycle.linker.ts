@@ -2,7 +2,7 @@
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 import { ElementRef, OnDestroy } from '@angular/core';
-import { ix } from '@jovian/type-tools';
+import { ix } from 'ts-comply';
 import { DomIdUtil } from './dom.id.util';
 
 export enum LifecycleLinkType {

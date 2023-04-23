@@ -4,7 +4,7 @@
 import { Store, createAction, createReducer, ActionCreator, on } from '@ngrx/store';
 import { Action as NgrxAction, ActionReducer, TypedAction } from '@ngrx/store/src/models';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { promise, Class, PartialCustom } from '@jovian/type-tools';
+import { promise, Class, PartialCustom } from 'ts-comply';
 import { BehaviorSubject, from, Observable, of, Subscription } from 'rxjs';
 import { catchError, map, mergeMap } from 'rxjs/operators';
 
@@ -316,31 +316,44 @@ export namespace rx {
         return new Action<T>(options, async (e: ActionArgs<T>) => {
           options?.onInvoke?.(e);
           const data = e.data;
-          const key = e.params.key;
+          const isJointKey = typeof e.params.key !== 'string';
+          const primaryKey = isJointKey ? JSON.stringify(e.params.key) : e.params.key;
+          const keysMap = isJointKey ? e.params.key : null;
           const resolver = { resolve: null as () => any };
           // await resolveLocks(data, key, options);
-          while (data.locks[key]) { await data.locks[key]; await sleepms(100); }
-          const lock = data.locks[key] = new Promise(resolve => resolver.resolve = () => { data.locks[key] = null; resolve(); });
-          setTimeout(() => { if (data.locks[key] === lock) { resolver.resolve(); } }, options.lockMaxWait ? options.lockMaxWait : actionDefaultLockMaxWait);
-          if (!data.fetchLasts[key]) { data.fetchLasts[key] = 0; }
-          if (Date.now() - data.fetchLasts[key] < (options.cacheTtl ? options.cacheTtl : actionDefaultcacheTtl)) {
+          while (data.locks[primaryKey]) { await data.locks[primaryKey]; await sleepms(100); }
+          const lock = data.locks[primaryKey] = new Promise(resolve => resolver.resolve = () => { data.locks[primaryKey] = null; resolve(); });
+          setTimeout(() => { if (data.locks[primaryKey] === lock) { resolver.resolve(); } }, options.lockMaxWait ? options.lockMaxWait : actionDefaultLockMaxWait);
+          if (!data.fetchLasts[primaryKey]) { data.fetchLasts[primaryKey] = 0; }
+          if (Date.now() - data.fetchLasts[primaryKey] < (options.cacheTtl ? options.cacheTtl : actionDefaultcacheTtl)) {
             options?.onResult?.(data.v, data.v); resolver.resolve();
             data.bump();
             return data.v;
           }
           let url = urlTemplate;
+          const endsInSlash = urlTemplate.endsWith('/');
+          if (!endsInSlash) { url += '/'; }
           const srcConf = (e.source as any).conf;
           if (url.startsWith('$BASE_URL') && srcConf && srcConf.baseUrl) { url = url.replace('$BASE_URL', srcConf.baseUrl); }
+          if (isJointKey) {
+            for (const subKey of Object.keys(keysMap)) {
+              const value = keysMap[subKey];
+              if (typeof value === 'string') { url = url.replace(`/:${subKey}/`, `/${value}/`); }
+            }
+          }
           for (const pathParam of Object.keys(e.params)) {
-            const value = e.params[pathParam];
+            if (isJointKey && pathParam === 'key') { continue; }
+            const value = e.params.hasOwnProperty(pathParam) ? e.params[pathParam] : keysMap[pathParam];
             if (typeof value === 'string') { url = url.replace(`/:${pathParam}/`, `/${value}/`); }
           }
+          if (!endsInSlash && url.endsWith('/')) { url = url.slice(0, -1); }
+          console.log(urlTemplate, url);
           const res = await e.comm.http.get(url).toPromise();
           const now = Date.now();
           data.fetchLast = now;
-          data.fetchLasts[key] = now;
-          if (!data.meta[key]) { data.meta[key] = {}; }
-          data.meta[key].lastFetched = now;
+          data.fetchLasts[primaryKey] = now;
+          if (!data.meta[primaryKey]) { data.meta[primaryKey] = {}; }
+          data.meta[primaryKey].lastFetched = now;
           const oldVal = data.v;
           options?.onRawResponse?.(res, oldVal);
           if (!res || res.status !== 'ok') {
@@ -349,7 +362,7 @@ export namespace rx {
             data.bump();
             return oldVal;
           }
-          const newVal = setkv(data.v, key, res.result);
+          const newVal = setkv(data.v, primaryKey, res.result);
           data.setValue(newVal);
           options?.onResult?.(newVal, oldVal);
           resolver.resolve();
@@ -683,7 +696,20 @@ export namespace rx {
     return node;
   }
 }
+
 function autoUnsub(component: any) {
   throw new Error('Function not implemented.');
 }
 
+function parseJointKey(keystring: string): { [key: string]: string } {
+  if (!keystring.startsWith('|')) { return { key: keystring }; }
+  const kvMap = {};
+  const kvList = keystring.split('|');
+  for (let i = 1; i < kvList.length; ++i) {
+    const lit = kvList[i].split('=');
+    const key = lit[0];
+    const value = lit.slice(1).join('=');
+    kvMap[key] = value;
+  }
+  return kvMap;
+};

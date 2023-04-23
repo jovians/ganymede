@@ -1,14 +1,13 @@
 /*
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
-import { AuthServer } from './auth.server';
 import { ServerConst } from './const';
 import { GanymedeServerExtensions } from './extensions';
-import { SecureHandshake } from '../../components/util/shared/crypto/secure.channel';
 import * as fs from 'fs';
 import * as axios from 'axios';
 import * as dns from 'dns';
-import { dp } from '@jovian/type-tools';
+import { dp } from 'ts-comply';
+import { DESTOR } from 'ts-comply/src/common/env/env.destor';
 
 const cluster = require('cluster');
 
@@ -22,52 +21,54 @@ export class ServerEntryPoint {
     for (const arg of process.argv) {
       if (arg === '--prod') { ServerConst.data.prod = true; }
     }
+    const destorList = JSON.parse(fs.readFileSync('ganymede.secrets.json', 'utf8')).destorList;
+    DESTOR.LIST = destorList;
     if (cluster.isMaster) {
       // Resolve destor
       let currentEnv = 'test';
       const destorInfo = { list: [] };
       if (!compileOnly) {
-        const destorData = fs.existsSync('config/.ganymede.topology.json') ?
-                              JSON.parse(fs.readFileSync('config/.ganymede.topology.json', 'utf8'))
-                            : JSON.parse(fs.readFileSync('.ganymede.topology.json', 'utf8'));
-        currentEnv = destorData.env;
-        const matchedDestors = [];
-        let tryCount = 0;
-        for (const target of destorData.destor.targets) {
-          ++tryCount;
-          const urlObj = new URL(target.endpoint);
-          const hostname = urlObj.hostname;
-          const ip = await dnsLookUp(hostname);
-          if (!ip) {
-            console.log(`[Destor resolve #${tryCount - 1}] unable to resolve ${hostname}, trying next...`);
-            continue;
-          }
-          const res = await destorGet(target);
-          if (!res) { continue; }
-          matchedDestors.push(target);
-        }
-        if (matchedDestors.length === 0) {
-          console.log(`No destor profiles are available, exiting.`);
-          process.exit(0);
-        }
-        for (const destor of matchedDestors) {
-          try {
-            const res = await axios.default.get(destor.endpoint, {
-              timeout: 7000,
-              headers: { Authorization: SecureHandshake.getAccessorHeader('internal', destor.token) },
-            });
-            if (res.status !== 200) { continue; }
-            const pubkeyB64 = destor.trust.split('::')[1];
-            const verifiedResult = SecureHandshake.verifyStamp(res.data.result, pubkeyB64);
-            if (!verifiedResult || verifiedResult.bad || verifiedResult.data === false) { continue; }
-            destorInfo.list.push(destor);
-          } catch (e) { console.log(e); continue; }
-        }
-        if (destorInfo.list.length === 0) {
-          console.log(`No destor profiles are available, exiting. 2`);
-          process.exit(0);
-        }
-        console.log(`[Destor resolved] discovered ${destorInfo.list.length} active destor endpoints.`);
+        // const destorData = fs.existsSync('config/.ganymede.topology.json') ?
+        //                       JSON.parse(fs.readFileSync('config/.ganymede.topology.json', 'utf8'))
+        //                     : JSON.parse(fs.readFileSync('.ganymede.topology.json', 'utf8'));
+        // currentEnv = destorData.env;
+        // const matchedDestors = [];
+        // let tryCount = 0;
+        // for (const target of destorData.destor.targets) {
+        //   ++tryCount;
+        //   const urlObj = new URL(target.endpoint);
+        //   const hostname = urlObj.hostname;
+        //   const ip = await dnsLookUp(hostname);
+        //   if (!ip) {
+        //     console.log(`[Destor resolve #${tryCount - 1}] unable to resolve ${hostname}, trying next...`);
+        //     continue;
+        //   }
+        //   const res = await destorGet(target);
+        //   if (!res) { continue; }
+        //   matchedDestors.push(target);
+        // }
+        // if (matchedDestors.length === 0) {
+        //   console.log(`No destor profiles are available, exiting.`);
+        //   process.exit(0);
+        // }
+        // for (const destor of matchedDestors) {
+        //   try {
+        //     const res = await axios.default.get(destor.endpoint, {
+        //       timeout: 7000,
+        //       headers: { Authorization: SecureHandshake.getAccessorHeader('internal', destor.token) },
+        //     });
+        //     if (res.status !== 200) { continue; }
+        //     const pubkeyB64 = destor.trust.split('::')[1];
+        //     const verifiedResult = SecureHandshake.verifyStamp(res.data.result, pubkeyB64);
+        //     if (!verifiedResult || verifiedResult.bad || verifiedResult.data === false) { continue; }
+        //     destorInfo.list.push(destor);
+        //   } catch (e) { console.log(e); continue; }
+        // }
+        // if (destorInfo.list.length === 0) {
+        //   console.log(`No destor profiles are available, exiting. 2`);
+        //   process.exit(0);
+        // }
+        // console.log(`[Destor resolved] discovered ${destorInfo.list.length} active destor endpoints.`);
       }
       // Default modules
       if (ServerConst.data.base.modules && !compileOnly) {
@@ -75,8 +76,8 @@ export class ServerEntryPoint {
           console.log(`Ganymede server module '${baseModuleName}' entrypoint (pid=${process.pid})`);
           switch (baseModuleName) {
             case 'auth':
-              const authServer = new AuthServer();
-              authServer.start();
+              // const authServer = new AuthServer();
+              // authServer.start();
               break;
           }
         }
@@ -90,6 +91,7 @@ export class ServerEntryPoint {
             const extData = ServerConst.data.extensions.native[nativeExt];
             const globalConfData = ServerConst.data.global ? ServerConst.data.global : {};
             extData._extension_key = `native.${nativeExt}`;
+            extData._destor_list = DESTOR.LIST;
             cluster.fork({
               BUILD_UUID: ServerEntryPoint.buildUuid,
               EXT_KEY: extData._extension_key,
@@ -118,33 +120,33 @@ function dnsLookUp(host: string) {
   });
 }
 
-function destorGet(target: any) {
-  return new Promise<string>(resolve => {
-    const pubkeyB64 = target.trust.split('::')[1];
-    // const ecdhKeypair = FourQ.ecdhGenerateKeyPair();
-    const authHeaderResult = SecureHandshake.getAuthHeader('internal',  '', target.token);
-    if (authHeaderResult.bad) { return resolve(null); }
-    const auth = SecureHandshake.parseAuthHeader(authHeaderResult.data);
-    axios.default.get(target.endpoint, { headers: { Authorization: authHeaderResult.data } }).then(r => {
-      if (r.status && r.data.status === 'ok') {
-        dp(r.data.result, pubkeyB64);
-        const verifiedResult = SecureHandshake.verifyStamp(r.data.result, pubkeyB64);
-        if (verifiedResult.bad) { return resolve(null); }
-        if (!verifiedResult.data) { return resolve(null); }
-        resolve(r.data.result);
-      } else { resolve(null); }
-    }).catch(e => {
-      if (e.response) {
-        console.log(
-          `[Destor resolution error] destor handshake failed for ${target.endpoint}, returned with ` +
-          `${e.response.status}: ${e.response.data.status}`
-        );
-      } else {
-        console.log(
-          `[Destor resolution error] destor handshake failed for ${target.endpoint}, returned with ${e.message}`
-        );
-      }
-      resolve(null);
-    });
-  });
-}
+// function destorGet(target: any) {
+//   return new Promise<string>(resolve => {
+//     const pubkeyB64 = target.trust.split('::')[1];
+//     // const ecdhKeypair = FourQ.ecdhGenerateKeyPair();
+//     const authHeaderResult = SecureHandshake.getAuthHeader('internal',  '', target.token);
+//     if (authHeaderResult.bad) { return resolve(null); }
+//     const auth = SecureHandshake.parseAuthHeader(authHeaderResult.data);
+//     axios.default.get(target.endpoint, { headers: { Authorization: authHeaderResult.data } }).then(r => {
+//       if (r.status && r.data.status === 'ok') {
+//         dp(r.data.result, pubkeyB64);
+//         const verifiedResult = SecureHandshake.verifyStamp(r.data.result, pubkeyB64);
+//         if (verifiedResult.bad) { return resolve(null); }
+//         if (!verifiedResult.data) { return resolve(null); }
+//         resolve(r.data.result);
+//       } else { resolve(null); }
+//     }).catch(e => {
+//       if (e.response) {
+//         console.log(
+//           `[Destor resolution error] destor handshake failed for ${target.endpoint}, returned with ` +
+//           `${e.response.status}: ${e.response.data.status}`
+//         );
+//       } else {
+//         console.log(
+//           `[Destor resolution error] destor handshake failed for ${target.endpoint}, returned with ${e.message}`
+//         );
+//       }
+//       resolve(null);
+//     });
+//   });
+// }

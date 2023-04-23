@@ -2,13 +2,14 @@
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { autoUnsub, ix } from '@jovian/type-tools';
+import { autoUnsub, ix } from 'ts-comply';
 import { RouteObservingService } from 'src/app/ganymede/components/services/route-observing.service';
 import { kvOrder, KVComparator } from 'src/app/ganymede/components/util/directive/filter/keyvalue.order';
 import { Components } from '../../../../../../../ui.components';
 import { AppService, rx } from '../../../../../../components/services/app.service';
 import { asRouteBasic, RouteData } from '../../../../../../components/util/common/route.helper';
-import { ExtNativeInfraService } from '../../components/shared/ext-native-infra.service';
+import { ExtNativeInfraService } from '../../services/ext-native-infra.service';
+import { currentRoute } from 'src/app/ganymede/components/util/common/route.model';
 
 @Component({
   selector: 'gany-ext-native-infra-page',
@@ -19,7 +20,24 @@ export class ExtNativeInfraPageComponent extends ix.Entity implements OnInit, On
   static registration = Components.register(ExtNativeInfraPageComponent, () => require('./ext-native-infra-page.component.json'));
 
   public static asRoute<T = any>(subdir: string, routeData: RouteData<T>) {
-    const routeDef = asRouteBasic(subdir, routeData);
+    const routeDef = asRouteBasic(subdir, routeData, {
+      uriBehavior: {
+        childRoute: {
+          aws: {
+            queryParams: [
+              { src: { type: 'local', path: 'aws/*'}, allowQueryParams: ['view', 'tab'] }, // within aws/* allow ['view', 'tab'] to be preserved/set
+              { src: { type: 'local', path: '*'}, allowQueryParams: [] }, // clear query params from all sources
+            ]
+          },
+          vcenter: {
+            queryParams: [
+              { src: { type: 'local', path: 'vcenter/*'}, allowQueryParams: ['tab'] }, // within vcenter/* allow 'tab' to be preserved/set
+              { src: { type: 'local', path: '*'}, allowQueryParams: [] }, // clear query params from all sources
+            ]
+          },
+        }
+      }
+    });
     routeDef.main.component = ExtNativeInfraPageComponent;
     return [routeDef.main, ...routeDef.others];
   }
@@ -55,16 +73,26 @@ export class ExtNativeInfraPageComponent extends ix.Entity implements OnInit, On
       }
     });
     this.infraService.ds.vcenter.quickStats.data$.subscribe(a => {
-      // this.orderer = this.getOrderer();
+      this.orderer = this.getOrderer();
     });
   }
 
   getProviderName(providerType: string) {
     switch (providerType) {
-      case 'aws': { return 'Amazon Web Service'; }
-      case 'gcp': { return 'Google Cloud Platform '; }
+      case 'aws': { return 'Amazon Web Services'; }
+      case 'gcp': { return 'Google Cloud Platform'; }
       case 'azure': { return 'Microsoft Azure'; }
       case 'vcenter': { return 'VMware vCenter'; }
+    }
+    return 'Unknown';
+  }
+
+  getProviderShortName(providerType: string) {
+    switch (providerType) {
+      case 'aws': { return 'AWS'; }
+      case 'gcp': { return 'GCP'; }
+      case 'azure': { return 'Azure'; }
+      case 'vcenter': { return 'vCenter'; }
     }
     return 'Unknown';
   }

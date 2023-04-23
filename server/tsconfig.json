@@ -1,24 +1,18 @@
 {
-  "compileOnSave": false,
   "compilerOptions": {
-    "baseUrl": "./",
-    "outDir": "./dist/out",
-    "sourceMap": false,
-    "declaration": false,
-    "downlevelIteration": true,
-    "experimentalDecorators": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "importHelpers": true,
-    "target": "es2015",
-    "resolveJsonModule": true,
+    "target": "es2017",
+    "module": "commonjs",
+    "strict": false,
+    "types": ["node"],
     "esModuleInterop": true,
-    "typeRoots": [
-      "node_modules/@types"
-    ],
-    "lib": [
-      "es2018",
-      "dom"
-    ],
-  }
+    "moduleResolution": "Node",
+    "removeComments": true,
+    "noImplicitThis": true,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+  },
+  "include": [
+    "src/**/*.ts",
+    "../../../../ganymede.app.server.ts"
+  ]
 }

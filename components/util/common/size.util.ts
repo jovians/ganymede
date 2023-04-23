@@ -4,7 +4,7 @@
 import { ganylog } from './console.util';
 import { v4 as uuidv4 } from 'uuid';
 import { LifecycleLinker, LifecycleLinkType } from './lifecycle.linker';
-import { ix } from '@jovian/type-tools';
+import { ix } from 'ts-comply';
 
 declare var window: any;
 

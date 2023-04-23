@@ -10,7 +10,10 @@
           <router-outlet></router-outlet>
         </main>
         <nav *ngIf="leftSidebarVisible" class="sidenav sidenav-narrow" [clr-nav-level]="1">
-            <app-left-sidebar #leftSideBarComponent [navItems]="leftSidebarNavItems"></app-left-sidebar>
+            <app-left-sidebar #leftSideBarComponent
+              [navItems]="leftSidebarNavItems"
+              [treeViewData]="leftSidebarTreeViewData"
+            ></app-left-sidebar>
         </nav>
         <nav *ngIf="rightSidebarVisible" class="sidenav" style="order:1; border-left: 1px solid #ccc;"  [clr-nav-level]="2">
             <app-right-sidebar #rightSideBarComponent></app-right-sidebar>

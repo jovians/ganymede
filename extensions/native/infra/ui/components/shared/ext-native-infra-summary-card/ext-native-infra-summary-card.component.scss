@@ -5,6 +5,10 @@
   max-width: 35rem;
   display: inline-block;
 
+  a.no-link:hover {
+    text-decoration: none;  
+  }
+
   .no-card {
     border: none !important;
     background: none !important;
@@ -55,6 +59,7 @@
     // max-width: 55%;
     .small-stats {
       font-size: 85%;
+      white-space: nowrap;
     }
     .aligned-right {
       float: right;
@@ -83,6 +88,13 @@
   }
   .prog-margin {
     height: 0.5rem;
+  }
+
+  .aws-table-body {
+    td {
+      font-size: 80%;
+      white-space: nowrap;
+    }
   }
 }
 

@@ -4,7 +4,7 @@
 
 import * as fs from 'fs';
 import { exec, spawn } from 'child_process';
-import { GanymedeHttpServer, HttpBaseLib, GanymedeHttpServerConfig } from './http.shim';
+import { HttpServerShim, HttpBaseLib, HttpServerShimConfig } from 'ts-comply/nodejs';
 import { ServerConst } from './const';
 
 export interface GanymedeServerExtension {
@@ -21,6 +21,7 @@ export class GanymedeServerExtensions {
     const ganyBasePath = __dirname.split('/').slice(0, -2).join('/');
     const extPath = `${ganyBasePath}/extensions/${key.split('.').join('/')}`;
     fs.writeFileSync(`${extPath}/server/.extension.build.uuid`, process.env.BUILD_UUID, 'utf8');
+    console.log(`Ganymede server extension '${key}' staring...`);
     if (!fs.existsSync(`${extPath}`)) {
       return console.log(`ganymede server extension '${key}' not found.`);
     }
@@ -28,7 +29,7 @@ export class GanymedeServerExtensions {
     if (alwaysCompile || compileOnly || !fs.existsSync(`${extPath}/server/src/main.js`)) {
       let compiled;
       try {
-        await execAsync(`tsc --target es5 --experimentalDecorators --resolveJsonModule ${extPath}/server/src/main.ts`);
+        await execAsync(`(cd '${extPath}/server' && npx tsc)`);
         compiled = true;
       } catch (e) {
         console.log(e.message);
@@ -60,9 +61,9 @@ export class GanymedeServerExtensions {
       console.log(`ganymede server extension '${key}' exited.`);
     });
   }
-  static getBaseAppApi(config: GanymedeHttpServerConfig, globalConfData: any) {
+  static getBaseAppApi(config: HttpServerShimConfig, globalConfData: any) {
     // TODO
-    const app = new GanymedeHttpServer(config, globalConfData);
+    const app = new HttpServerShim(config, globalConfData);
     return app;
   }
   static getGlobalConfData(globalConfData: any) {

@@ -2,8 +2,8 @@
  * Copyright 2014-2021 Jovian, all rights reserved.
  */
 import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
-import { autoUnsub, ix } from '@jovian/type-tools';
-import { ExtNativeInfraService } from '../../shared/ext-native-infra.service';
+import { autoUnsub, ix } from 'ts-comply';
+import { ExtNativeInfraService } from '../../../services/ext-native-infra.service';
 import { AppService, rx } from '../../../../../../../components/services/app.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RouteObservingService } from '../../../../../../../components/services/route-observing.service';
@@ -79,12 +79,12 @@ export class ExtNativeInfraVcenterComponent extends ix.Entity implements OnInit,
       this.getCurrentTabName();
     });
     bindSub(this, route.queryParams, params => {
-      if (params.view) {
-        if (this.tabActiveState[params.view] === null) {
-          console.error(new Error(`unrecognized tab view name '${params.view}'`));
+      if (params.tab) {
+        if (this.tabActiveState[params.tab] === null) {
+          console.error(new Error(`unrecognized tab view name '${params.tab}'`));
           return;
         }
-        this.tabActiveState[params.view] = true;
+        this.tabActiveState[params.tab] = true;
       } else {
         this.tabActiveState.summary = true;
       }
@@ -100,6 +100,7 @@ export class ExtNativeInfraVcenterComponent extends ix.Entity implements OnInit,
         this.quickStatsLast = meta.lastFetched;
         this.quickStatsData = member;
         this.quickStatsGraphData = this.extractGraphData(this.quickStatsData);
+        this.quickStatsShowLoading = false;
       }
     });
     this.vcenter.allObjects.keySub(this, keyGetter, member => {
@@ -143,7 +144,8 @@ export class ExtNativeInfraVcenterComponent extends ix.Entity implements OnInit,
   }
 
   tabSelect(targetTabName: string) {
-    this.router.navigate(['.'], { relativeTo: this.route, queryParams: { view: targetTabName } });
+    if (targetTabName === 'summary') { targetTabName = undefined; }
+    this.router.navigate(['.'], { relativeTo: this.route, queryParams: { tab: targetTabName } });
   }
 
   dataFetcherCpu = (params) => new Promise<any>(resolve => { resolve(this.quickStatsGraphData.cpu); });

@@ -6,7 +6,7 @@ import { Injectable } from '@angular/core';
 import { ganymedeAppData } from 'ganymede.app';
 import { rx, AppService } from 'src/app/ganymede/components/services/app.service';
 import { WavefrontEntry } from 'src/app/ganymede/components/metrics/wavefront/wavefront.models';
-import { VcenterInventoryStubsData, VsphereDatacenterUtilizationSummary } from '../vcenter/vcenter.models';
+import { VcenterInventoryStubsData, VsphereDatacenterUtilizationSummary } from '../components/vcenter/vcenter.models';
 
 const extData = ganymedeAppData.extensions?.native?.infra;
 
@@ -42,6 +42,33 @@ export class ExtNativeInfraDataCollection {
     }),
   };
 
+  aws = {
+    quickStats: new rx.Data<rx.MapOf<any>>({
+      firstValue: {},
+      actions: {
+        FETCH: rx.Action.common.propertyByKey('$BASE_URL/aws/:key/quick-stats'),
+      }
+    }),
+    quickStatsRegional: new rx.Data<rx.MapOf<any>>({
+      firstValue: {},
+      actions: {
+        FETCH: rx.Action.common.propertyByKey('$BASE_URL/aws/:key/quick-stats/:region'),
+      }
+    }),
+    // allObjects: new rx.Data<rx.MapOf<{[entityKey: string]: string}>>({
+    //   firstValue: {},
+    //   actions: {
+    //     FETCH: rx.Action.common.propertyByKey('$BASE_URL/aws/:key/all-objects'),
+    //   }
+    // }),
+    // entityByGuid: new rx.Data<rx.MapOf<any>>({ 
+    //   firstValue: {},
+    //   actions: {
+    //     FETCH: rx.Action.common.propertyByKey('$BASE_URL/aws/:key/managed-object'),
+    //   }
+    // }),
+  };
+
 }
 
 
@@ -62,17 +89,6 @@ export class ExtNativeInfraService {
   vcenterStubsDataAdd(key: string, data: VcenterInventoryStubsData) {
     this.vcenterStubs[key] = data;
   }
-
-  // async getWavefrontData(start: number, end: number) {
-  //   const testQuery = `ts("vsphere.host.cpu.used.summation", vcenter="vcenter.sddc-54-145-245-241.vmwarevmc.com" and cpu="instance-total")`;
-  //   const entry = new WavefrontEntry({ endpoint: `https://vmware.wavefront.com`});
-  //   const access = entry.setAccess({
-  //     name: 'default-access',
-  //     token: 'dc4d5106-b2cb-4284-864e-26ab99622e6e',
-  //     useProxy: true,
-  //   });
-  //   return await access.getChartData({ queryString: testQuery, start, end, shownTags: ['host', 'vcenter'] });
-  // }
 
 }
 

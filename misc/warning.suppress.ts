@@ -4,8 +4,6 @@
 
 // Env & utils
 import { environment } from '../../../environments/environment.prod';
-import * as destorComms from '../components/util/shared/crypto/destor.comms';
-import * as secureComm from '../components/util/shared/crypto/secure.comm';
 import * as murmur from '../components/util/crypto/murmurhash';
 import * as unitUtils from '../components/util/shared/unit.utils';
 import * as i18nHelper from '../components/util/common/i18n-helper';
